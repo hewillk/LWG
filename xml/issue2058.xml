@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2058" status="Review">
+<issue num="2058" status="WP">
 <title><tt>valarray</tt> and <tt>begin&#47;end</tt></title>
 <section><sref ref="[numarray]"/></section>
 <submitter>Gabriel Dos Reis</submitter>
@@ -61,6 +61,15 @@ new containers.
 Stefanus provides suggested wording.
 </p>
 
+
+<note>2012, Kona</note>
+<p>
+Moved to Tenatively Ready by post-meeting issues processing group, after confirmation
+from Gaby.
+</p>
+
+<note>2012, Portland: applied to WP</note>
+
 </discussion>
 
 <resolution>
@@ -94,7 +103,7 @@ requirements of a constant random access iterator (24.2.7) whose <tt>value_type<
 </p>
 <p><ins>
 2 The iterators  returned by <tt>begin</tt> and <tt>end</tt> for an array are guaranteed to be valid until the
-member function <tt>resize(size_t, T)</tt> (<sref = ref"[valarray.members]"/>) is called for that array or until
+member function <tt>resize(size_t, T)</tt> (<sref ref="[valarray.members]"/>) is called for that array or until
 the lifetime of that array ends, whichever happens first.
 </ins></p>
 </resolution>
