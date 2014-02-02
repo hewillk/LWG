@@ -1,5 +1,5 @@
 // This program reads all the issues in the issues directory passed as the first command line argument.
-// If all documents are successfully parsed, it will generate the standard LWG Issues List documents
+// If all documents are successfully parsed, it will generate the standard issues List documents
 // for an ISO SC22 WG21 mailing.
 
 // Based on code originally donated by Howard Hinnant
@@ -210,9 +210,9 @@ auto remove_qualifier(std::string const & stat) -> std::string {
 }
 
 
-static constexpr char const * LWG_ACTIVE {"lwg-active.html" };
-static constexpr char const * LWG_CLOSED {"lwg-closed.html" };
-static constexpr char const * LWG_DEFECTS{"lwg-defects.html"};
+static constexpr char const * LWG_ACTIVE {"active.html" };
+static constexpr char const * LWG_CLOSED {"closed.html" };
+static constexpr char const * LWG_DEFECTS{"defects.html"};
 
 // functions to relate the status of an issue to its relevant published list document
 auto filename_for_status(std::string stat) -> std::string {
@@ -612,7 +612,7 @@ void replace_all_irefs(std::vector<issue> const & issues, std::string & s) {
    // Replace all tagged "issues references" in string 's' with an HTML anchor-link to the live issue
    // in its appropriate issue list, as determined by the issue's status.
    // Format of an issue reference: <iref ref="ISS"/>
-   // Format of anchor: <a href="lwg-INDEX.html#ISS">ISS</a>
+   // Format of anchor: <a href="INDEX.html#ISS">ISS</a>
    std::ostringstream er;
  
    for (auto i = s.find("<iref ref=\""); i != std::string::npos; i = s.find("<iref ref=\"") ) {
@@ -882,7 +882,7 @@ private:
 LwgIssuesXml::LwgIssuesXml(std::string const & path)
    : m_data{}
    {
-   std::string filename{path + "lwg-issues.xml"};
+   std::string filename{path + "issues.xml"};
    std::ifstream infile{filename.c_str()};
    if (!infile.is_open()) {
       throw std::runtime_error{"Unable to open " + filename};
@@ -926,12 +926,12 @@ auto LwgIssuesXml::get_intro(std::string doc) const -> std::string {
 
     auto i = m_data.find(doc);
     if (i == std::string::npos) {
-        throw std::runtime_error{"Unable to find intro in lwg-issues.xml"};
+        throw std::runtime_error{"Unable to find intro in issues.xml"};
     }
     i += doc.size();
     auto j = m_data.find("</intro>", i);
     if (j == std::string::npos) {
-        throw std::runtime_error{"Unable to parse intro in lwg-issues.xml"};
+        throw std::runtime_error{"Unable to parse intro in issues.xml"};
     }
     return m_data.substr(i, j-i);
 }
@@ -941,12 +941,12 @@ auto LwgIssuesXml::get_maintainer() const -> std::string {
    std::string r = get_attribute("maintainer");
    auto m = r.find("&lt;");
    if (m == std::string::npos) {
-      throw std::runtime_error{"Unable to parse maintainer email address in lwg-issues.xml"};
+      throw std::runtime_error{"Unable to parse maintainer email address in issues.xml"};
    }
    m += sizeof("&lt;") - 1;
    auto me = r.find("&gt;", m);
    if (me == std::string::npos) {
-      throw std::runtime_error{"Unable to parse maintainer email address in lwg-issues.xml"};
+      throw std::runtime_error{"Unable to parse maintainer email address in issues.xml"};
    }
    std::string email = r.substr(m, me-m);
    // &lt;                                    lwgchair@gmail.com    &gt;
@@ -963,13 +963,13 @@ auto LwgIssuesXml::get_revision() const -> std::string {
 auto LwgIssuesXml::get_revisions(std::vector<issue> const & issues, std::string const & diff_report) const -> std::string {
    auto i = m_data.find("<revision_history>");
    if (i == std::string::npos) {
-      throw std::runtime_error{"Unable to find <revision_history> in lwg-issues.xml"};
+      throw std::runtime_error{"Unable to find <revision_history> in issues.xml"};
    }
    i += sizeof("<revision_history>") - 1;
 
    auto j = m_data.find("</revision_history>", i);
    if (j == std::string::npos) {
-      throw std::runtime_error{"Unable to find </revision_history> in lwg-issues.xml"};
+      throw std::runtime_error{"Unable to find </revision_history> in issues.xml"};
    }
    auto s = m_data.substr(i, j-i);
    j = 0;
@@ -1010,13 +1010,13 @@ auto LwgIssuesXml::get_revisions(std::vector<issue> const & issues, std::string 
 auto LwgIssuesXml::get_statuses() const -> std::string {
    auto i = m_data.find("<statuses>");
    if (i == std::string::npos) {
-      throw std::runtime_error{"Unable to find statuses in lwg-issues.xml"};
+      throw std::runtime_error{"Unable to find statuses in issues.xml"};
    }
    i += sizeof("<statuses>") - 1;
 
    auto j = m_data.find("</statuses>", i);
    if (j == std::string::npos) {
-      throw std::runtime_error{"Unable to parse statuses in lwg-issues.xml"};
+      throw std::runtime_error{"Unable to parse statuses in issues.xml"};
    }
    return m_data.substr(i, j-i);
 }
@@ -1026,12 +1026,12 @@ auto LwgIssuesXml::get_attribute(std::string const & attribute) const -> std::st
     std::string search_string{attribute + "=\""};
     auto i = m_data.find(search_string);
     if (i == std::string::npos) {
-        throw std::runtime_error{"Unable to find " + attribute + " in lwg-issues.xml"};
+        throw std::runtime_error{"Unable to find " + attribute + " in issues.xml"};
     }
     i += search_string.size();
     auto j = m_data.find('\"', i);
     if (j == std::string::npos) {
-        throw std::runtime_error{"Unable to parse " + attribute + " in lwg-issues.xml"};
+        throw std::runtime_error{"Unable to parse " + attribute + " in issues.xml"};
     }
     return m_data.substr(i, j-i);
 }
@@ -1079,13 +1079,13 @@ void print_table(std::ostream& out, std::vector<issue>::const_iterator i, std::v
    out <<
 R"(<table border="1" cellpadding="4">
 <tr>
-  <td align="center"><a href="lwg-toc.html"><b>Issue</b></a></td>
-  <td align="center"><a href="lwg-status.html"><b>Status</b></a></td>
-  <td align="center"><a href="lwg-index.html"><b>Section</b></a></td>
+  <td align="center"><a href="toc.html"><b>Issue</b></a></td>
+  <td align="center"><a href="status.html"><b>Status</b></a></td>
+  <td align="center"><a href="index.html"><b>Section</b></a></td>
   <td align="center"><b>Title</b></td>
   <td align="center"><b>Proposed Resolution</b></td>
   <td align="center"><b>Duplicates</b></td>
-  <td align="center"><a href="lwg-status-date.html"><b>Last modified</b></a></td>
+  <td align="center"><a href="status-date.html"><b>Last modified</b></a></td>
 </tr>
 )";
 
@@ -1097,7 +1097,7 @@ R"(<table border="1" cellpadding="4">
       out << "<td align=\"right\">" << make_ref_string(*i) << "</td>\n";
 
       // Status
-      out << "<td align=\"left\"><a href=\"lwg-active.html#" << remove_qualifier(i->stat) << "\">" << i->stat << "</a><a name=\"" << i->num << "\"></a></td>\n";
+      out << "<td align=\"left\"><a href=\"active.html#" << remove_qualifier(i->stat) << "\">" << i->stat << "</a><a name=\"" << i->num << "\"></a></td>\n";
 
       // Section
       out << "<td align=\"left\">";
@@ -1149,8 +1149,8 @@ void make_sort_by_num(std::vector<issue>& issues, std::string const & filename, 
 R"(<h1>C++ Standard Library Issues List (Revision )" << lwg_issues_xml.get_revision() << R"()</h1>
 <h1>Table of Contents</h1>
 <p>Reference ISO/IEC IS 14882:2011(E)</p>
-<p>This document is the Table of Contents for the <a href="lwg-active.html">Library Active Issues List</a>,
-<a href="lwg-defects.html">Library Defect Reports List</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.</p>
+<p>This document is the Table of Contents for the <a href="active.html">Library Active Issues List</a>,
+<a href="defects.html">Library Defect Reports List</a>, and <a href="closed.html">Library Closed Issues List</a>.</p>
 )";
    out << build_timestamp;
 
@@ -1175,8 +1175,8 @@ R"(<h1>C++ Standard Library Issues List (Revision )" << lwg_issues_xml.get_revis
 <h1>Index by Status and Section</h1>
 <p>Reference ISO/IEC IS 14882:2011(E)</p>
 <p>
-This document is the Index by Status and Section for the <a href="lwg-active.html">Library Active Issues List</a>,
-<a href="lwg-defects.html">Library Defect Reports List</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.
+This document is the Index by Status and Section for the <a href="active.html">Library Active Issues List</a>,
+<a href="defects.html">Library Defect Reports List</a>, and <a href="closed.html">Library Closed Issues List</a>.
 </p>
 
 )";
@@ -1210,8 +1210,8 @@ R"(<h1>C++ Standard Library Issues List (Revision )" << lwg_issues_xml.get_revis
 <h1>Index by Status and Date</h1>
 <p>Reference ISO/IEC IS 14882:2011(E)</p>
 <p>
-This document is the Index by Status and Date for the <a href="lwg-active.html">Library Active Issues List</a>,
-<a href="lwg-defects.html">Library Defect Reports List</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.
+This document is the Index by Status and Date for the <a href="active.html">Library Active Issues List</a>,
+<a href="defects.html">Library Defect Reports List</a>, and <a href="closed.html">Library Closed Issues List</a>.
 </p>
 )";
    out << build_timestamp;
@@ -1284,9 +1284,9 @@ void make_sort_by_section(std::vector<issue>& issues, std::string const & filena
    out << "<h1>C++ Standard Library Issues List (Revision " << lwg_issues_xml.get_revision() << ")</h1>\n";
    out << "<h1>Index by Section</h1>\n";
    out << "<p>Reference ISO/IEC IS 14882:2011(E)</p>\n";
-   out << "<p>This document is the Index by Section for the <a href=\"lwg-active.html\">Library Active Issues List</a>";
+   out << "<p>This document is the Index by Section for the <a href=\"active.html\">Library Active Issues List</a>";
    if(!active_only) {
-      out << ", <a href=\"lwg-defects.html\">Library Defect Reports List</a>, and <a href=\"lwg-closed.html\">Library Closed Issues List</a>";
+      out << ", <a href=\"defects.html\">Library Defect Reports List</a>, and <a href=\"closed.html\">Library Closed Issues List</a>";
    }
    out << ".</p>\n";
    out << "<h2>Index by Section";
@@ -1295,10 +1295,10 @@ void make_sort_by_section(std::vector<issue>& issues, std::string const & filena
    }
    out << "</h2>\n";
    if (active_only) {
-      out << "<p><a href=\"lwg-index.html\">(view all issues)</a></p>\n";
+      out << "<p><a href=\"index.html\">(view all issues)</a></p>\n";
    }
    else {
-      out << "<p><a href=\"lwg-index-open.html\">(view only non-Ready open issues)</a></p>\n";
+      out << "<p><a href=\"index-open.html\">(view only non-Ready open issues)</a></p>\n";
    }
    out << build_timestamp;
 
@@ -1315,10 +1315,10 @@ assert(!i->tags.empty());
       std::string const msn{major_section(section_db[i->tags[0]])};
       out << "<h2><a name=\"Section " << msn << "\"></a>" << "Section " << msn << " (" << (j-i) << " issues)</h2>\n";
       if (active_only) {
-         out << "<p><a href=\"lwg-index.html#Section " << msn << "\">(view all issues)</a></p>\n";
+         out << "<p><a href=\"index.html#Section " << msn << "\">(view all issues)</a></p>\n";
       }
       else if (mjr_section_open.count(*i) > 0) {
-         out << "<p><a href=\"lwg-index-open.html#Section " << msn << "\">(view only non-Ready open issues)</a></p>\n";
+         out << "<p><a href=\"index-open.html#Section " << msn << "\">(view only non-Ready open issues)</a></p>\n";
       }
 
       print_table(out, i, j);
@@ -1355,7 +1355,7 @@ void print_issues(std::ostream & out, std::vector<issue> const & issues, Pred pr
             out << ", " << section_db[iss.tags[k]] << " " << iss.tags[k];
          }
 
-         out << " <b>Status:</b> <a href=\"lwg-active.html#" << remove_qualifier(iss.stat) << "\">" << iss.stat << "</a>\n";
+         out << " <b>Status:</b> <a href=\"active.html#" << remove_qualifier(iss.stat) << "\">" << iss.stat << "</a>\n";
          out << " <b>Submitter:</b> " << iss.submitter
              << " <b>Opened:</b> ";
          print_date(out, iss.date);
@@ -1365,16 +1365,16 @@ void print_issues(std::ostream & out, std::vector<issue> const & issues, Pred pr
 
          // view active issues in []
          if (active_issues.count(iss) > 1) {
-            out << "<p><b>View other</b> <a href=\"lwg-index-open.html#" << remove_square_brackets(iss.tags[0]) << "\">active issues</a> in " << iss.tags[0] << ".</p>\n";
+            out << "<p><b>View other</b> <a href=\"index-open.html#" << remove_square_brackets(iss.tags[0]) << "\">active issues</a> in " << iss.tags[0] << ".</p>\n";
          }
 
          // view all issues in []
          if (all_issues.count(iss) > 1) {
-            out << "<p><b>View all other</b> <a href=\"lwg-index.html#" << remove_square_brackets(iss.tags[0]) << "\">issues</a> in " << iss.tags[0] << ".</p>\n";
+            out << "<p><b>View all other</b> <a href=\"index.html#" << remove_square_brackets(iss.tags[0]) << "\">issues</a> in " << iss.tags[0] << ".</p>\n";
          }
          // view all issues with same status
          if (issues_by_status.count(iss) > 1) {
-            out << "<p><b>View all issues with</b> <a href=\"lwg-status.html#" << iss.stat << "\">" << iss.stat << "</a> status.</p>\n";
+            out << "<p><b>View all issues with</b> <a href=\"status.html#" << iss.stat << "\">" << iss.stat << "</a> status.</p>\n";
          }
 
          // duplicates
@@ -1434,7 +1434,7 @@ R"(<table>
 void make_active(std::vector<issue> const & issues, std::string const & path, LwgIssuesXml const & lwg_issues_xml, std::string const & diff_report) {
    assert(is_sorted(issues.begin(), issues.end(), sort_by_num{}));
 
-   std::string filename{path + "lwg-active.html"};
+   std::string filename{path + "active.html"};
    std::ofstream out{filename.c_str()};
    if (!out)
      throw std::runtime_error{"Failed to open " + filename};
@@ -1452,7 +1452,7 @@ void make_active(std::vector<issue> const & issues, std::string const & path, Lw
 void make_defect(std::vector<issue> const & issues, std::string const & path, LwgIssuesXml const & lwg_issues_xml, std::string const & diff_report) {
    assert(is_sorted(issues.begin(), issues.end(), sort_by_num{}));
 
-   std::string filename{path + "lwg-defects.html"};
+   std::string filename{path + "defects.html"};
    std::ofstream out(filename.c_str());
    if (!out)
      throw std::runtime_error{"Failed to open " + filename};
@@ -1469,7 +1469,7 @@ void make_defect(std::vector<issue> const & issues, std::string const & path, Lw
 void make_closed(std::vector<issue> const & issues, std::string const & path, LwgIssuesXml const & lwg_issues_xml, std::string const & diff_report) {
    assert(is_sorted(issues.begin(), issues.end(), sort_by_num{}));
 
-   std::string filename{path + "lwg-closed.html"};
+   std::string filename{path + "closed.html"};
    std::ofstream out{filename.c_str()};
    if (!out)
      throw std::runtime_error{"Failed to open " + filename};
@@ -1488,7 +1488,7 @@ void make_tentative(std::vector<issue> const & issues, std::string const & path,
    // publish a document listing all tentative issues that may be acted on during a meeting.
    assert(is_sorted(issues.begin(), issues.end(), sort_by_num{}));
 
-   std::string filename{path + "lwg-tentative.html"};
+   std::string filename{path + "tentative.html"};
    std::ofstream out{filename.c_str()};
    if (!out)
      throw std::runtime_error{"Failed to open " + filename};
@@ -1508,7 +1508,7 @@ void make_unresolved(std::vector<issue> const & issues, std::string const & path
    // publish a document listing all non-tentative, non-ready issues that must be reviewed during a meeting.
    assert(is_sorted(issues.begin(), issues.end(), sort_by_num{}));
 
-   std::string filename{path + "lwg-unresolved.html"};
+   std::string filename{path + "unresolved.html"};
    std::ofstream out{filename.c_str()};
    if (!out)
      throw std::runtime_error{"Failed to open " + filename};
@@ -1527,7 +1527,7 @@ void make_immediate(std::vector<issue> const & issues, std::string const & path,
    // publish a document listing all non-tentative, non-ready issues that must be reviewed during a meeting.
    assert(is_sorted(issues.begin(), issues.end(), sort_by_num{}));
 
-   std::string filename{path + "lwg-immediate.html"};
+   std::string filename{path + "immediate.html"};
    std::ofstream out{filename.c_str()};
    if (!out)
      throw std::runtime_error{"Failed to open " + filename};
@@ -2005,7 +2005,7 @@ int main(int argc, char* argv[]) {
       section_db = read_section_db(path + "meta-data/");
       //    check_against_index(section_db);
 
-      auto const old_issues = read_issues_from_toc(read_file_into_string(path + "meta-data/lwg-toc.old.html"));
+      auto const old_issues = read_issues_from_toc(read_file_into_string(path + "meta-data/toc.old.html"));
 
       auto const issues_path = path + "xml/";
       LwgIssuesXml lwg_issues_xml(issues_path);
@@ -2050,16 +2050,16 @@ int main(int argc, char* argv[]) {
 
       // Now we have a parsed and formatted set of issues, we can write the standard set of HTML documents
       // Note that each of these functions is going to re-sort the 'issues' vector for its own purposes
-      make_sort_by_num            (issues, {target_path + "lwg-toc.html"},         lwg_issues_xml);
-      make_sort_by_status         (issues, {target_path + "lwg-status.html"},      lwg_issues_xml);
-      make_sort_by_status_mod_date(issues, {target_path + "lwg-status-date.html"}, lwg_issues_xml);
-      make_sort_by_section        (issues, {target_path + "lwg-index.html"},       lwg_issues_xml);
+      make_sort_by_num            (issues, {target_path + "toc.html"},         lwg_issues_xml);
+      make_sort_by_status         (issues, {target_path + "status.html"},      lwg_issues_xml);
+      make_sort_by_status_mod_date(issues, {target_path + "status-date.html"}, lwg_issues_xml);
+      make_sort_by_section        (issues, {target_path + "index.html"},       lwg_issues_xml);
 
       // Note that this additional document is very similar to unresolved-index.html below
-      make_sort_by_section        (issues, {target_path + "lwg-index-open.html"},  lwg_issues_xml, true);
+      make_sort_by_section        (issues, {target_path + "index-open.html"},  lwg_issues_xml, true);
 
       // Make a similar set of index documents for the issues that are 'live' during a meeting
-      // Note that these documents want to reference each other, rather than lwg- equivalents,
+      // Note that these documents want to reference each other, rather than  equivalents,
       // although it may not be worth attempting fix-ups as the per-issue level
       // During meetings, it would be good to list newly-Ready issues here
       make_sort_by_num            (unresolved_issues, {target_path + "unresolved-toc.html"},         lwg_issues_xml);
@@ -2068,7 +2068,7 @@ int main(int argc, char* argv[]) {
       make_sort_by_section        (unresolved_issues, {target_path + "unresolved-index.html"},       lwg_issues_xml);
 
       // Make another set of index documents for the issues that are up for a vote during a meeting
-      // Note that these documents want to reference each other, rather than lwg- equivalents,
+      // Note that these documents want to reference each other, rather than  equivalents,
       // although it may not be worth attempting fix-ups as the per-issue level
       // Between meetings, it would be good to list Ready issues here
       make_sort_by_num            (votable_issues, {target_path + "votable-toc.html"},         lwg_issues_xml);
