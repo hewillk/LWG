@@ -1,7 +1,7 @@
 @echo off
 bin\lists
 if errorlevel 1 goto error
-mailing\lwg-active.html
+mailing\sg3-active.html
 goto done
 
 :error
