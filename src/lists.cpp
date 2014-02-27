@@ -1055,8 +1055,8 @@ R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
     padding-top: 1px;
     padding-bottom: 1px;
   }
-  ins {background-color:#A0FFA0}
-  del {background-color:#FFA0A0}
+  ins {background-color:#E8FFE8}
+  del {background-color:#FFD7D7}
 </style>
 </head>
 <body>
