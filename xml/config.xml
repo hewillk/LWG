@@ -14,23 +14,23 @@
             defects_name="defects.html"
             toc_name="toc.html"
             old_toc_name="toc.old.html"
-            section_index_name="section_index.html"
-            status_index_name="status_index.html"
-            status_date_index_name="status_date_index.html"
-            unresolved_toc_name="unresolved_toc.html"
-            unresolved_section_index_name="unresolved_section_index.html"
-            unresolved_status_index_name="unresolved_status_index.html"
-            unresolved_status_date_index_name="unresolved_status_date.html"
-            unresolved_prioritized_index_name="unresolved_prioritized_index.html"
-            votable_toc_name="votable_toc.html"
-            votable_section_index_name="votable_section_index.html"
-            votable_status_index_name="votable_status_index.html"
-            votable_status_date_index_name="votable_status_date_index.html"
-            open_index_name="open_index.html"
+            section_index_name="section-index.html"
+            status_index_name="status-index.html"
+            status_date_index_name="status-date-index.html"
+            unresolved_toc_name="unresolved-toc.html"
+            unresolved_section_index_name="unresolved-section-index.html"
+            unresolved_status_index_name="unresolved-status-index.html"
+            unresolved_status_date_index_name="unresolved-status-date.html"
+            unresolved_prioritized_index_name="unresolved-prioritized-index.html"
+            votable_toc_name="votable-toc.html"
+            votable_section_index_name="votable-section-index.html"
+            votable_status_index_name="votable-status-index.html"
+            votable_status_date_index_name="votable-status-date-index.html"
+            open_index_name="open-index.html"
             tentative_name="tentative.html"
             unresolved_name="unresolved.html"
             immediate_name="immediate.html"
-            issues_for_editor_name="issues_for_editor.html"
+            issues_for_editor_name="issues-for-editor.html"
 >
 
 <intros>
@@ -45,7 +45,7 @@
       <li><a href="<replace "closed_name"/>">Library Closed Issues List</a></li>
   </ul>
   <p>The purpose of this document is to record the status of issues
-  which have come before the <replace "owner"/> (<replace "owner-abbrev"/>) of the INCITS PL22.16
+  which have come before the <replace "owner"/> (<replace "owner_abbrev"/>) of the INCITS PL22.16
   and ISO WG21 C++ Standards Committee. Issues represent
   potential defects in the <replace "doc_reference"/> document.  
   </p>
@@ -68,9 +68,9 @@
   into a single version.</p>
 
   <p>This document includes <i>[bracketed italicized notes]</i> as a
-  reminder to the <replace "owner-abbrev"/> of current progress on issues. Such notes are
+  reminder to the <replace "owner_abbrev"/> of current progress on issues. Such notes are
   strictly unofficial and should be read with caution as they may be
-  incomplete or incorrect. Be aware that <replace "owner-abbrev"/> support for a particular
+  incomplete or incorrect. Be aware that <replace "owner_abbrev"/> support for a particular
   resolution can quickly change if new viewpoints or killer examples are
   presented in subsequent discussions.</p>
 
@@ -159,7 +159,7 @@ ownership of it.
       <li><a href="<replace "closed_name"/>">Library Closed Issues List</a></li>
     </ul>
   <p>This document contains only library issues which have been closed
-  by the <replace "owner"/> (<replace "owner-abbrev"/>) after being found to be defects
+  by the <replace "owner"/> (<replace "owner_abbrev"/>) after being found to be defects
   in the standard.  That is, issues which have a status of <a href="<replace "active_name"/>#DR">DR</a>,
   <a href="<replace "active_name"/>#TC1">TC1</a>, <a href="<replace "active_name"/>#C++11">C++11</a>, 
   or <a href="<replace "active_name"/>#Resolved">Resolved</a>. See the
@@ -1633,7 +1633,7 @@ of issue <iref ref="29"/>.  Add further rationale to issue
 </revision>
 
 <revision tag="R11">
-post-Kona mailing: Updated to reflect <replace "owner-abbrev"/> and full committee actions
+post-Kona mailing: Updated to reflect <replace "owner_abbrev"/> and full committee actions
 in Kona (99-0048/N1224). Note changed resolution of issues
 <iref ref="4"/> and <iref ref="38"/>. Added issues <iref ref="196"/>
 to <iref ref="198"/>. Closed issues list split into "defects" and
@@ -1656,7 +1656,7 @@ pre-Kona mailing.  Added issues <iref ref="140"/> to
 </revision>
 
 <revision tag="R8">
-post-Dublin mailing. Updated to reflect <replace "owner-abbrev"/> and full committee actions
+post-Dublin mailing. Updated to reflect <replace "owner_abbrev"/> and full committee actions
 in Dublin. (99-0016/N1193, 21 Apr 99)
 </revision>
 
@@ -1686,7 +1686,7 @@ issues corrected. (22 Oct 98)
 
 <revision tag="R3">
 post-Santa Cruz II: Issues <iref ref="94"/> to <iref ref="109"/>
-added, many issues updated to reflect <replace "owner-abbrev"/> consensus (12 Oct 98)
+added, many issues updated to reflect <replace "owner_abbrev"/> consensus (12 Oct 98)
 </revision>
 
 <revision tag="R2">
@@ -1702,46 +1702,46 @@ format, <iref ref="64"/> title. (17 Sep 98)
 </revision_history>
 
 <statuses>
-  <p>Issues reported to the <replace "owner-abbrev"/> transition through a variety of statuses,
+  <p>Issues reported to the <replace "owner_abbrev"/> transition through a variety of statuses,
   indicating their progress towards a resolution.  Typically, most issues
   will flow through the following stages.
   </p>
 
   <p><b><a name="New">New</a></b> - The issue has not yet been
-  reviewed by the <replace "owner-abbrev"/>. Any <b>Proposed Resolution</b> is purely a
+  reviewed by the <replace "owner_abbrev"/>. Any <b>Proposed Resolution</b> is purely a
   suggestion from the issue submitter, and should not be construed as
-  the view of <replace "owner-abbrev"/>.</p>
+  the view of <replace "owner_abbrev"/>.</p>
 
-  <p><b><a name="Open">Open</a></b> - The <replace "owner-abbrev"/> has discussed the issue
+  <p><b><a name="Open">Open</a></b> - The <replace "owner_abbrev"/> has discussed the issue
   but is not yet ready to move the issue forward. There are several
   possible reasons for open status:</p>
      <ul>
         <li>Consensus may have not yet have been reached as to how to deal
             with the issue.</li>
-        <li>Informal consensus may have been reached, but the <replace "owner-abbrev"/> awaits
+        <li>Informal consensus may have been reached, but the <replace "owner_abbrev"/> awaits
             exact <b>Proposed Resolution</b> wording for review.</li>
-        <li>The <replace "owner-abbrev"/> wishes to consult additional technical experts before
+        <li>The <replace "owner_abbrev"/> wishes to consult additional technical experts before
             proceeding.</li>
         <li>The issue may require further study.</li>
      </ul>
 
   <p>A <b>Proposed Resolution</b> for an open issue is still not be
-  construed as the view of <replace "owner-abbrev"/>. Comments on the current state of
+  construed as the view of <replace "owner_abbrev"/>. Comments on the current state of
   discussions are often given at the end of open issues in an italic
   font. Such comments are for information only and should not be given
   undue importance.</p>
 
   <p><b><a name="Review">Review</a></b> - Exact wording of a
   <b>Proposed Resolution</b> is now available for review on an issue
-  for which the <replace "owner-abbrev"/> previously reached informal consensus.</p>
+  for which the <replace "owner_abbrev"/> previously reached informal consensus.</p>
 
-  <p><b><a name="Ready">Ready</a></b> - The <replace "owner-abbrev"/> has reached consensus
+  <p><b><a name="Ready">Ready</a></b> - The <replace "owner_abbrev"/> has reached consensus
   that the issue is a defect in the Standard, the <b>Proposed
   Resolution</b> is correct, and the issue is ready to forward to the
   full committee for further action as a Defect Report (DR).</p>
 
   <p>Typically, an issue must have a proposed resolution in the currently
-  published issues list, whose wording does not change during <replace "owner-abbrev"/> review, to
+  published issues list, whose wording does not change during <replace "owner_abbrev"/> review, to
   move to the Ready status.</p>
 
   <p><b><a name="Voting">Voting</a></b> - This status should not be seen
@@ -1771,19 +1771,19 @@ format, <iref ref="64"/> title. (17 Sep 98)
   on.
   </p>
 
-  <p><b><a name="Deferred">Deferred</a></b> - The <replace "owner-abbrev"/> has discussed the issue,
+  <p><b><a name="Deferred">Deferred</a></b> - The <replace "owner_abbrev"/> has discussed the issue,
   is not yet ready to move the issue forward, but neither does it deem the
   issue significant enough to delay publishing a standard or Technical Report.
   A typical deferred issue would be seeking to clarify wording that might be
   technically correct, but easily mis-read.</p>
 
   <p>A <b>Proposed Resolution</b> for a deferred issue is still not be
-  construed as the view of <replace "owner-abbrev"/>. Comments on the current state of
+  construed as the view of <replace "owner_abbrev"/>. Comments on the current state of
   discussions are often given at the end of open issues in an italic
   font. Such comments are for information only and should not be given
   undue importance.</p>
 
-  <p><b><a name="Core">Core</a></b> - The <replace "owner-abbrev"/> has discussed the issue, and feels
+  <p><b><a name="Core">Core</a></b> - The <replace "owner_abbrev"/> has discussed the issue, and feels
   that some key part of resolving the issue is better handled by a cleanup of
   the language in the Core part of the standard.  The issue is passed to the Core
   Working Group, which should ideally open a corresponding issue that can be
@@ -1791,7 +1791,7 @@ format, <iref ref="64"/> title. (17 Sep 98)
   made (or declined to make) any changes.
   </p>
 
-  <p><b><a name="EWG">EWG</a></b> - The <replace "owner-abbrev"/> has discussed the issue, and wonder
+  <p><b><a name="EWG">EWG</a></b> - The <replace "owner_abbrev"/> has discussed the issue, and wonder
   that some key part of resolving the issue is better handled by some (hopefully
   small) extension to the language.  The issue is passed to the Evolution Working
   Group, which should ideally open a corresponding issue that can be linked from
@@ -1829,30 +1829,30 @@ format, <iref ref="64"/> title. (17 Sep 98)
   Resolution as a Technical Corrigenda.  Action on this issue is thus
   complete and no further action is possible under ISO rules.</p>
 
-  <p><b><a name="TRDec">TRDec</a></b> - (Decimal TR defect) - The <replace "owner-abbrev"/> has voted to
+  <p><b><a name="TRDec">TRDec</a></b> - (Decimal TR defect) - The <replace "owner_abbrev"/> has voted to
   accept the Defect Report's Proposed Resolution into the Decimal TR.  Action on this
   issue is thus complete and no further action is expected.</p>
 
-  <p><b><a name="Resolved">Resolved</a></b> - The <replace "owner-abbrev"/> has reached consensus
+  <p><b><a name="Resolved">Resolved</a></b> - The <replace "owner_abbrev"/> has reached consensus
   that the issue is a defect in the Standard, but the resolution adopted to
   resolve the issue came via some other mechanism than this issue in the
   list - typically by applying a formal paper, occasionally as a side effect
   of consolidating several interacting issue resolutions into a single issue.</p>
 
-  <p><b><a name="Dup">Dup</a></b> - The <replace "owner-abbrev"/> has reached consensus that
+  <p><b><a name="Dup">Dup</a></b> - The <replace "owner_abbrev"/> has reached consensus that
   the issue is a duplicate of another issue, and will not be further
   dealt with. A <b>Rationale</b> identifies the duplicated issue's
   issue number.</p>
 
-  <p><b><a name="NAD">NAD</a></b> - The <replace "owner-abbrev"/> has reached consensus that
+  <p><b><a name="NAD">NAD</a></b> - The <replace "owner_abbrev"/> has reached consensus that
   the issue is not a defect in the Standard.</p>
 
-  <p><b><a name="NAD Editorial">NAD Editorial</a></b> - The <replace "owner-abbrev"/> has reached consensus that
+  <p><b><a name="NAD Editorial">NAD Editorial</a></b> - The <replace "owner_abbrev"/> has reached consensus that
   the issue can either be handled editorially, or is handled by a paper (usually
   linked to in the rationale).</p>
 
   <p><b><a name="NAD Future">NAD Future</a></b> - In addition to the regular
-  status, the <replace "owner-abbrev"/> believes that this issue should be revisited at the next
+  status, the <replace "owner_abbrev"/> believes that this issue should be revisited at the next
   revision of the standard.</p>
 
   <p><b><a name="NAD Concepts">NAD Concepts</a></b> - This status reflects an evolution
@@ -1881,7 +1881,7 @@ format, <iref ref="64"/> title. (17 Sep 98)
   <p>Issues are always given the status of <a href="<replace "active_name"/>#New">New</a> when
   they first appear on the issues list. They may progress to
   <a href="<replace "active_name"/>#Open">Open</a> or <a href="<replace "active_name"/>#Review">Review</a>
-  while the <replace "owner-abbrev"/> is actively working on them. When the <replace "owner-abbrev"/> has reached consensus on
+  while the <replace "owner_abbrev"/> is actively working on them. When the <replace "owner_abbrev"/> has reached consensus on
   the disposition of an issue, the status will then change to
   <a href="<replace "active_name"/>#Dup">Dup</a>, <a href="<replace "active_name"/>#NAD">NAD</a>, or
   <a href="<replace "active_name"/>#Ready">Ready</a> as appropriate.  Once the full PL22.16 committee
@@ -1889,7 +1889,7 @@ format, <iref ref="64"/> title. (17 Sep 98)
   Report ( <a href="<replace "active_name"/>#DR">DR</a>). These in turn may become the basis for
   Technical Corrigenda (<a href="<replace "active_name"/>#TC1">TC1</a>), or are closed without action
   other than a Record of Response (<a href="<replace "active_name"/>#Resolved">Resolved</a> ).  The
-  intent of this <replace "owner-abbrev"/> process is that only issues which are truly defects in the Standard move
+  intent of this <replace "owner_abbrev"/> process is that only issues which are truly defects in the Standard move
   to the formal ISO DR status.
   </p>
 
