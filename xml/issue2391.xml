@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2391" status="New">
+<issue num="2391" status="Review">
 <title><tt>basic_string</tt> is missing non-<tt>const</tt> <tt>data()</tt></title>
 <section><sref ref="[basic.string]"/></section>
 <submitter>Michael Bradshaw</submitter>
@@ -29,6 +29,18 @@ and in the <a href="https://groups.google.com/a/isocpp.org/forum/#!topic/std-dis
 This requires a small change to <tt>std::basic_string</tt>'s definition in <sref ref="[basic.string]"/> to add the method to 
 <tt>std::basic_string</tt>, and another small change in <sref ref="[string.accessors]"/> to define the new method.
 </p>
+
+<note>Teleconference, Jan 2015</note>
+<p>
+Broad but not unanimous support.  The objection was a concern that this is changing the
+interface of a class through the issues process.
+</p>
+
+<p>
+AJM to ask LEWG chair if they want to take this issue before we revisit, otherwise it
+may move to Ready on next review.
+</p>
+
 </discussion>
 
 <resolution>
