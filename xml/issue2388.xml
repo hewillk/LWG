@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2388" status="New">
+<issue num="2388" status="Open">
 <title>Handling self-assignment in the proposed library function <tt>std::exchange</tt></title>
 <section><sref ref="[utility.exchange]"/></section>
 <submitter>Nick Calus</submitter>

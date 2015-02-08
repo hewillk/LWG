@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2432" status="New">
+<issue num="2432" status="EWG">
 <title><tt>initializer_list</tt> assignability</title>
 <section><sref ref="[support.initlist]"/></section>
 <submitter>David Krauss</submitter>
