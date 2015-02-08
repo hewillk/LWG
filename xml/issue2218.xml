@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2218" status="Open">
+<issue num="2218" status="Tentatively Ready">
 <title>Unclear how containers use <tt>allocator_traits::construct()</tt></title>
 <section><sref ref="[container.requirements.general]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -54,6 +54,11 @@ should be replaced by "<tt>rebind_traits&lt;U&gt;::</tt>"
 <p/>
 Otherwise it implies using the allocator's functions directly, but they might not exist and 
 it should be through the rebound traits type.
+</p>
+
+<note>Teleconference, January 29 2015</note>
+<p>
+Moved to Tentatively Ready
 </p>
 
 </discussion>
