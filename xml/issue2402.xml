@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2402" status="New">
+<issue num="2402" status="Tentatively NAD">
 <title><tt>basic_string(const basic_string&amp; str, size_type pos, size_type n = npos)</tt> shouldn't use <tt>Allocator()</tt></title>
 <section><sref ref="[string.cons]"/></section>
 <submitter>Stephan T. Lavavej</submitter>
@@ -30,6 +30,19 @@ belonging to the container being copied.", but this isn't exactly a copy constru
 <tt>const allocator_type&amp;</tt> argument. [&hellip;] A copy of this allocator is used for any memory allocation performed".
 </p>
 </blockquote>
+
+<note>Teleconference, January 29 2015</note>
+<p>
+Move to NAD, this is not a copy constructor, and so deliberately does not use the <tt>allocator_traits</tt> method for
+finding an allocator for copy constructors.
+</p>
+
+<p>
+This may be a reasonable design change (and change of current behavior) but should be considered more broadly,
+and the correct response would be a paper submitted to LEWG.  Closing this issue as NAD should not prejudice
+such a paper.
+</p>
+
 </discussion>
 
 <resolution>

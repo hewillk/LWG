@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2156" status="Open">
+<issue num="2156" status="Tentatively Ready">
 <title>Unordered containers' <tt>reserve(n)</tt> reserves for <tt>n-1</tt> elements</title>
 <section><sref ref="[unord.req]"/></section>
 <submitter>Daniel James</submitter>
@@ -89,6 +89,11 @@ AJM: we don't have enough brainpower to do this now, so not priority zero
 
 <p>
 Recategorised as P3
+</p>
+
+<note>Teleconference, January 29 2015</note>
+<p>
+Move to Tentatively Ready.
 </p>
 
 </discussion>
