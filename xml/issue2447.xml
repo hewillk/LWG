@@ -3,12 +3,12 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2447" status="New">
+<issue num="2447" status="Open">
 <title>Allocators and <tt>volatile</tt>-qualified value types</title>
 <section><sref ref="[allocator.requirements]"/></section>
 <submitter>Daniel Kr&uuml;gler</submitter>
 <date>16 Oct 2014</date>
-<priority>0</priority>
+<priority>4</priority>
 
 <discussion>
 <p>

@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2467" status="New">
+<issue num="2467" status="Tentatively Ready">
 <title><tt>is_always_equal</tt> has slightly inconsistent default</title>
 <section><sref ref="[allocator.requirements]"/><sref ref="[allocator.traits.types]"/></section>
 <submitter>Howard Hinnant</submitter>
@@ -66,6 +66,9 @@ Both options are correct, and I see no reason to prefer one fix over the other. 
 </discussion>
 
 <resolution>
+<p>
+Change Table 28 to say: <tt>is_empty&lt;X&gt;<ins>::type</ins></tt>.
+<p/>
 </resolution>
 
 </issue>
