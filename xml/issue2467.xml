@@ -68,7 +68,7 @@ Both options are correct, and I see no reason to prefer one fix over the other. 
 <resolution>
 <p>
 Change Table 28 to say: <tt>is_empty&lt;X&gt;<ins>::type</ins></tt>.
-<p/>
+</p>
 </resolution>
 
 </issue>
