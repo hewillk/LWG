@@ -1,12 +1,13 @@
 ﻿<?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd" [ 
   <!ENTITY nbsp "&#160;">
+  <!ENTITY uuml "&#xFC;">
 ] >
 
 <issue num="60" status="New">
 <title>[PDTS] Incorrect <i>Throws</i> specification for <tt>absolute()</tt></title>
 <section><sref ref="15.1 [fs.op.absolute]"/></section>
-<submitter>Daniel Krügler</submitter>
+<submitter>Daniel Kr&uuml;gler</submitter>
 <date>28 Feb 2014</date>
 
 <discussion>

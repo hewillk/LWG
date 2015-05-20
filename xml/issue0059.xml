@@ -1,16 +1,17 @@
 ﻿<?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd" [ 
   <!ENTITY nbsp "&#160;">
+  <!ENTITY uuml "&#xFC;">
 ] >
 
 <issue num="59" status="New">
 <title>[PDTS] Invalid expressions for bitmask types</title>
 <section><sref ref="10 [fs.enum]"/></section>
-<submitter>Daniel Krügler</submitter>
+<submitter>Daniel Kr&uuml;gler</submitter>
 <date>1 Mar 2014</date>
 
 <discussion>
-<p/><code>copy_options</code> is declared as <code>enum class</code> type that is a bismask type, but the 
+<p/><code>copy_options</code> is declared as <code>enum class</code> type that is a bitmask type, but the 
 specification repeatedly uses expressions that are invalid for scoped 
 enums, such as:
 
