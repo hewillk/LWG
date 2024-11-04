@@ -54,3 +54,15 @@ jobs:
         path: html/issue*.html
         retention-days: 7
         if-no-files-found: ignore
+
+    - name: Check source code changes
+      continue-on-error: true
+      run: |
+        git fetch --depth 2 origin master
+        if ! git diff --quiet origin/master HEAD -- src
+        then
+          if ! bin/check-html-diffs.sh origin/master always
+          then
+            echo "::warning title=html-diffs::Generated HTML files do not match"
+          fi
+        fi
