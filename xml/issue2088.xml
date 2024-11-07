@@ -3,7 +3,7 @@
   <!ENTITY nbsp "&#160;">
 ] >
 
-<issue num="2088" status="Open">
+<issue num="2088" status="Resolved">
 <title><tt>std::terminate</tt> problem</title>
 <section><sref ref="[exception.terminate]"/></section>
 <submitter>Daniel Kr&uuml;gler</submitter>
@@ -144,6 +144,9 @@ for.  Review this issue again once Jens wording is available.
 Alisdair to review clause 15.5 (per Jens suggestion) and recommend any changes, then integrate
 Jens wording into this issue.
 </p>
+
+<note>2024-11-07 Status changed: Open &rarr; Resolved.</note>
+<p>Resolved by the resolution of LWG <iref ref="2111"/>.</p>
 
 </discussion>
 
