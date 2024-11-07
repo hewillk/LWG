@@ -202,7 +202,7 @@
 <!ELEMENT mstyle        (%PresExpression;)>
 
 <!ATTLIST math          %att-mode; %att-display; %MATHML.NamespaceDecl.attrib;>
-<!ATTLIST mglyph        %att-alt; %att-fontfamily; %att-index;>
+<!ATTLIST mglyph        %att-fontfamily;>
 <!ATTLIST mrow          %MATHML.Common.attrib;>
 <!ATTLIST mi            %MATHML.Common.attrib; %att-fontinfo;>
 <!ATTLIST mo            %MATHML.Common.attrib; %att-fontinfo; %att-opinfo;>
@@ -224,8 +224,8 @@
                         %att-rquote; %att-linethickness; %att-scriptlevel; %att-scriptsizemultiplier;
                         %att-scriptminsize; %att-background; %att-open; %att-close;
                         %att-separators; %att-subscriptshift; %att-superscriptshift;
-                        %att-accentunder; %att-tableinfo; %att-rowspan; %att-columnspan;
-                        %att-edge; %att-selection; %att-bevelled; %att-height; %att-depth;>
+                        %att-accentunder; %att-rowspan; %att-columnspan;
+                        %att-edge; %att-bevelled;>
 
 <!-- the common HTML entities for special characters -->
 <!ENTITY Aacute     "&#xC1;">
