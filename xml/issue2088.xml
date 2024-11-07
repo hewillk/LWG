@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
-<!DOCTYPE issue SYSTEM "lwg-issue.dtd" [ 
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd" [
   <!ENTITY nbsp "&#160;">
 ] >
 
@@ -22,11 +22,11 @@ paragraph 1 reads
 </p>
 <blockquote><p>
 <i>Remarks</i>: Called by the implementation when exception handling must
-be abandoned for any of several reasons (15.5.1), in effect immediately after 
-evaluating the <em>throw-expression</em> (18.8.3.1). May also be called directly by the 
+be abandoned for any of several reasons (15.5.1), in effect immediately after
+evaluating the <em>throw-expression</em> (18.8.3.1). May also be called directly by the
 program.
 </p></blockquote>
-<p>It is not clear what is "in effect". It was clear in previous drafts where paragraphs 
+<p>It is not clear what is "in effect". It was clear in previous drafts where paragraphs
 1 and 2 read:
 </p>
 <blockquote><p>
@@ -61,18 +61,18 @@ that was in effect immediately after evaluating the throw-expression".
   triggered by the implementation - no throw-expression involved.
 </li>
 <li>
-  In case a destructor throws during stack unwinding we have two throw-expressions 
+  In case a destructor throws during stack unwinding we have two throw-expressions
   involved.
  </li>
  </ul>
 <p>
 Which one is referred to?
 <p/>
-In case <tt>std::nested_exception::rethrow_nested</tt> is called for an object that has 
-captured no exception, there is no throw-expression involved directly (and may no throw 
+In case <tt>std::nested_exception::rethrow_nested</tt> is called for an object that has
+captured no exception, there is no throw-expression involved directly (and may no throw
 be involved even indirectly).
 <p/>
-Next, <sref ref="[terminate.handler]"/>, paragraph 2 says 
+Next, <sref ref="[terminate.handler]"/>, paragraph 2 says
 </p>
 <blockquote><p>
 <i>Required behavior</i>: A <tt>terminate_handler</tt> shall terminate execution
@@ -84,33 +84,33 @@ exception (because word "return" implies a normal return).
 <p/>
 One could argue that words "terminate execution of the program" are sufficient,
 but then why "without returning to the caller" would be mentioned. In
-case such handler throws, noexcept specification in function <tt>std::terminate</tt> 
-is violated, and <tt>std::terminate</tt> would be called recursively - should 
-<tt>std::abort</tt> not be called in case of recursive <tt>std::terminate</tt> 
-call? On the other hand some controlled recursion could be useful, like in the 
+case such handler throws, noexcept specification in function <tt>std::terminate</tt>
+is violated, and <tt>std::terminate</tt> would be called recursively - should
+<tt>std::abort</tt> not be called in case of recursive <tt>std::terminate</tt>
+call? On the other hand some controlled recursion could be useful, like in the
 <a href="http://cplusplus.co.il/2010/03/21/catching-uncaught-exceptions-within-terminate/">following technique</a>.
 </p>
 </blockquote>
 
 <p>
-The here mentioned wording changes by N3189 in regard to <sref ref="[terminate]"/> p1 
-were done for a better separation of effects (Effects element) and additional normative 
+The here mentioned wording changes by N3189 in regard to <sref ref="[terminate]"/> p1
+were done for a better separation of effects (Effects element) and additional normative
 wording explanations (Remarks element), there was no meaning change intended. Further,
-there was already a defect existing in the previous wording, which was not updated when 
-further situations where defined, when <tt>std::terminate</tt> where supposed to be 
-called by the implementation. 
+there was already a defect existing in the previous wording, which was not updated when
+further situations where defined, when <tt>std::terminate</tt> where supposed to be
+called by the implementation.
 <p/>
 The part
 <p/>
 "in effect immediately after evaluating the throw-expression"
 <p/>
-should be removed and the quoted reference to <sref ref="[terminate.handler]"/> 
-need to be part of the effects element where it refers to the current <tt>terminate_handler</tt> 
+should be removed and the quoted reference to <sref ref="[terminate.handler]"/>
+need to be part of the effects element where it refers to the current <tt>terminate_handler</tt>
 function, so should be moved just after
 <p/>
 "Effects: Calls the current <tt>terminate_handler</tt> function."
 <p/>
-It seems ok to allow a termination handler to exit via an exception, but the 
+It seems ok to allow a termination handler to exit via an exception, but the
 suggested idiom should better be replaced by a more simpler one based on
 evaluating the current exception pointer in the terminate handler, e.g.
 </p>
