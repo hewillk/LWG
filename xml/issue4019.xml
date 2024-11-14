@@ -56,6 +56,8 @@ fewer sharp edges here, and we encourage a paper exploring options.
 | 4| 2| 2| 0| 0|
 </pre>
 </p>
+
+<note>2024-11-14; Related to LWG <iref ref="4097"/>.</note>
 </discussion>
 
 <resolution>
