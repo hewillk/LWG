@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3454" status="LEWG">
+<issue num="3454" status="Open">
 <title><tt>pointer_traits::pointer_to</tt> should be <tt>constexpr</tt></title>
 <section><sref ref="[pointer.traits]"/></section>
 <submitter>Alisdair Meredith</submitter>
@@ -36,6 +36,11 @@ nodes, and stored as <tt>end</tt> sentinel directly in the <tt>list</tt> object)
  pointer that designates the SSO buffer.) As things currently stand, 
  <tt>constexpr basic_string</tt> can support fancy pointers <em>or</em> SSO, 
  but not both.
+</p>
+<note>Wrocław 2024-11-18; LEWG approves the direction</note>
+<p>
+Should there be an Annex C entry noting that program-defined specializations
+need to add `constexpr` to be conforming?
 </p>
 </discussion>
 
