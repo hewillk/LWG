@@ -3,7 +3,7 @@
 
 <issue num="4172" status="New">
 <title>unique_lock self-move-assignment is broken</title>
-<section><sref ref="[thread.lock.unique.cons]"/></section>
+<section><sref ref="[thread.lock.unique.cons]"/> <sref ref="[thread.lock.shared.cons]"/></section>
 <submitter>Casey Carter</submitter>
 <date>13 Nov 2024</date>
 <priority>99</priority>
@@ -27,6 +27,11 @@ from self-move-assignment as of LWG <iref ref="2839"/>.
 </p>
 <p>
 Also, the move assignment operator doesn't specify what it returns.
+</p>
+
+<note>2024-11-18; Casey expands the PR to cover `shared_lock`</note>
+<p>
+`shared_lock` has the same problems, and can be fixed in the same way.
 </p>
 </discussion>
 
@@ -96,6 +101,33 @@ In this case, *this will own the mutex after the assignment and u will not.
 </p>
 <p>
 <del>-21- Throws: Nothing.</del>
+</p>
+</blockquote>
+</li>
+
+<li>
+<p>
+Modify <sref ref="[thread.lock.shared.cons]"/> as follows:
+</p>
+
+<blockquote>
+<pre><code>
+shared_lock&amp; operator=(shared_lock&amp;&amp; sl) noexcept;
+</code></pre>
+<p>
+-17- <i>Effects</i>:
+<del>If `owns` calls `pm->unlock_shared()`.</del>
+<ins>Equivalent to: `shared_lock{std::move(sl)}.swap(*this)`.</ins>
+</p>
+<p>
+<ins>-?- <i>Returns</i>: `*this`.</ins>
+</p>
+<p>
+<del>-18- <i>Postconditions</i>:
+`pm == sl_p.pm` and `owns == sl_p.owns`
+(where `sl_p` is the state of `sl` just prior to this assignment),
+`sl.pm == nullptr` and `sl.owns == false`.
+</del>
 </p>
 </blockquote>
 </li>
