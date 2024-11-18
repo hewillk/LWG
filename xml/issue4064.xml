@@ -60,6 +60,7 @@ return a pointer to a suitable created object.</ins>
 
 <note>St. Louis 2024-06-26; CWG suggested improved wording</note>
 <note>St. Louis 2024-06-28; LWG: move to Ready</note>
+<note>Wrocław 2024-11-18; approved by Core (again)</note>
 
 </discussion>
 
