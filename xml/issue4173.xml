@@ -14,7 +14,10 @@ The Containers clause often uses "references, pointers, or iterators" which
 is verbose, and needs to be said in full whenever talking about iterator
 invalidation. It would be helpful to have a term of art that refers to all
 of them, something like "element references" or to avoid any confusion with
-actual references, "element indicators".
+actual references, "element indicators". Maybe "element handles" but that
+could be confused with node handles for associative containers, and
+(based on Wikipedia) has connotations of additional indirection, and something
+which would <i>not</i> be invalidated when the underlying storage changes.
 </p>
 </discussion>
 
