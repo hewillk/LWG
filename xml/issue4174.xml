@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4174" status="New">
+<title>How does [atomics.order] p3 apply when then modification is an initialization?</title>
+<section><sref ref="[atomics.order]"/></section>
+<submitter>jim x</submitter>
+<date>13 Nov 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider this example
+</p>
+<blockquote><pre>
+std::atomic&lt;int&gt; v = 0;
+// thread 1:
+v.load(std::memory_order::seq_cst);
+//thread 2:
+v.store(1,std::memory_order::seq_cst);
+</pre></blockquote>
+<p>
+If the load operation reads the value `0`, how are load and store operations ordered in the single total order? 
+According to <sref ref="[atomics.order]"/> p3 (emphasize mine)
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+An atomic operation <i>A</i> on some atomic object <i>M</i> is <i>coherence-ordered before</i> 
+another atomic operation <i>B</i> on <i>M</i> if
+</p>
+<ol style="list-style-type: none">
+<li><p>[&hellip;]</p></li>
+<li><p>(3.3) &mdash; <i>A</i> and <i>B</i> are not the same atomic read-modify-write operation, 
+and there exists an <b>atomic modification <i>X</i></b> of <i>M</i> such that <i>A</i> reads the value stored by 
+<i>X</i> and <i>X</i> precedes <i>B</i> in the modification order of <i>M</i>, or</p></li>
+</ol>
+</blockquote>
+<p>
+According to <sref ref="[atomics.types.operations]"/> p3 (emphasize mine)
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<i>Effects</i>: Initializes the object with the value <tt>desired</tt>. <b>Initialization is not an atomic operation</b> 
+(<sref ref="[intro.multithread]"/>).
+</blockquote>
+<p>
+So, how does <sref ref="[atomics.order]"/> p3 apply to this example such that the load operation precedes 
+the store operation in the single total order <i>S</i>?
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
