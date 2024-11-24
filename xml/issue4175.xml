@@ -1,0 +1,163 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4175" status="New">
+<title>`get_env()` specified in terms of `as_const()` but this doesn't work with rvalue senders</title>
+<section><sref ref="[exec.get.allocator]"/><sref ref="[exec.get.stop.token]"/><sref ref="[exec.get.env]"/>
+         <sref ref="[exec.get.domain]"/><sref ref="[exec.get.scheduler]"/>         
+         <sref ref="[exec.get.delegation.scheduler]"/><sref ref="[exec.get.fwd.progress]"/>
+         <sref ref="[exec.get.compl.sched]"/></section>
+<submitter>Lewis Baker</submitter>
+<date>10 Nov 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The current specification of `std::execution::get_env()` defines `get_env(o)` as `as_const(o).get_env()`. 
+However, the `as_const()` function has a deleted rvalue-taking overload, meaning that you cannot pass temporaries to it.  
+<p/>
+This means that several uses of `get_env()` which pass expressions which are either potentially rvalues 
+(e.g. in definition of `connect(sndr, rcvr)` it uses the expression `get_env(rcvr)`, but `rcvr` could be, 
+and usually is, a prvalue) or always rvalues (e.g. `scheduler` concept has the expression 
+<tt>get_env(schedule(std::forward&lt;Sch&gt;(sch)))</tt>).  
+<p/>
+The intent here was that `get_env()` is a function that takes as an argument a <tt>const T&amp;</tt> and thus 
+allows prvalues to bind to it. We basically just want to require that `get_env()` finds a const-qualified 
+member-function. The use of `as_const()` does not seem to mirror the semantics of a function with a 
+<tt>const T&amp;</tt> parameter, so I suggest we change it to something else that expresses the intent.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N4993"/>.
+</p>
+
+<ol>
+<li><p>Add to the end of <sref ref="[exec.general]"/> as indicated:</p>
+
+<blockquote>
+<p>
+<ins>-?- For a subexpression `expr`, let <tt><i>AS-CONST</i>(expr)</tt> be expression-equivalent to</ins> 
+</p>
+<blockquote><pre>
+<ins>[](const auto&amp; x) noexcept -&gt; const auto&amp; { return x; }(expr)</ins>
+</pre></blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.allocator]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- `get_allocator` asks a queryable object for its associated allocator.
+<p/>
+-2- The name `get_allocator` denotes a query object. For a subexpression `env`, `get_allocator(env)` is
+expression-equivalent to <tt><i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(env).query(get_allocator))</tt>.
+</p>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.stop.token]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `get_stop_token` denotes a query object. For a subexpression `env`, `get_stop_token(env)` is
+expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; <tt><i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(env).query(get_stop_token))</tt> 
+if that expression is well-formed.</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.env]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- `execution::get_env` is a customization point object. For a subexpression `o`, `execution::get_env(o)` is
+expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+<li><p>(1.1) &mdash; <tt><i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(o).get_env())</tt> 
+if that expression is well-formed.</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.domain]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `get_domain` denotes a query object. For a subexpression `env`, `get_domain(env)` is expression-equivalent
+to <tt><i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(env).query(get_domain))</tt>.
+</p>
+
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.scheduler]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `get_scheduler` denotes a query object. For a subexpression `env`, `get_scheduler(env)` is
+expression-equivalent to <tt><i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(env).query(get_scheduler))</tt>.
+</p>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.delegation.scheduler]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `get_delegation_scheduler` denotes a query object. For a subexpression `env`, 
+`get_delegation_scheduler(env)` is expression-equivalent to 
+<tt><i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(env).query(get_delegation_scheduler))</tt>.
+</p>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.fwd.progress]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `get_forward_progress_guarantee` denotes a query object. For a subexpression `sch`, let 
+`Sch` be `decltype((sch))`. If `Sch` does not satisfy `scheduler`, `get_forward_progress_guarantee` is ill-formed.
+Otherwise, `get_forward_progress_guarantee(sch)` is expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; <tt><i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(sch).query(get_forward_progress_guarantee))</tt> 
+if that expression is well-formed.</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[exec.get.compl.sched]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `get_completion_scheduler` denotes a query object template. For a subexpression `q`, the expression
+<tt>get_completion_scheduler&lt;<i>completion-tag</i>&gt;(q)</tt> is ill-formed if <tt><i>completion-tag</i></tt> 
+is not one of `set_value_t`, `set_error_t`, or `set_stopped_t`. Otherwise, 
+<tt>get_completion_scheduler&lt;<i>completion-tag</i>&gt;(q)</tt> is expression-equivalent to
+</p>
+<blockquote><pre>
+<i>MANDATE-NOTHROW</i>(<del>as_const</del><ins><i>AS-CONST</i></ins>(q).query(get_completion_scheduler&lt;<i>completion-tag</i>&gt;
+</pre></blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
