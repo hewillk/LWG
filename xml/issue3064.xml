@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3064" status="New">
+<issue num="3064" status="Resolved">
 <title>How do uninitialized memory algorithms obtain pointer without undefined behavior?</title>
 <section><sref ref="[specialized.algorithms]"/></section>
 <submitter>Alisdair Meredith</submitter>
@@ -36,6 +36,13 @@ function as casting a pointer to <tt>void*</tt> in order to get the address of t
 </p>
 
 <note>2018-02-20, Priority set to 3 after mailing list discussion</note>
+<note>2024-11-28 Status changed: New &rarr; Resolved.</note>
+<p>
+Resolved by
+<a href="https://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#453"
+title='References may only bind to “valid” objects'>CWG 453</a>,
+accepted as a DR in March 2024.
+</p>
 </discussion>
 
 <resolution>
