@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4140" status="Voting">
+<issue num="4140" status="WP">
 <title>Useless default constructors for bit reference types</title>
 <section>
   <sref ref="[template.bitset.general]"/>
@@ -50,6 +50,7 @@ has exactly the same issue.
 Set status to Tentatively Ready after eight votes in favour during reflector poll.
 </p>
 
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

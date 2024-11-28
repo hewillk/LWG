@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4064" status="Voting">
+<issue num="4064" status="WP">
 <title>Clarify that <tt>std::launder</tt> is not needed when using the result of <tt>std::memcpy</tt></title>
 <section><sref ref="[cstring.syn]"/></section>
 <submitter>Jan Schultke</submitter>
@@ -62,6 +62,7 @@ return a pointer to a suitable created object.</ins>
 <note>St. Louis 2024-06-28; LWG: move to Ready</note>
 <note>Wrocław 2024-11-18; approved by Core (again)</note>
 
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

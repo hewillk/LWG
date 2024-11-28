@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4124" status="Voting">
+<issue num="4124" status="WP">
 <title>Cannot format `zoned_time` with resolution coarser than seconds</title>
 <section><sref ref="[time.format]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -45,6 +45,7 @@ The proposed resolution below has been implemented in libstdc++.
 Set status to Tentatively Ready after seven votes in favour during reflector poll.
 </p>
 
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

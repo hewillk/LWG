@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4170" status="Voting">
+<issue num="4170" status="WP">
 <title>`contiguous_iterator` should require `to_address(I{})`</title>
 <section><sref ref="[iterator.concept.contiguous]"/></section>
 <submitter>Casey Carter</submitter>
@@ -32,6 +32,7 @@ to empty pointer ranges as desired.
 Set status to Tentatively Ready after eight votes in favour during reflector poll.
 </p>
 
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

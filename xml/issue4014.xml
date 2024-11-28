@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4014" status="Voting">
+<issue num="4014" status="WP">
 <title>LWG 3809 changes behavior of some existing <tt>std::subtract_with_carry_engine</tt> code</title>
 <section><sref ref="[rand.eng.sub]"/></section>
 <submitter>Matt Stephanson</submitter>
@@ -121,6 +121,7 @@ The new proposed resolution below restores the old behaviour for that type.
 
 <note>2024-10-09; LWG telecon: Move to Ready</note>
 
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3436" status="Voting">
+<issue num="3436" status="WP">
 <title><tt>std::construct_at</tt> should support arrays</title>
 <section><sref ref="[specialized.construct]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -188,6 +188,7 @@ supported value-initialization.
 </p>
 
 <note>St. Louis 2024-06-24; move to Ready.</note>
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

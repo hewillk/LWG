@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4044" status="Voting">
+<issue num="4044" status="WP">
 <title>Confusing requirements for <code>std::print</code> on POSIX platforms</title>
 <section><sref ref="[print.fun]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -418,6 +418,7 @@ parenthesis.
 </p>
 
 <note>St. Louis 2024-06-24; move to Ready.</note>
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

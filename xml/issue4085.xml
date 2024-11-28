@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4085" status="Voting">
+<issue num="4085" status="WP">
 <title><tt>ranges::generate_random</tt>'s helper lambda should specify the return type</title>
 <section><sref ref="[alg.rand.generate]"/></section>
 <submitter>Hewill Kang</submitter>
@@ -62,6 +62,7 @@ Set priority to 2 after reflector poll.
 
 <note>2024-10-09; LWG telecon: Move to Ready</note>
 
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

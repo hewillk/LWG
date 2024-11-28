@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4119" status="Voting">
+<issue num="4119" status="WP">
 <title><code>generator::promise_type::yield_value(ranges::elements_of&lt;R, Alloc&gt;)</code>'s nested <code>generator</code> may be ill-formed</title>
 <section><sref ref="[coro.generator.promise]"/></section>
 <submitter>Hewill Kang</submitter>
@@ -38,6 +38,7 @@ to <code>void</code> since that type doesn't matter to us.
 Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 
+<note>Wrocław 2024-11-23; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>
