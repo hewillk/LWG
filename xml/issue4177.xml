@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4177" status="New">
+<title>&sect;[atomics.order] p8 "circularly depend on their own computation" is unclear for loop</title>
+<section><sref ref="[atomics.order]"/></section>
+<submitter>jim x</submitter>
+<date>29 Nov 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[atomics.order]"/> p8 and p9 gave two paradigmatic examples of how "circularly depend on 
+their own computation" means. However, consider this example:
+</p>
+<blockquote><pre>
+std::atomic&lt;int&gt; x = 0, y = 2;
+
+// thread 1:
+if (y.load(relaxed) == 1) { // #1
+  x.store(1, relaxed); // #2
+}
+
+//thread 2:
+int pre = x.load(relaxed); // #3
+while (pre != 0) {
+  if (x.compare_exchange_strong(pre, pre + 1, acquire, relaxed)) {  // #4
+    break;
+  }
+}
+y.store(1, relaxed); // #5
+</pre></blockquote>
+<p>
+when both `#1` and `#3` read `1`, is this a kind of OOTA? `#3` depends on `#2`, `#2` depends on `#1`, 
+`#1` depends on `#5`, and the execution of `#5` depends on the exiting of the loop, which in turn initially 
+depends on `pre`.
+<p/>
+The loop can never execute, exit after certain iterations, or be a long-time-running without exiting 
+(i.e. `cmpxchg` keeps failing). So, it is unclear whether the execution of `#5` depends on the loop. 
+However, it resembles the `spin-loop` (a failed `cmpxchg` is a pure load with a relaxed load), and the 
+subsequent codes won't execute until the loop exits. So, the scenario of spin-lock seems to agree that 
+the code after a loop depends on the loop(regardless of whether the loop can quickly exit or be a 
+long-time-run loop).
+<p/>
+From this perspective, the `while` case is something like the `if`, for `if`, the condition is not 
+`true`, and the code thereof cannot be executed. Similarly, a code after a while cannot be executed 
+if the loop doesn't exit.
+<p/>
+<b>Suggested resolution:</b>
+<p/>
+ Either accurately specify what "circularly depend on their own computation" means, or add a paradigmatic 
+ example regarding loop to indicate what it means.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
