@@ -57,7 +57,10 @@ replace all occurrences of "<tt>writable</tt>" (the concept) with "<tt>indirectl
 </p>
 </blockquote>
 <p>
-has not been completed through-out the working draft.
+has either been incorrectly applied <sref ref="[iterator.requirements.general]"/> (because that position did not
+actually refer to the <tt>writable</tt> concept) or if the interpretation that the original <i>writable</i>
+definition from <sref ref="[iterator.requirements.general]"/> was intended to be aliased with the <tt>writable</tt>
+concept this substitution has been incompletely applied to the working draft.
 </p>
 </discussion>
 
