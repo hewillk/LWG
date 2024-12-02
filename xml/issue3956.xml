@@ -31,11 +31,74 @@ lookup (i.e. unqualified lookup plus ADL) or just ADL, as was done for
 Set priority to 3 after reflector poll.
 </p>
 
+<note>2024-12-02; Jonathan provides wording</note>
+<p>
+I suggest that `from_stream` should only be found via ADL,
+not unqualified lookup. This is consistent with what we did for
+`make_error_code` and `make_error_condition`, and more recently for
+`submdspan_mapping`.  I see no reason to treat `from_stream` differently.
+This implies that implementations might need a poison poll in `std::chrono`
+so that unqualified lookup stops as soon as those are found.
+</p>
+
 </discussion>
 
 <resolution>
 <p>
+This wording is relative to <paper num="N4993"/>.
 </p>
+
+<ol>
+<li><p>Modify <sref ref="[contents]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-3-
+Whenever an unqualified name other than
+`swap`, `make_error_code`, `make_error_condition`,
+<ins>`from_stream`,</ins>
+or `submdspan_mapping`
+is used in the specification of a declaration `D`
+in Clause 17 through Clause 33 or Annex D,
+its meaning is established as-if by performing unqualified name lookup
+(<sref ref="[basic.lookup.unqual]"/>)
+in the context of `D`.
+</p>
+<p>
+[<i>Note 1</i>:
+Argument-dependent lookup is not performed. &mdash; <i>end note</i>]
+</p>
+<p>
+Similarly, the meaning of a <i>qualified-id</i> is established as-if
+by performing qualified name lookup (<sref ref="[basic.lookup.qual]"/>)
+in the context of `D`.
+</p>
+<p>
+[<i>Example 1</i>:
+The reference to `is_array_v` in the specification of `std::to_array`
+(<sref ref="[array.creation]"/>) refers to `::std::is_array_v`.
+&mdash; <i>end example</i>]
+</p>
+<p>
+[<i>Note 2</i>: Operators in expressions (<sref ref="[over.match.oper]"/>)
+are not so constrained; see <sref ref="[global.functions]"/>.
+&mdash; <i>end note</i>]
+</p>
+<p>
+The meaning of the unqualified name `swap` is established
+in an overload resolution context for swappable values
+(<sref ref="[swappable.requirements]"/>).
+The meanings of the unqualified names
+`make_error_code`, `make_error_condition`,
+<ins>`from_stream`,</ins>
+and `submdspan_mapping`
+are established as-if by performing argument-dependent lookup
+(<sref ref="[basic.lookup.argdep]"/>).
+</p>
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
