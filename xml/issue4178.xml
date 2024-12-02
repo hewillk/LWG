@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4178" status="New">
+<title><i>writable</i> is no longer a term of power</title>
+<section><sref ref="[iterator.requirements.general]"/><sref ref="[iterator.cpp17.general]"/>
+<sref ref="[alg.replace]"/><sref ref="[alg.fill]"/><sref ref="[alg.remove]"/>
+<sref ref="[alg.unique]"/><sref ref="[alg.random.sample]"/><sref ref="[partial.sort.copy]"/>
+<sref ref="[alg.partitions]"/><sref ref="[partial.sum]"/>
+<sref ref="[adjacent.difference]"/><sref ref="[rand.util.seedseq]"/></section>
+<submitter>Alisdair Meredith</submitter>
+<date>27 Nov 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+There are a numerous algorithms that mandate an iterator is "writable (<sref ref="[iterator.requirements.general]"/>)":
+e.g., for the `std::fill` algorithm, <sref ref="[alg.fill]"/> 26.7.6p2
+</p>
+<blockquote>
+<p>
+<i>Mandates</i>: The expression value is writable (<sref ref="[iterator.requirements.general]"/>) to the output iterator.
+</p>
+</blockquote>
+<p>
+However, checking <sref ref="[iterator.requirements.general]"/> I can find no definition for the term "writable".
+Checking past standard, I found that in C++17 we have the following definition:
+</p>
+<blockquote>
+<p>
+An output iterator `i` has a non-empty set of types that are <i>writable</i> to the iterator;
+</p>
+</blockquote>
+<p>
+However, when we introduced the concept-based iterator taxonomy, this definition was replaced by:
+</p>
+<blockquote>
+<p>
+An output iterator `i` has a non-empty set of types that are `indirectly_writable` to the iterator;
+</p>
+</blockquote>
+<p>
+where the term of power is no longer defined, but a concept is used to define the relationship between 
+iterator and value instead. We need to either find and fix each reference to "writable" (or more properly 
+"writable to" &mdash; the old term is a relationship between two types, not a property of just one) using 
+the `indirectly_writable` concept, or restore a definition of the term of power &mdash; likely phased in 
+terms of the `indirectly_writable` concept.
+<p/>
+There is some urgency to this issue, as I am drafting wording for an EWG paper with a library component 
+that should land for C++26, and I am modeling that wording on existing algorithms which is how I ran into 
+this issue. It would be helpful to have a recommendation for how to write mandates clauses until this issue 
+is resolved &mdash; should we perpetuate the bad "writable" wording to be part of a global fix, or attempt 
+to use `indirectly_writable`, not knowing if that would be the preferred consistent direction for the future?
+<p/>
+<b>Daniel:</b>
+<p/>
+It seems that the editorial direction of <paper num="P1878R1"/> accepted in Belfast 2019,
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+Change stable name [iterator.concept.writable] to [iterator.concept.indirectly.writable] and globally
+replace all occurrences of "<tt>writable</tt>" (the concept) with "<tt>indirectly_writable</tt>"
+</p>
+</blockquote>
+<p>
+has not been completed through-out the working draft.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
