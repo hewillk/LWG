@@ -24,7 +24,7 @@ e.g., for the `std::fill` algorithm, <sref ref="[alg.fill]"/> 26.7.6p2
 </blockquote>
 <p>
 However, checking <sref ref="[iterator.requirements.general]"/> I can find no definition for the term "writable".
-Checking past standard, I found that in C++17 we have the following definition:
+Checking past standards, I found that in C++17 we have the following definition:
 </p>
 <blockquote>
 <p>
@@ -43,14 +43,8 @@ An output iterator `i` has a non-empty set of types that are `indirectly_writabl
 where the term of power is no longer defined, but a concept is used to define the relationship between 
 iterator and value instead. We need to either find and fix each reference to "writable" (or more properly 
 "writable to" &mdash; the old term is a relationship between two types, not a property of just one) using 
-the `indirectly_writable` concept, or restore a definition of the term of power &mdash; likely phased in 
+the `indirectly_writable` concept, or restore a definition of the term of power &mdash; likely phrased in 
 terms of the `indirectly_writable` concept.
-<p/>
-There is some urgency to this issue, as I am drafting wording for an EWG paper with a library component 
-that should land for C++26, and I am modeling that wording on existing algorithms which is how I ran into 
-this issue. It would be helpful to have a recommendation for how to write mandates clauses until this issue 
-is resolved &mdash; should we perpetuate the bad "writable" wording to be part of a global fix, or attempt 
-to use `indirectly_writable`, not knowing if that would be the preferred consistent direction for the future?
 <p/>
 <b>Daniel:</b>
 <p/>
