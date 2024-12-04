@@ -4,7 +4,7 @@
 ] >
 
 <issue num="2146" status="Open">
-<title>Are reference types <tt>Copy</tt>&#47;<tt>Move-Constructible</tt>&#47;<tt>Assignable</tt> or <tt>Destructible</tt>?</title>
+<title>Are reference types <tt>CopyConstructible</tt>&#47;<tt>MoveConstructible</tt>&#47;<tt>CopyAssignable</tt>&#47;<tt>MoveAssignable</tt>&#47;<tt>Destructible</tt>?</title>
 <section><sref ref="[utility.arg.requirements]"/></section>
 <submitter>Nikolay Ivchenkov</submitter>
 <date>23 Mar 2012</date>
@@ -137,10 +137,21 @@ The <tt>swap</tt> case still needs solving. Still need a survey.
 
 <note>2024-03-15; LWG <iref ref="4047"/> addresses the <code>swap</code> part</note>
 
+<note>2024-12-04; Daniel comments</note>
+<p>
+The mentioned requirement sets have been renamed a while ago to:
+</p>
+<ul>
+<li><p><i>Cpp17CopyConstructible</i></p></li>
+<li><p><i>Cpp17MoveConstructible</i></p></li>
+<li><p><i>Cpp17CopyAssignable</i></p></li>
+<li><p><i>Cpp17MoveAssignable</i></p></li>
+<li><p><i>Cpp17Destructible</i></p></li>
+</ul>
+
 </discussion>
 
 <resolution>
-
 </resolution>
 
 </issue>
