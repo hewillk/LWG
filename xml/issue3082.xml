@@ -26,6 +26,62 @@ the text suggesting a latitude in rounding logic should be removed.
 
 <note>2018-08-23 Batavia Issues processing</note>
 <p>Marshall to talk to Jens about this</p>
+
+<note>2024-12-04; add comments from Richard Smith</note>
+<p>
+In editorial issue
+<a href="https://github.com/cplusplus/draft/issues/6730">#6730</a>
+Richard said:
+</p>
+<blockquote>
+<sref ref="[charconv.from.chars]"/>/6.4 says:
+
+<blockquote>
+In any case, the resulting value is one of at most two floating-point
+values closest to the value of the string matching the pattern.
+</blockquote>
+
+This is ambiguous. It could mean either:
+<ol>
+<li>
+The resulting value is the implementation's choice of one of a set of values,
+and that set contains the two values closest to the value of the string.
+</li>
+<li>
+The resulting value is the implementation's choice of one of a set of values,
+and that set contains all values that are closest to the value of the string
+(of which it turns out there can be up to two).
+</li>
+</ol>
+<p>
+I think the normal English interpretation would be (1),
+but the intended interpretation is actually (2).
+</p>
+<p>
+(Under (1), the string `"1.0"` can produce the value one ULP less than 1.0
+or it can produce 1.0, and the string <code>"1.00&lt;lots of 0s&gt;1"</code>
+can produce those same two values, because the value one ULP less than 1.0
+is closer to that string than the value one ULP greater than 1.0.)
+</p>
+<p>
+Perhaps the wording from <sref ref="[conv.double]"/>/2 and
+<sref ref="[expr.static.cast]"/>/11 can be used instead:
+</p>
+<blockquote>
+If the source value can be exactly represented in the destination type,
+the result of the conversion is that exact representation.
+If the source value is between two adjacent destination values,
+the result of the conversion is an implementation-defined choice
+of either of those values.
+</blockquote>
+</blockquote>
+<p>
+Editorial pull request
+<a href="https://github.com/cplusplus/draft/pull/6833">#6833</a>
+proposed a change along those lines, but conflicts with the proposed resolution
+to this issue.
+We should address Richard's comment as part of this issue.
+</p>
 </discussion>
 
 <resolution>
