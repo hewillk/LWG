@@ -39,9 +39,90 @@ to unordered associative containers as well.
 Set priority to 3 after reflector poll.
 </p>
 
+<note>2024-12-04; Jonathan provides wording</note>
+<p>
+If we want to require <a href="https://www.stroustrup.com/SCARY.pdf">SCARY</a>
+iterators then that should be a proposal that goes through LEWG design review.
+I propose an almost minimal change to make the spec consistent without
+imposing any new requirements on implementations.
+</p>
+<p>
+The minimal change would be to say that iterators remain valid if `a` and `a2`
+have the same type, which is the minimum portable guarantee that always holds.
+However what matters in practice is whether the iterator types are the same.
+That would not be a portable guarantee, because it depends on whether the
+implementation uses SCARY iterators for its maps and sets, so users could
+write code that works on one implementation and fails to compile when moved
+to a different implementation. But that portability trap would be present
+even if we only say iterators remain valid when `a` and `a2` are the same type.
+If the code compiles and works on an implementation with SCARY iterators,
+then users will rely on that, even if unintentionally. Leaving that case
+unspecified or undefined in the standard doesn't prevent users from relying
+on it. It doesn't seem to serve any benefit to pretend it doesn't work when
+it actually does on some implementations.
+</p>
+<p>
+N.B. Libstdc++ associative container iterators are SCARY by default,
+but non-SCARY when `-D_GLIBCXX_DEBUG` is used to enable Debug Mode
+(see <a href="https://gcc.gnu.org/PR62169">Bug 62169</a>).
+I believe libc++ iterators are SCARY even when
+`-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG` is used,
+and MSVC STL iterators are SCARY even when `/D_ITERATOR_DEBUG_LEVEL` is used.
+</p>
+
 </discussion>
 
 <resolution>
+<p>
+This wording is relative to <paper num="N4993"/>.
+</p>
+
+<ol>
+<li>
+<p>
+Modify <sref ref="[associative.reqmts.general]"/> as indicated:
+</p>
+
+<blockquote>
+<pre><code>a.merge(a2)</code></pre>
+<p>-112-
+<i>Result</i>: `void`
+</p>
+<p>-113-
+<i>Preconditions</i>:
+`a.get_allocator() == a2.get_allocator()`<ins> is `true`</ins>.
+</p>
+<p>-114-
+<i>Effects</i>:
+Attempts to extract each element in `a2` and insert it into `a`
+using the comparison object of `a`.
+In containers with unique keys,
+if there is an element in `a` with key equivalent to
+the key of an element from `a2`,
+then that element is not extracted from `a2`.
+</p>
+<p>-115-
+<i>Postconditions</i>:
+Pointers and references to the transferred elements of `a2`
+refer to those same elements but as members of `a`.
+<ins>If `a.begin()` and `a2.begin()` have the same type, iterators</ins>
+<del>Iterators</del>
+referring to the transferred elements will continue to refer to their elements,
+but they now behave as iterators into `a`, not into `a2`.
+</p>
+<p>-116-
+<i>Throws</i>:
+Nothing unless the comparison objects throws.
+</p>
+<p>-117-
+<i>Complexity</i>:
+<i>N</i> log(`a.size()`+<i>N</i>), where <i>N</i> has the value `a2.size()`.
+</p>
+
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
