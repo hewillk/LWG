@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4178" status="New">
+<issue num="4178" status="NAD Editorial">
 <title><i>writable</i> is no longer a term of power</title>
 <section><sref ref="[iterator.requirements.general]"/><sref ref="[iterator.cpp17.general]"/>
 <sref ref="[alg.replace]"/><sref ref="[alg.fill]"/><sref ref="[alg.remove]"/>
@@ -62,6 +62,7 @@ actually refer to the <tt>writable</tt> concept) or if the interpretation that t
 definition from <sref ref="[iterator.requirements.general]"/> was intended to be aliased with the <tt>writable</tt>
 concept this substitution has been incompletely applied to the working draft.
 </p>
+<note>2024-12-04 Status changed: New &rarr; NAD Editorial.</note>
 </discussion>
 
 <resolution>
