@@ -77,13 +77,377 @@ is exactly equal to the size of the range.
 This should talk about calls to `allocator_traits::destroy`.
 </p>
 <p>
+<sref ref="[deque.modifiers]"/> is similar.
 Look for similar problems elsewhere.
 </p>
+
+<note>2024-12-06; Jonathan adds wording, incorporating Arthur's wording</note>
 </discussion>
 
 <resolution>
 <p>
+This wording is relative to <paper num="N4993"/>.
 </p>
+
+<ol>
+<li>
+<p>Modify <sref ref="[deque.capacity]"/> as indicated:</p>
+<blockquote>
+<pre>void shrink_to_fit();</pre>
+<p>
+-5- <i>Preconditions</i>:
+`T` is <i>CppMoveInsertable</i> into `deque`.
+</p>
+<p>
+-6- <i>Effects</i>:
+`shrink_to_fit` is a non-binding request to reduce memory use
+but does not change the size of the sequence.
+[<i>Note 1</i>:
+The request is non-binding to allow latitude for
+implementation-specific optimizations.
+&mdash; <i>end note</i>]
+If the size is equal to the old capacity, or
+if an exception is thrown other than by the <del>move constructor</del>
+<ins>move-construction of one object</ins>
+of a non-<i>Cpp17CopyInsertable</i> <ins>type</ins> `T`
+<ins>from another</ins>,
+then there are no effects.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[deque.modifiers]"/> as indicated:</p>
+<blockquote>
+<pre>iterator insert(const_iterator position, const T&amp; x);
+...
+template&lt;<i>container-compatible-range</i>&lt;T&gt; R&gt;
+  void append_range(R&amp;&amp; rg);</pre>
+<p>
+-1- <i>Effects</i>: [...]
+</p>
+<p>
+-2- <i>Complexity</i>:
+The complexity is linear in the number of elements inserted plus
+the lesser of the distances to the beginning and end of the deque.
+Inserting a single element at either the beginning or end of a deque
+always takes constant time and causes
+<del>a single call to a constructor of T</del>
+<ins>construction of a single object of type `T`</ins>.
+</p>
+<p>
+-3- <i>Remarks</i>:
+If an exception is thrown other than by the
+<del>copy constructor, move constructor,
+assignment operator, or move assignment operator of `T`
+</del>
+<ins>
+construction or assignment of one object of type `T` from another
+</ins>,
+there are no effects.
+If an exception is thrown while inserting a single element at either end,
+there are no effects.
+Otherwise, if an exception is thrown by the
+<del>move constructor of a</del>
+<ins>move-construction of one object of</ins>
+non-<i>Cpp17CopyInsertable</i>
+<ins>type</ins>
+`T` <ins>from another</ins>, the effects are unspecified.
+<p>[...]</p>
+-5- <i>Throws</i>:
+Nothing unless an exception is thrown by
+<del>the assignment operator of `T`</del>
+<ins>
+the assignment of one object of type `T` from another
+</ins>.
+</p>
+<pre>iterator erase(const_iterator position);
+iterator erase(const_iterator first, const_iterator last);
+void pop_front();
+void pop_back();</pre>
+<p>
+-4- <i>Effects</i>:
+An erase operation that erases the last element of a deque invalidates only
+the past-the-end iterator
+and all iterators and references to the erased elements.
+An erase operation that erases the first element of a deque but not the last
+element invalidates only iterators and references to the erased elements.
+An erase operation that erases neither the first element nor the last element
+of a deque invalidates the past-the-end iterator and all iterators and
+references to all the elements of the deque.
+</p>
+<p>
+[<i>Note 1</i>:
+`pop_front` and `pop_back` are erase operations.
+&mdash; <i>end note</i>]
+</p>
+<p>
+-5- <i>Throws</i>:
+Nothing unless an exception is thrown by <del>the</del><ins>an</ins>
+assignment operator of `T`.
+</p>
+<p>
+-6- <i>Complexity</i>:
+The number of
+<del>calls to the destructor of `T`</del>
+<ins>objects of type `T` destroyed</ins>
+is the same as the number of
+elements erased, but the number of calls to the assignment operator of `T`
+is no more than the lesser of the number of elements before the erased
+elements and the number of elements after the erased elements.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[forward.list.modifiers]"/> as indicated:</p>
+<blockquote>
+<p>
+-1- [...]
+Inserting `n` elements into a `forward_list` is linear in
+`n`, and the number of <del>calls to the copy or move constructor of</del>
+<ins>objects of type</ins> `T` <ins>constructed</ins> is
+exactly equal to `n`. Erasing `n` elements from a `forward_list` is
+linear in `n` and the number of <del>calls to the destructor of</del>
+<ins>objects of</ins> type `T` <ins>destroyed</ins> is exactly equal to `n`.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[list.modifiers]"/> as indicated:</p>
+<blockquote>
+<p>
+-1- <i>Complexity</i>:
+Insertion of a single element into a list takes constant time and exactly one
+<del>call to a constructor of `T`</del>
+<ins>object of type `T` is constructed</ins>
+Insertion of multiple elements into a list is linear in the number of
+elements inserted and the number of
+<del>calls to the copy constructor or move constructor of `T`</del>
+<ins>objects of type `T` constructed</ins>
+is exactly equal to the number of elements inserted.
+</p>
+<p>
+-2- <i>Remarks</i>:
+Does not affect the validity of iterators and references.
+If an exception is thrown, there are no effects.
+</p>
+<pre>iterator erase(const_iterator position);
+iterator erase(const_iterator first, const_iterator last);
+void pop_front();
+void pop_back();
+void clear() noexcept;</pre>
+<p>
+-3- <i>Effects</i>:
+Invalidates only the iterators and references to the erased elements.
+</p>
+<p>
+-4- <i>Throws</i>: Nothing.
+</p>
+<p>
+-5- <i>Complexity</i>:
+Erasing a single element is a constant time operation with a single
+<del>call to the destructor of `T`</del>
+<ins>object of type `T` destroyed</ins>.
+Erasing a range in a list is linear time in the
+size of the range and the number of
+<del>calls to the destructor of type `T`</del>
+<ins>objects of type `T` destroyed</ins>
+is exactly equal to the size of the range.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[vector.cons]"/> as indicated:</p>
+<blockquote>
+<pre>template&lt;class InputIterator&gt;
+  constexpr vector(InputIterator first, InputIterator last,
+                   const Allocator&amp; = Allocator());</pre>
+<p>
+-9- <i>Effects</i>:
+Constructs a `vector` equal to the range [`first`, `last`),
+using the specified allocator.
+</p>
+<p>
+-10- <i>Complexity</i>:
+<del>Makes only <i>N</i> calls to the copy constructor of</del>
+<ins>Initializes exactly <i>N</i> objects of type</ins>
+`T`
+(where <i>N</i> is the distance between `first` and `last`)
+and no reallocations if iterators `first` and `last` are of forward,
+bidirectional, or random access categories.
+It <del>makes</del> <ins>initializes</ins> order
+<i>N</i>
+<del>calls to the copy constructor of</del>
+<ins>objects of type</ins>
+`T` and <ins>performs</ins>
+order log <i>N</i> reallocations if they are just input iterators.
+</p>
+<pre>template&lt;<i>container-compatible-range</i>&lt;T&gt; R&gt;
+  constexpr vector(from_range_t, R&amp;&amp; rg, const Allocator&amp; = Allocator());</pre>
+<p>
+-11- <i>Effects</i>:
+Constructs a `vector` object with the elements of the range `rg`,
+using the specified allocator.
+</p>
+<p>
+-12- <i>Complexity</i>:
+Initializes exactly <i>N</i> elements from the results of dereferencing
+successive iterators of `rg`, where <i>N</i> is `ranges::distance(rg)`.
+Performs no reallocations if `R` models `ranges::forward_range` or
+`ranges::sized_range`; otherwise, performs order log <i>N</i> reallocations
+and <ins>initializes</ins> order <i>N</i>
+<del>calls to the copy or move constructor of</del>
+<ins>objects of type</ins> `T`.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[vector.capacity]"/> as indicated:</p>
+<blockquote>
+<pre>constexpr void reserve(size_type n);</pre>
+<p>
+-3- <i>Preconditions</i>:
+`T` is <i>CppMoveInsertable</i> into `vector`.
+</p>
+<p>
+-4- <i>Effects</i>:
+A directive that informs a `vector` of a planned change in size,
+so that it can manage the storage allocation accordingly.
+After `reserve<del>()</del>`, `capacity()` is greater or equal to
+the argument of `reserve` if reallocation happens;
+and equal to the previous value of `capacity()` otherwise.
+Reallocation happens at this point if and only if
+the current capacity is less than the argument of `reserve<del>()</del>`.
+If an exception is thrown other than by the
+<del>move constructor of a</del>
+<ins>move-construction of one object of</ins>
+non-<i>Cpp17CopyInsertable</i>
+<ins>type</ins> `T` <ins>from another</ins>, there are no effects.
+</p>
+<p>[...]</p>
+<pre>constexpr shrink_to_fit();</pre>
+<p>
+-8- <i>Preconditions</i>:
+`T` is <i>CppMoveInsertable</i> into `vector`.
+</p>
+<p>
+-9- <i>Effects</i>:
+`shrink_to_fit` is a non-binding request to reduce `capacity()` to `size()`.
+[<i>Note 2</i>:
+The request is non-binding to allow latitude for
+implementation-specific optimizations.
+&mdash; <i>end note</i>]
+It does not increase `capacity()`, but may reduce `capacity()` by causing
+reallocation.
+If an exception is thrown other than by the <del>move constructor</del>
+<ins>move-construction of one object</ins>
+of a non-<i>Cpp17CopyInsertable</i> <ins>type</ins> `T`
+<ins>from another</ins>,
+there are no effects.
+</p>
+<p>[...]</p>
+<pre>constexpr void resize(size_type sz);</pre>
+<p>
+-14- <i>Preconditions</i>:
+`T` is <i>Cpp17MoveInsertable</i> and <i>Cpp17DefaultInsertable</i> into
+`vector`.
+</p>
+<p>
+-15- <i>Effects</i>: [...]
+</p>
+<p>
+-16- <i>Remarks</i>:
+If an exception is thrown other than by the <del>move constructor</del>
+<ins>move-construction of one object</ins>
+of a non-<i>Cpp17CopyInsertable</i> <ins>type</ins> `T`
+<ins>from another</ins>,
+there are no effects.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[vector.modifiers]"/> as indicated:</p>
+<blockquote>
+<pre>iterator insert(const_iterator position, const T&amp; x);
+...
+template&lt;<i>container-compatible-range</i>&lt;T&gt; R&gt;
+  void append_range(R&amp;&amp; rg);</pre>
+<p>
+-1- <i>Complexity</i>: [...]
+</p>
+<p>
+-2- <i>Remarks</i>:
+Causes reallocation if the new size is greater than the old capacity.
+Reallocation invalidates all the references, pointers, and iterators
+referring to the elements in the sequence, as well as the past-the-end iterator.
+If no reallocation happens, then
+references, pointers, and iterators
+before the insertion point remain valid
+but those at or after the insertion point,
+including the past-the-end iterator,
+are invalidated.
+If an exception is thrown other than by the
+<del>copy constructor, move constructor,
+assignment operator, or move assignment operator of
+`T` or by any \tcode{InputIterator} operation</del>
+<ins>the construction or assignment of one object of type `T` from another,
+or by any `InputIterator` operation</ins>,
+there are no effects.
+If an exception is thrown while inserting a single element at the end and
+`T` is <i>Cpp17CopyInsertable</i> or
+<code>is_nothrow_move_constructible_v&lt;T&gt;</code> is `true`,
+there are no effects.
+Otherwise, if an exception is thrown by the
+<del>move constructor of a</del>
+<ins>move-construction of one object of</ins>
+non-<i>Cpp17CopyInsertable</i>
+<ins>type</ins>
+`T` <ins>from another</ins>, the effects are unspecified.
+</p>
+<pre>constexpr iterator erase(const_iterator position);
+constexpr iterator erase(const_iterator first, const_iterator last);
+constexpr void pop_back();</pre>
+<p>
+-3- <i>Effects</i>:
+Invalidates iterators and references at or after the point of the erase.
+</p>
+<p>
+-4- <i>Throws</i>:
+Nothing unless an exception is thrown by the
+<del>assignment operator or move assignment operator of `T`</del>
+<ins>construction or assignment of one object of type `T` from another</ins>.
+</p>
+<p>
+-5- <i>Complexity</i>:
+The
+<del>destructor of `T` is called the number of times</del>
+<ins>number of objects of type `T` destroyed is</ins>
+equal to the number of the elements erased,
+but <del>the</del><ins>an</ins>
+assignment operator of `T` is called the number of times equal to
+the number of elements in the vector after the erased elements.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[inplace.vector.modifiers]"/> as indicated:</p>
+<blockquote>
+<pre>constexpr iterator erase(const_iterator position);
+constexpr iterator erase(const_iterator first, const_iterator last);
+constexpr void pop_back();</pre>
+<p>
+-29- <i>Complexity</i>:
+The
+<del>destructor of `T` is called the number of times</del>
+<ins>number of objects of type `T` destroyed is</ins>
+equal to the number of the elements erased,
+but <del>the</del><ins>an</ins>
+assignment operator of `T` is called the number of times equal to
+the number of elements after the erased elements.
+</p>
+</blockquote>
+</li>
+
+</ol>
 </resolution>
 
 </issue>
