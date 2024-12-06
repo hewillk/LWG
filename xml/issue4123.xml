@@ -75,7 +75,8 @@ Erasing a range in a list is linear time in the size of the range
 and the number of calls to the destructor of type `T`
 is exactly equal to the size of the range.
 </blockquote>
-This should talk about calls to `allocator_traits::destroy`.
+This should talk about calls to `allocator_traits::destroy`,
+or objects being destroyed.
 </p>
 <p>
 <sref ref="[deque.modifiers]"/> is similar.
