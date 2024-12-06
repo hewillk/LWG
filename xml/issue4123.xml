@@ -132,9 +132,9 @@ template&lt;<i>container-compatible-range</i>&lt;T&gt; R&gt;
 The complexity is linear in the number of elements inserted plus
 the lesser of the distances to the beginning and end of the deque.
 Inserting a single element at either the beginning or end of a deque
-always takes constant time and causes
-<del>a single call to a constructor of T</del>
-<ins>construction of a single object of type `T`</ins>.
+always takes constant time and 
+<del>causes a single call to a constructor of T</del>
+<ins>constructs a single object of type `T`</ins>.
 </p>
 <p>
 -3- <i>Remarks</i>:
@@ -218,9 +218,10 @@ linear in `n` and the number of <del>calls to the destructor of</del>
 <blockquote>
 <p>
 -1- <i>Complexity</i>:
-Insertion of a single element into a list takes constant time and exactly one
+Insertion of a single element into a list takes constant time and
+<ins>constructs</ins> exactly one
 <del>call to a constructor of `T`</del>
-<ins>object of type `T` is constructed</ins>
+<ins>object of type `T`</ins>.
 Insertion of multiple elements into a list is linear in the number of
 elements inserted and the number of
 <del>calls to the copy constructor or move constructor of `T`</del>
@@ -270,17 +271,17 @@ using the specified allocator.
 </p>
 <p>
 -10- <i>Complexity</i>:
-<del>Makes only <i>N</i> calls to the copy constructor of</del>
-<ins>Initializes exactly <i>N</i> objects of type</ins>
-`T`
+<del>Makes only <i>N</i> calls to the copy constructor of `T`</del>
+<ins>Initializes exactly <i>N</i> elements</ins>
+
 (where <i>N</i> is the distance between `first` and `last`)
 and no reallocations if iterators `first` and `last` are of forward,
 bidirectional, or random access categories.
 It <del>makes</del> <ins>initializes</ins> order
 <i>N</i>
-<del>calls to the copy constructor of</del>
-<ins>objects of type</ins>
-`T` and <ins>performs</ins>
+<del>calls to the copy constructor of `T`</del>
+<ins>elements</ins>
+ and <ins>performs</ins>
 order log <i>N</i> reallocations if they are just input iterators.
 </p>
 <pre>template&lt;<i>container-compatible-range</i>&lt;T&gt; R&gt;
@@ -297,8 +298,8 @@ successive iterators of `rg`, where <i>N</i> is `ranges::distance(rg)`.
 Performs no reallocations if `R` models `ranges::forward_range` or
 `ranges::sized_range`; otherwise, performs order log <i>N</i> reallocations
 and <ins>initializes</ins> order <i>N</i>
-<del>calls to the copy or move constructor of</del>
-<ins>objects of type</ins> `T`.
+<del>calls to the copy or move constructor of `T`</del>
+<ins>elements</ins>.
 </p>
 </blockquote>
 </li>
