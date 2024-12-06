@@ -48,6 +48,37 @@ of the special member functions.
 Set priority to 3 after reflector poll. Arthur to draft wording.
 </p>
 
+<note>2024-12-06; LWG telecon</note>
+<p>
+<sref ref="[list.modifiers]"/> p1 says:
+<blockquote>
+<i>Complexity</i>:
+Insertion of a single element into a list takes constant time and exactly
+one call to a constructor of `T`.
+Insertion of multiple elements into a list is linear in the number of elements inserted,
+and the number of calls to the copy constructor or move constructor of `T`
+is exactly equal to the number of elements inserted.
+</blockquote>
+In addition to incorrectly talking about "the copy constructor or move
+constructor", it should not should not talk about any "call to a constructor"
+because scalars and aggregates do not have constructors at all.
+We should talk about calls to `allocator_traits::construct` not constructors.
+</p>
+<p>
+Similarly, p5 says:
+<blockquote>
+<i>Complexity</i>:
+Erasing a single element is a constant time operation with
+a single call to the destructor of `T`.
+Erasing a range in a list is linear time in the size of the range
+and the number of calls to the destructor of type `T`
+is exactly equal to the size of the range.
+</blockquote>
+This should talk about calls to `allocator_traits::destroy`.
+</p>
+<p>
+Look for similar problems elsewhere.
+</p>
 </discussion>
 
 <resolution>
