@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4180" status="New">
+<title>Inconsistent constraints on <tt>flat_<i>foo</i>::emplace</tt></title>
+<section><sref ref="[flat.multiset.modifiers]"/><sref ref="[flat.map.modifiers]"/></section>
+<submitter>Arthur O'Dwyer</submitter>
+<date>09 Dec 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The usual pattern in <sref ref="[containers]"/> is that `x.emplace(args...)` has a precondition 
+(<sref ref="[sequence.reqmts]"/> p20, <sref ref="[associative.reqmts.general]"/> p48) but no 
+<i>Constraints</i> element. That is, `emplace` is not SFINAE-friendly. And it has only the one overload, 
+so it doesn't need a constraint for purposes of overload resolution.
+<p/>
+No Constraints on `emplace`: `deque` (<sref ref="[deque.modifiers]"/>), `list` (<sref ref="[list.modifiers]"/>), 
+`vector` (<sref ref="[vector.modifiers]"/>), `containers` (<sref ref="[sequence.reqmts]"/> p19), 
+`associative containers` (<sref ref="[associative.reqmts.general]"/> p47), 
+`unordered containers` (<sref ref="[unord.req.general]"/> p78), `priority_queue` (<sref ref="[priqueue.members]"/> p5), 
+`optional` (<sref ref="[optional.assign]"/> p29).
+<p/>
+Constraints on `emplace`: `flat_map` (<sref ref="[flat.map.modifiers]"/> p1), 
+`flat_multiset` (<sref ref="[flat.multiset.modifiers]"/> p1), `any` (<sref ref="[any.modifiers]"/> p1), 
+`expected` (<sref ref="[expected.object.assign]"/> p16), `variant` (<sref ref="[variant.mod]"/> p1).
+<p/>
+I believe a <i>Constraints</i> element was accidentally copy-pasted from the spec of <tt>flat_map::insert(P&amp;&amp;)</tt>
+ &mdash; which does need the constraint because it's part of `insert`'s large overload set &mdash; to 
+ `flat_map::emplace`, and then from there to `flat_multiset::emplace`. The constraint is already (correctly) absent 
+ `from flat_set::emplace`.
+<p/>
+While we're touching this paragraph, also resolve the vague word "initializes" to "direct-non-list-initializes." 
+Editorially, <tt>pair&lt;&hellip;&gt;</tt> is a verbose way to spell the `value_type` of a `flat_map`; we should 
+be consistent and just say `value_type`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N4993"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: <sref ref="[flat.set.modifiers]"/> is already OK as far as this issue is concerned: 
+it has no wording for `emplace`.
+<p/> 
+[flat.multimap.modifiers] is already OK ditto: it does not exist. ]
+</p>
+</blockquote>
+
+<ol>
+<li><p>Modify <sref ref="[flat.multiset.modifiers]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class... Args&gt; iterator emplace(Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-1- <i><ins>Mandates</ins><del>Constraints</del></i>: <tt>is_constructible_v&lt;value_type, Args...&gt;</tt> is <tt>true</tt>.
+<p/>
+-2- <i>Effects</i>: First, <ins>direct-non-list-</ins>initializes an object `t` of type `value_type` with 
+<tt>std::forward&lt;Args&gt;(args)...</tt>, then inserts `t` as if by:
+</p>
+<blockquote><pre>
+auto it = ranges::upper_bound(c, t, compare);
+c.insert(it, std::move(t));
+</pre></blockquote>
+<p>
+-3- <i>Returns</i>: An iterator that points to the inserted element.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[flat.map.modifiers]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class... Args&gt; pair&lt;iterator, bool&gt; emplace(Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-1- <i><ins>Mandates</ins><del>Constraints</del></i>: <tt>is_constructible_v&lt;<ins>value_type</ins><del>pair&lt;key_type, mapped_type&gt;</del>, Args...&gt;</tt> 
+is <tt>true</tt>.
+<p/>
+-2- <i>Effects</i>: <ins>First, direct-non-list-i</ins><del>I</del>nitializes an object `t` of type 
+<tt><ins>value_type</ins><del>pair&lt;key_type, mapped_type&gt;</del></tt> with <tt>std::forward&lt;Args&gt;(args)...</tt>; 
+if the map already contains an element whose key is equivalent to `t.first`, `*this` is unchanged. Otherwise, equivalent to:
+</p>
+<blockquote><pre>
+auto key_it = ranges::upper_bound(c.keys, t.first, compare);
+auto value_it = c.values.begin() + distance(c.keys.begin(), key_it);
+c.keys.insert(key_it, std::move(t.first));
+c.values.insert(value_it, std::move(t.second));
+</pre></blockquote>
+<p>
+-3- <i>Returns</i>: The `bool` component of the returned pair is `true` if and only if the insertion took place, and
+the iterator component of the pair points to the element with key equivalent to `t.first`.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+</ol>
+</resolution>
+
+</issue>
