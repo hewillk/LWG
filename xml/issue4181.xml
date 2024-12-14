@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4181" status="New">
+<title>Some ranges have negative `ssize`</title>
+<section><sref ref="[iterator.range]"/><sref ref="[range.prim.ssize]"/></section>
+<submitter>Casey Carter</submitter>
+<date>13 Dec 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+There exist range types `R` whose size is representable by neither `ptrdiff_t` nor 
+<tt><i>make-signed-like-t</i>&lt;ranges::range_size_t&lt;R&gt;&gt;</tt>, specifically `views::iota(size_t(0), size_t(-1))`. 
+It's unfortunate that `std::ssize` and `ranges::ssize` produce a negative size for such ranges even when their 
+difference type is capable of representing their size (see <a href="https://www.godbolt.org/z/599z55Y4f">demo</a>). 
+Perhaps the `ssize` overloads should return 
+<tt>static_cast&lt;common_type_t&lt;ptrdiff_t, iter_difference_t&lt;decltype(<i>meow</i>.begin())&gt;&gt;&gt;(<i>meow</i>.size())</tt> 
+instead when the argument <tt><i>meow</i></tt> models `range`?
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
