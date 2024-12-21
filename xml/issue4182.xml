@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4182" status="New">
+<title>Definition of `NULL` is too broad</title>
+<section><sref ref="[support.types.nullptr]"/></section>
+<submitter>Janet Cobb</submitter>
+<date>09 Dec 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[conv.ptr]"/>/1 reads in part: "A <i>null pointer constant</i> is an integer literal (<sref ref="[lex.icon]"/>) 
+with value zero or a prvalue of type `std::nullptr_t`.".
+<p/>
+<sref ref="[support.types.nullptr]"/>/2 reads: "The macro `NULL` is an implementation-defined null pointer constant.".
+<p/>
+Together, these imply that `#define NULL (::std::unreachable(), nullptr)` is a conforming definition. The expression is 
+a prvalue of type `std::nullptr_t`, so it is a null pointer constant. This makes it implementation-defined whether 
+any program that evaluates `NULL` has undefined behavior.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+
+<ol>
+<li><p>Modify <sref ref="[support.types.nullptr]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The macro `NULL` is an implementation-defined null pointer constant <ins>that is a literal 
+(<sref ref="[lex.icon]"/>, <sref ref="[lex.nullptr]"/>)</ins>.<sup>footnote 161</sup>
+<p/>
+<small>161) Possible definitions include `0` and `0L`, but not `(void*)0`.</small>
+</p>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
