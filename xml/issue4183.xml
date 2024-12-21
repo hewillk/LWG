@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4183" status="New">
+<title>`subrange` should provide `data()`</title>
+<section><sref ref="[range.subrange.general]"/><sref ref="[range.subrange.general]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>16 Dec 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, only four view classes in <code>&lt;ranges&gt;</code> explicitly provide `data()` members.
+</p>
+<p>
+Two of them are `empty_view` and `single_view`, because their `data()` is always valid
+and can be marked `noexcept`.
+</p>
+<p>
+The remaining two are `ref_view` and `owning_view` with constrained `data()`,
+which is redundant since `data()` can always obtained from `view_interface`
+when the underlying range is contiguous. I suspect this is because `ranges::data` 
+is more efficient.
+</p>
+<p>
+However, `subrange` does not have a `data()` member, which seems worth considering 
+because this function can always be `noexcept` given that `to_address` is always `noexcept`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[range.subrange.general]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::ranges {
+  [&hellip;]
+  template&lt;input_or_output_iterator I, sentinel_for&lt;I&gt; S = I, subrange_kind K =
+      sized_sentinel_for&lt;S, I&gt; ? subrange_kind::sized : subrange_kind::unsized&gt;
+    requires (K == subrange_kind::sized || !sized_sentinel_for&lt;S, I&gt;)
+  class subrange : public view_interface&lt;subrange&lt;I, S, K&gt;&gt; {
+    [&hellip;]
+    constexpr bool empty() const;
+    constexpr <i>make-unsigned-like-t</i>&lt;iter_difference_t&lt;I&gt;&gt; size() const
+      requires (K == subrange_kind::sized);
+    <ins>constexpr auto data() const noexcept requires contiguous_iterator&lt;I&gt;;</ins>
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[range.subrange.access]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <i>make-unsigned-like-t</i>&lt;iter_difference_t&lt;I&gt;&gt; size() const
+    requires (K == subrange_kind::sized);
+</pre>
+<blockquote>
+<p>
+-5- <i>Effects</i>:
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+<ins>constexpr auto data() const noexcept requires contiguous_iterator&lt;I&gt;;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Effects</i>: Equivalent to: <code>to_address(<i>begin_</i>);</code></ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
