@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4184" status="New">
+<title>Domain of <code>ranges::c<i>meow</i></code> doesn't match <code>ranges::<i>meow</i></code></title>
+<section><sref ref="[range.access]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>17 Dec 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`ranges::begin/rbegin/data` can be used on non-ranges as long as the object has a
+`begin/rbegin/data` member, this is also true for their const versions before C++23.
+<p/>
+However, in C++23 the const version always applied <code><i>possibly-const-range</i></code> to the object,
+which no longer worked for non-ranges due to this function requiring `input_range`, 
+which seems to be a breaking change (<a href="https://godbolt.org/z/KKe4nG9W8">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;ranges&gt;
+
+struct NotRange {
+        int* begin();
+  const int* begin() const;
+        int* rbegin();
+  const int* rbegin() const;
+        int* data();
+  const int* data() const;
+};
+
+int main() {
+  NotRange r;
+
+  (void) std::ranges::begin(r);
+  (void) std::ranges::rbegin(r);
+  (void) std::ranges::data(r);
+
+  // <span  style="color:#C80000;font-weight:bold">The following works in C++20, fails in C++23</span>
+  (void) std::ranges::cbegin(r);
+  (void) std::ranges::crbegin(r);
+  (void) std::ranges::cdata(r);
+}
+</pre></blockquote>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
