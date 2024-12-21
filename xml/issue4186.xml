@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4186" status="New">
+<title>`regex_traits::transform_primary` mistakenly detects `typeid` of a function</title>
+<section><sref ref="[re.traits]"/></section>
+<submitter>Jiang An</submitter>
+<date>18 Dec 2024</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[re.traits]"/>/7 currently says <tt>typeid(use_facet&lt;collate&lt;charT&gt;&gt;) == 
+typeid(collate_byname&lt;charT&gt;)</tt>, which is always `false` because 
+<tt>use_facet&lt;collate&lt;charT&gt;&gt;</tt> is a function template specialization while 
+<tt>collate_byname&lt;charT&gt;</tt> is a class template specialization. This looks like 
+misuse, and has been present in TR1 (<paper num="N1836"/>).
+<p/>
+Presumably the intended operand is <tt>use_facet&lt;collate&lt;charT&gt;&gt;(getloc())</tt>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[re.traits]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class ForwardIterator&gt;
+  string_type transform_primary(ForwardIterator first, ForwardIterator last) const;
+</pre>
+<blockquote>
+<p>
+-7- <i>Effects</i>: If
+</p>
+<blockquote><pre>
+typeid(use_facet&lt;collate&lt;charT&gt;&gt;<ins>(getloc())</ins>) == typeid(collate_byname&lt;charT&gt;)
+</pre></blockquote>
+<p>
+and the form of the sort key returned by <tt>collate_byname&lt;charT&gt;::transform(first, last)</tt> 
+is known and can be converted into a primary sort key then returns that key, otherwise returns an empty
+string.
+</p>
+</blockquote>
+</blockquote>
+
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
