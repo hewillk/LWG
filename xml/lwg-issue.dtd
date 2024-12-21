@@ -94,6 +94,7 @@
 <!ELEMENT span ANY>
 <!ATTLIST span style CDATA #IMPLIED>
 <!ELEMENT dfn ANY>
+<!ELEMENT small ANY>
 
 <!-- MathML elements, simplified DTD version derived from:
 
