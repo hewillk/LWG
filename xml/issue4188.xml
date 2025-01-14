@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4188" status="New">
+<title><code>ostream::sentry</code> destructor should handle exceptions</title>
+<section><sref ref="[ostream.sentry]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>14 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+LWG <iref ref="397"/> suggested changing <sref ref="[ostream.sentry]"/> to
+say that the `ostream::sentry` destructor doesn't throw any exceptions.
+That issue was closed as resolved by LWG <iref ref="835"/> which included
+the "Throws: Nothing" change to the `sentry` destructor.
+However, that part of the resolution never seems to have been applied to
+the working draft. <paper num="N3091"/> mentions applying LWG 835 for
+<paper num="N3090"/> but the destructor change is missing, maybe because
+the paragraph for the sentry destructor had been renumbered from p17 to p4
+and LWG 835 didn't show sufficient context to indicate the intended location.
+</p>
+
+<p>
+The problem described in LWG <iref ref="397"/> is still present:
+the streambuf operations can fail, and the sentry needs to handle that.
+The changes for LWG <iref ref="835"/> ensure no exception is thrown if
+<code>rdbuf()-&gt;pubsync()</code> returns -1 on failure, but do nothing for
+the case where it throws an exception (the original topic of LWG 397!).
+Because C++11 made `~sentry` implicitly `noexcept`,
+an exception from `rdbuf()->pubsync()` will terminate the process.
+That needs to be fixed.
+</p>
+
+<p>
+Libstdc++ does terminate if `pubsync()` throws when called by `~sentry`.
+Both MSVC and Libc++ silently swallow exceptions.
+It seems preferable to handle the exception and report an error,
+just as we do when `pubsync()` returns -1.
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[ostream.sentry]"/> as indicated:</p>
+
+<blockquote>
+<pre><code>~sentry();</code></pre>
+<blockquote>
+-4- If
+<code>(os.flags() &amp; ios_base::unitbuf) &amp;&amp; !uncaught_exceptions() &amp;&amp; os.good()</code> is `true`, calls <code>os.rdbuf()-&gt;pubsync()</code>.
+If that function returns −1
+<ins> or exits via an exceptions</ins>,
+sets `badbit` in `os.rdstate()` without propagating an exception.
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
