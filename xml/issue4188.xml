@@ -55,7 +55,7 @@ This wording is relative to <paper num="N5001"/>.
 -4- If
 <code>(os.flags() &amp; ios_base::unitbuf) &amp;&amp; !uncaught_exceptions() &amp;&amp; os.good()</code> is `true`, calls <code>os.rdbuf()-&gt;pubsync()</code>.
 If that function returns −1
-<ins> or exits via an exceptions</ins>,
+<ins> or exits via an exception</ins>,
 sets `badbit` in `os.rdstate()` without propagating an exception.
 </blockquote>
 </blockquote>
