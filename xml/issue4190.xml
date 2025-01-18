@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4190" status="New">
+<title>Specification of <i>completion-signatures-for</i> in [exec.snd.expos]/p39 is recursive</title>
+<section><sref ref="[exec.snd.expos]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>2 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[exec.snd.expos]"/>/p39 reads:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+For a subexpression `sndr` let `Sndr` be `decltype((sndr))`. Let `rcvr` be a receiver with an associated
+environment of type `Env` such that <tt>sender_in&lt;Sndr, Env&gt;</tt> is `true`. 
+<tt><i>completion-signatures-for</i>&lt;Sndr, Env&gt;</tt> denotes a specialization of `completion_signatures`, 
+the set of whose template arguments correspond to the set of completion operations that are potentially 
+evaluated as a result of starting (<sref ref="[exec.async.ops]"/>) the operation state that results from 
+connecting `sndr` and `rcvr`. When <tt>sender_in&lt;Sndr, Env&gt;</tt> is `false`, the type denoted
+by <tt><i>completion-signatures-for</i>&lt;Sndr, Env&gt;</tt>, if any, is not a specialization of 
+`completion_signatures`.
+</p>
+</blockquote>
+<p>
+This paragraph is trying to specify the return type of <tt><i>basic-sender</i>::get_completion_signatures</tt>, 
+but it immediately goes off the rails when it tests for the satisfaction of <tt>sender_in&lt;Sndr, Env&gt;</tt>. 
+The <tt>sender_in&lt;Sndr, Env&gt;</tt> concept requires that <tt>get_completion_signatures(sndr, env)</tt> is 
+well-formed and that its type is a specialization of <tt>completion_signatures</tt>. But the return type of 
+`get_completion_signatures(sndr, env)` is exactly the thing this para is trying to define!
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.snd.expos]"/> as indicated:</p>
+
+<blockquote><p>
+-39- <ins>Let type `Sndr` be a (possibly `const`-qualified) specialization of <tt><i>basic-sender</i></tt> 
+or an lvalue reference of such, and let `Rcvr` be the type of a receiver with an associated environment 
+of type `Env`. If the type <tt><i>basic-operation</i>&lt;Sndr, Rcvr&gt;</tt> is well-formed, let `op` be 
+an lvalue subexpression of that type.</ins><del>For a subexpression `sndr` let `Sndr` be `decltype((sndr))`. 
+Let `rcvr` be a receiver with an associated environment of type `Env` such that <tt>sender_in&lt;Sndr, Env&gt;</tt> 
+is `true`.</del> <tt><i>completion-signatures-for</i>&lt;Sndr, Env&gt;</tt> denotes a specialization of 
+`completion_signatures`, the set of whose template arguments correspond to the set of completion operations 
+that are potentially evaluated  <ins>(<sref ref="[basic.def.odr]"/>)</ins> as a result of 
+<ins>evaluating `op.start()`.</ins><del>starting (<sref ref="[exec.async.ops]"/>) the operation state that results from 
+connecting `sndr` and `rcvr`. When <tt>sender_in&lt;Sndr, Env&gt;</tt> is `false`</del><ins>Otherwise</ins>, 
+the type denoted by <tt><i>completion-signatures-for</i>&lt;Sndr, Env&gt;</tt>, if any, is not a 
+specialization of `completion_signatures`.
+<p/>
+<i>Recommended practice</i>: When <ins>the type <tt><i>basic-operation</i>&lt;Sndr, Rcvr&gt;</tt> is 
+ill-formed</ins><del><tt>sender_in&lt;Sndr, Env&gt;</tt> is `false`</del>, implementations are encouraged 
+to use the type denoted by <tt><i>completion-signatures-for</i>&lt;Sndr, Env&gt;</tt> to communicate to 
+users why.
+
+</p></blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
