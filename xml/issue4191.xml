@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4191" status="New">
+<title>P1467 changed the return type of <tt>pow(complex&lt;float&gt;, int)</tt></title>
+<section><sref ref="[cmplx.over]"/></section>
+<submitter>Tim Song</submitter>
+<date>10 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Before C++20,<sref ref="[cmplx.over]"/> says that this produces a <tt>complex&lt;double&gt;</tt>. 
+This was confirmed by LWG <iref ref="844"/> and consistent with C99.
+<p/>
+<paper num="P1467"/> changed the return type to <tt>complex&lt;common_type_t&lt;float, int&gt;&gt;</tt>, 
+which is <tt>complex&lt;float&gt;</tt>. This is a breaking change that does not appear to have been 
+intentional.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[cmplx.over]"/> as indicated:</p>
+
+<blockquote><p>
+-3- Function template `pow` has additional constexpr overloads sufficient to ensure, for a call with one argument of
+type <tt>complex&lt;T1&gt;</tt> and the other argument of type `T2` or <tt>complex&lt;T2&gt;</tt>, both arguments 
+are effectively cast to <tt>complex&lt;common_type_t&lt;T1, <ins>T3</ins><del>T2</del>&gt;&gt;</tt><ins>, where 
+`T3` is `double` if `T2` is an integer type and `T2` otherwise</ins>. If <tt>common_type_t&lt;T1, <ins>T3</ins><del>T2</del>&gt;</tt> 
+is not well-formed, then the program is ill-formed.
+</p></blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
