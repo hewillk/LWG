@@ -10,7 +10,7 @@
 
 <discussion>
 <p>
-Before C++20,<sref ref="[cmplx.over]"/> says that this produces a <tt>complex&lt;double&gt;</tt>. 
+Before C++20, <sref ref="[cmplx.over]"/> says that this produces a <tt>complex&lt;double&gt;</tt>. 
 This was confirmed by LWG <iref ref="844"/> and consistent with C99.
 <p/>
 <paper num="P1467"/> changed the return type to <tt>complex&lt;common_type_t&lt;float, int&gt;&gt;</tt>, 
