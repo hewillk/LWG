@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4193" status="New">
+<title>&sect;[time.zone.db] the specification uses the undefined term "thread-safe"</title>
+<section><sref ref="[time.zone.db]"/></section>
+<submitter>S. B. Tam</submitter>
+<date>16 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<paper num="N5001"/> <sref ref="[time.zone.db.list]"/> p3:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Synchronization</i>: This operation is thread-safe with respect to `reload_tzdb()`.
+</p>
+</blockquote>
+<p>
+<paper num="N5001"/> <sref ref="[time.zone.db.access]"/> p2:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Synchronization</i>: It is safe to call this function from multiple threads at one time.
+</p>
+</blockquote>
+<p>
+<paper num="N5001"/> <sref ref="[time.zone.db.remote]"/> p3:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Synchronization</i>: This function is thread-safe with respect to `get_tzdb_list().front()` and 
+`get_tzdb_list().erase_after()`.
+</p>
+</blockquote>
+<p>
+The standard does not define what "thread-safe" means, which makes the meaning of these sentences unclear. 
+Does it mean that "concurrent calls do not introduce data races", or does it additionally require a single 
+total order on these operations? In either case, it should be specified clearly.
+</p>
+
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
