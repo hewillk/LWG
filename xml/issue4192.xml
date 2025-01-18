@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4192" status="New">
+<title>&sect;[ios.base.cons] `ios_base` members may not have indeterminate values after construction</title>
+<section><sref ref="[ios.base.cons]"/><sref ref="[ios.base.locales]"/></section>
+<submitter>S. B. Tam</submitter>
+<date>12 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[ios.base.cons]"/> specifies that
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+Each `ios_base` member has an indeterminate value after construction.
+</p>
+</blockquote>
+<p>
+However
+</p>
+<ul>
+<li><p>If the `ios_base` object has static storage duration, the members would have been zero-initialized.</p></li>
+<li><p>If the `ios_base` object has automatic storage duration, the members would have erroneous values.</p></li>
+</ul>
+<p>
+In either case, the constructor cannot cause the members to have indeterminate values after construction.
+<p/>
+A related problem is that <sref ref="[ios.base.locales]"/> requires `ios_base::getloc` to return:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+If no locale has been imbued, a copy of the global C++ locale, `locale()`, in effect at the time of construction.
+</p>
+</blockquote>
+<p>
+However, according to <sref ref="[ios.base.cons]"/>, the corresponding member is not initialized 
+until `basic_ios::init` is called.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[ios.base.locales]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+ios_base();
+</pre>
+<blockquote><p>
+-1- <i>Effects</i>: Each `ios_base` member has an <ins>unspecified (possibly</ins> indeterminate <ins>or erroneous)</ins> 
+value after construction. The object's members shall be initialized by calling `basic_ios::init` before the object's 
+first use or before it is destroyed, whichever comes first; otherwise the behavior is undefined.
+</p></blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[ios.base.cons]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+locale getloc() const;
+</pre>
+<blockquote><p>
+-4- <i>Returns</i>: If no locale has been imbued, a copy of the global C++ locale, `locale()`, 
+in effect at the time of <del>construction</del><ins>the last `basic_ios::init` call on the current 
+object</ins>. Otherwise, returns the imbued locale, to be used to perform locale-dependent 
+input and output operations.
+</p></blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
