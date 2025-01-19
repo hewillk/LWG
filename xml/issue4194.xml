@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4194" status="New">
+<title><tt>atomic&lt;void*&gt;</tt> should use generic class template</title>
+<section><sref ref="[atomics.types.pointer]"/></section>
+<submitter>Gonzalo Brito</submitter>
+<date>16 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[atomics.types.pointer]"/> p1 states (emphasis mine):
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+There is a partial specialization of the `atomic` class template for <b>pointers</b>.
+</p>
+</blockquote>
+<p>
+which requires <tt>atomic&lt;void*&gt;</tt> to use the `atomic` class template for pointers.
+However, the `fetch_add`/`_sub` member functions add a `difference_type` to a `T*` 
+which requires a pointer-to-object type (these member functions are `constexpr`, 
+so trying to support this seems unimplementable).
+<p/>
+For `atomic_ref`, the <sref ref="[atomics.ref.pointer]"/> p1 states (emphasis mine):
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+There are specializations of the `atomic_ref``  class template for all <b>pointer-to-object types</b>.
+</p>
+</blockquote>
+<p>
+which avoids this issue and applying the same form to <sref ref="[atomics.types.pointer]"/> would make 
+<tt>atomic&lt;void*&gt;</tt> and <tt>atomic_ref&lt;void*&gt;</tt> consistent.
+<p/>
+Technically this would be a breaking change, but all C++ standard library implementations surveyed are broken, 
+and the proposed fix would make them compliant: see libstdc++, libc++ and MSVC STL errors 
+<a href="https://godbolt.org/z/dso3P6fKf">here</a>. These standard libraries require a 
+pointer-to-object type, <tt>atomic&lt;void*&gt;</tt> uses the general template. Therefore, no user 
+code seems to be impacted.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[atomics.types.pointer]"/> as indicated:</p>
+
+<blockquote><p>
+-1- There is a partial specialization of the `atomic` class template for 
+<del>pointers</del><ins>pointer-to-object types</ins>. Specializations of this partial
+specialization are standard-layout structs. They each have a trivial destructor.
+</p></blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
