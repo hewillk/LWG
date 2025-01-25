@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4195" status="New">
+<title><tt>expected&lt;int, int&gt;</tt> isn't specified to be trivially assignable</title>
+<section><sref ref="[expected.object.assign]"/><sref ref="[expected.void.assign]"/></section>
+<submitter>Barry Revzin</submitter>
+<date>21 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, we specify that the copy constructor, move constructor, and destructor <tt>expected&lt;int, int&gt;</tt> 
+are trivial operations. But we do not specify that the copy assignment operator or move assignment operator are. 
+There is implementation divergence &mdash; MSVC's implementation is trivially copyable, but libstdc++'s and libc++'s 
+are not (although, they are trivial for the purposes of calls, which is important for being able to return such a 
+type in a register).
+<p/>
+I'm not sure there is any reason the assignment operators should not be trivial here. We should add the same kind 
+of remarks in both cases: that the copy assignment operator is trivial if <tt>T</tt> and <tt>E</tt> are trivially 
+copy assignable and the move assignment operator is trivial if <tt>T</tt> and <tt>E</tt> are trivially move assignable.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[expected.object.assign]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr expected&amp; operator=(const expected&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-2- <i>Effects</i>: [&hellip;]
+<p/>
+-3- <i>Returns</i>: <tt>*this</tt>.
+<p/>
+-4- <i>Remarks</i>: This operator is defined as deleted unless: 
+</p>
+<ol style="list-style-type: none">
+<li><p>(4.1) &mdash; [&hellip;]</p></li>
+<li><p>(4.2) &mdash; [&hellip;]</p></li>
+<li><p>(4.3) &mdash; [&hellip;]</p></li>
+<li><p>(4.4) &mdash; [&hellip;]</p></li>
+</ol>
+<p>
+<ins>-?- This operator is trivial if</ins>
+</p>
+<ol style="list-style-type: none">
+<li><p><ins>(?.1) &mdash; <tt>is_trivially_copy_assignable_v&lt;T&gt;</tt> is <tt>true</tt> and</ins></p></li>
+<li><p><ins>(?.2) &mdash; <tt>is_trivially_copy_assignable_v&lt;E&gt;</tt> is <tt>true</tt>.</ins></p></li>
+</ol>
+</blockquote>
+
+<pre>
+constexpr expected&amp; operator=(expected&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-5- <i>Constraints</i>: [&hellip;]
+<p/>
+-6- <i>Effects</i>: [&hellip;]
+<p/>
+-7- <i>Returns</i>: <tt>*this</tt>.
+<p/>
+-8- <i>Remarks</i>: The exception specification is equivalent to:
+</p>
+<blockquote><pre>
+is_nothrow_move_assignable_v&lt;T&gt; &amp;&amp; is_nothrow_move_constructible_v&lt;T&gt; &amp;&amp;
+is_nothrow_move_assignable_v&lt;E&gt; &amp;&amp; is_nothrow_move_constructible_v&lt;E&gt;
+</pre></blockquote>
+<p>
+<ins>-?- This operator is trivial if</ins>
+</p>
+<ol style="list-style-type: none">
+<li><p><ins>(?.1) &mdash; <tt>is_trivially_move_assignable_v&lt;T&gt;</tt> is <tt>true</tt> and</ins></p></li>
+<li><p><ins>(?.2) &mdash; <tt>is_trivially_move_assignable_v&lt;E&gt;</tt> is <tt>true</tt>.</ins></p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[expected.void.assign]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr expected&amp; operator=(const expected&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: [&hellip;]
+<p/>
+-2- <i>Returns</i>: <tt>*this</tt>.
+<p/>
+-3- <i>Remarks</i>: This operator is defined as deleted unless <tt>is_copy_assignable_v&lt;E&gt;</tt> 
+is <tt>true</tt> and <tt>is_copy_constructible_v&lt;E&gt;</tt> is <tt>true</tt>. 
+<p/>
+<ins>-?- This operator is trivial if <tt>is_trivially_copy_assignable_v&lt;E&gt;</tt> is <tt>true</tt>.</ins>
+</p>
+</blockquote>
+
+<pre>
+constexpr expected&amp; operator=(expected&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-4- <i>Constraints</i>: [&hellip;]
+<p/>
+-5- <i>Effects</i>: [&hellip;]
+<p/>
+-6- <i>Returns</i>: <tt>*this</tt>.
+<p/>
+-7- <i>Remarks</i>: The exception specification is equivalent to <tt>is_nothrow_move_constructible_v&lt;E&gt; &amp;&amp; 
+is_nothrow_move_assignable_v&lt;E&gt;</tt>.
+<p/>
+<ins>-?- This operator is trivial if <tt>is_trivially_move_assignable_v&lt;E&gt;</tt> is <tt>true</tt>.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
