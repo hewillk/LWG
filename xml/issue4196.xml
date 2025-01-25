@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4196" status="New">
+<title>Complexity of `inplace_merge()` is incorrect</title>
+<section><sref ref="[alg.merge]"/></section>
+<submitter>Stephen Howe</submitter>
+<date>22 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+For <paper num="N5001"/>, section <sref ref="[alg.merge]"/> p5, it says for `merge()` <i>Complexity</i> (emphasis mine):
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+For the overloads with no `ExecutionPolicy`, <b>at most</b> <tt><i>N</i> - 1</tt> comparisons and applications of each
+projection
+</p>
+</blockquote>
+<p>
+For <paper num="N5001"/>, section <sref ref="[alg.merge]"/> p11, it says from `inplace_merge()` <i>Complexity</i> (emphasis mine):
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Complexity</i>: Let <tt><i>N</i> = last - first</tt>:
+</p>
+<ol style="list-style-type: none">
+<li><p>(11.1) &mdash; For the overloads with no `ExecutionPolicy`, and if enough additional memory is available, <b>exactly</b>
+<tt><i>N</i> - 1</tt> comparisons.</p></li>
+<li><p>(11.2) &mdash; Otherwise, <tt>&#x1d4aa;(<i>N</i> log <i>N</i>)</tt> comparisons.</p></li>
+</ol>
+</blockquote>
+<p>
+This wording should be (emphasis mine)
+</p>
+<blockquote>
+<p>
+<i>Complexity</i>: Let <tt><i>N</i> = last - first</tt>:
+</p>
+<ol style="list-style-type: none">
+<li><p>(11.1) &mdash; For the overloads with no `ExecutionPolicy`, and if enough additional memory is available, <b>at most</b>
+<tt><i>N</i> - 1</tt> comparisons.</p></li>
+<li><p>(11.2) &mdash; Otherwise, <tt>&#x1d4aa;(<i>N</i> log <i>N</i>)</tt> comparisons.</p></li>
+</ol>
+</blockquote>
+<p>
+Consider the 2 sequences in a `std::vector` of `int`s and assume that `inplace_merge` has enough memory:
+</p>
+<blockquote><pre>
+{ 1 }, { 2, 3, 4, 5, 6, 7 )
+</pre></blockquote>
+<p>
+<tt><i>N</i></tt> is `7`, 7 elements. So <tt><i>N</i> - 1</tt> is `6`
+<p/>
+If you `inplace_merge()` the two sequences, the `1` is compared with `2` and `1` is output. But now the 1st 
+sequence is over, so the 2nd sequence is copied. Only 1 comparison is done, not 6.
+</p>
+
+<note>2025-01-25; Daniel comments</note>
+<p>
+The <a href="https://sgistl.github.io/inplace_merge.html">SGI STL archive</a> correctly says "at most" as well.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[alg.merge]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class BidirectionalIterator&gt;
+  constexpr void inplace_merge(BidirectionalIterator first,
+                               BidirectionalIterator middle,
+                               BidirectionalIterator last);
+template&lt;class ExecutionPolicy, class BidirectionalIterator&gt;
+  void inplace_merge(ExecutionPolicy&amp;&amp; exec,
+                     BidirectionalIterator first,
+                     BidirectionalIterator middle,
+                     BidirectionalIterator last);
+template&lt;class BidirectionalIterator, class Compare&gt;
+  constexpr void inplace_merge(BidirectionalIterator first,
+                               BidirectionalIterator middle,
+                               BidirectionalIterator last, Compare comp);
+template&lt;class ExecutionPolicy, class BidirectionalIterator, class Compare&gt;
+  void inplace_merge(ExecutionPolicy&amp;&amp; exec,
+                     BidirectionalIterator first,
+                     BidirectionalIterator middle,
+                     BidirectionalIterator last, Compare comp);
+template&lt;bidirectional_iterator I, sentinel_for&lt;I&gt; S, class Comp = ranges::less,
+         class Proj = identity&gt;
+  requires sortable&lt;I, Comp, Proj&gt;
+  constexpr I ranges::inplace_merge(I first, I middle, S last, Comp comp = {}, Proj proj = {});
+</pre>
+<blockquote>
+<p>
+-7- [&hellip;]
+<p/>
+-8- <i>Preconditions</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: Merges two sorted consecutive ranges `[first, middle)` and `[middle, last)`, 
+putting the result of the merge into the range `[first, last)`. The resulting range is sorted 
+with respect to `comp` and `proj`.
+<p/>
+-10- <i>Returns</i>: `last` for the overload in namespace `ranges`.
+<p/>
+-11- <i>Complexity</i>: Let <tt><i>N</i> = last - first</tt>:
+</p>
+<ol style="list-style-type: none">
+<li><p>(11.1) &mdash; For the overloads with no `ExecutionPolicy`, and if enough additional memory is available, 
+<del>exactly</del><ins>at most</ins> <tt><i>N</i> - 1</tt> comparisons.</p></li>
+<li><p>(11.2) &mdash; Otherwise, <tt>&#x1d4aa;(<i>N</i> log <i>N</i>)</tt> comparisons.</p></li>
+</ol>
+<p>
+In either case, twice as many projections as comparisons.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
