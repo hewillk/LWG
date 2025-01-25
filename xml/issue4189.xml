@@ -13,9 +13,7 @@
 `cache_latest_view` can be freestanding, but this never comes up in the discussion, which seems to be an oversight.
 </p>
 
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5001"/>.
 </p>
@@ -46,6 +44,64 @@ namespace std::ranges {
   namespace views { inline constexpr <i>unspecified</i> cache_latest = <i>unspecified</i>; }            <ins>// <i>freestanding</i></ins>
   [&hellip;]
 }
+</pre></blockquote>
+</li>
+</ol>
+</superseded>
+
+<note>2025-01-04; Tim Song suggests alternative wording</note>
+<p>
+While we are here, we can use the new convention from <paper num="P2407"/> to dramatically simplify 
+<tt>&lt;ranges&gt;</tt>. Most future additions to this header should have no problem being freestanding, 
+so that is the right default.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[version.syn]"/> as indicated:</p>
+
+<blockquote><pre>
+#define __cpp_lib_ranges_cache_latest 202411L // <ins><i>freestanding</i>,</ins> <i>also in</i> &lt;ranges&gt;
+</pre></blockquote>
+
+</li>
+
+<li><p>Delete all "// <i>freestanding</i>" comments in <sref ref="[ranges.syn]"/>, header <tt>&lt;ranges&gt;</tt> 
+synopsis, and then modify as indicated:</p>
+
+<blockquote><pre>
+<ins>// <i>mostly freestanding</i></ins>
+#include &lt;compare&gt;              // <i>see <sref ref="[compare.syn]"/></i>
+#include &lt;initializer_list&gt;     // <i>see <sref ref="[initializer.list.syn]"/></i>
+#include &lt;iterator&gt;             // <i>see <sref ref="[iterator.synopsis]"/></i>
+
+[&hellip;]
+namespace std::ranges {
+  // <i><sref ref="[range.elementsof]"/>, class template elements_of</i>
+  template&lt;range R, class Allocator = allocator&lt;byte&gt;&gt;
+    struct elements_of;  <ins>// <i>hosted</i></ins>
+  [&hellip;]
+
+  // <i><sref ref="[range.istream]"/>, istream view</i>
+  template&lt;movable Val, class CharT, class Traits = char_traits&lt;CharT&gt;&gt;
+    requires <i>see below</i>
+  class basic_istream_view;  <ins>// <i>hosted</i></ins>
+  template&lt;class Val&gt;
+    using istream_view = basic_istream_view&lt;Val, char&gt;;   <ins>// <i>hosted</i></ins>
+  template&lt;class Val&gt;
+    using wistream_view = basic_istream_view&lt;Val, wchar_t&gt;;   <ins>// <i>hosted</i></ins>
+
+  namespace views {
+    template&lt;class T&gt; constexpr <i>unspecified</i> istream = <i>unspecified</i>; <ins>// <i>hosted</i></ins>
+  }
+  [&hellip;]
+}
+[&hellip;]
 </pre></blockquote>
 </li>
 </ol>
