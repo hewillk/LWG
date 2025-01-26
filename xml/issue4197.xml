@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4197" status="New">
+<title>Complexity of `std::visit` with immediate functions</title>
+<section><sref ref="[variant.visit]"/></section>
+<submitter>Jiang An</submitter>
+<date>26 Jan 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`std::visit` generally needs to be implemented with "vtables" that contain function pointers. 
+When `std::visit` needs to call an immediate function (e.g. when passing a lambda whose 
+`operator()` is `consteval`), the vtable will contain a pointer to an immediate-escalated 
+function, which forbids the vtable from being a `constexpr` variable.
+<p/>
+In order to properly handle immediate functions in `std::visit`, it seems necessary to form 
+the vtable, or do some non-constant-time lookup each time when calling `std::visit`. In other words, 
+<sref ref="[variant.visit]"/>/8 seems to be unimplementable when an immediate function is involved.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[variant.visit]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class Visitor, class... Variants&gt;
+  constexpr <i>see below</i> visit(Visitor&amp;&amp; vis, Variants&amp;&amp;... vars);
+template&lt;class R, class Visitor, class... Variants&gt;
+  constexpr R visit(Visitor&amp;&amp; vis, Variants&amp;&amp;... vars);
+</pre>
+<blockquote>
+<p>
+-1- [&hellip;] Let <tt><i>n</i></tt> be `sizeof...(Variants)`. [&hellip;]
+<p/>
+[&hellip;]
+<p/>
+-8- <i>Complexity</i>: <ins>If <tt><i>n</i> &gt; 1</tt> or any of the aforementioned <tt><i>INVOKE</i></tt> 
+operations calls an immediate function, the invocation of the callable object has no complexity requirements. 
+Otherwise</ins><del>For <tt><i>n</i> &le; 1</tt></del>, the invocation of the callable object is 
+implemented in constant time, i.e., for <tt><i>n</i> = 1</tt>, it does not depend on the number 
+of alternative types of <tt>V<sub>0</sub></tt>. <del>For <tt><i>n</i> &gt; 1</tt>, the invocation of 
+the callable object has no complexity requirements.</del>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
