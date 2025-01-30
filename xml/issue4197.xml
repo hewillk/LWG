@@ -19,6 +19,9 @@ In order to properly handle immediate functions in `std::visit`, it seems necess
 the vtable, or do some non-constant-time lookup each time when calling `std::visit`. In other words, 
 <sref ref="[variant.visit]"/>/8 seems to be unimplementable when an immediate function is involved.
 </p>
+
+<note>2025-01-01; <paper num="P3603R0"/> addresses this</note>
+
 </discussion>
 
 <resolution>
