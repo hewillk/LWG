@@ -6,7 +6,7 @@
 <section><sref ref="[variant.visit]"/></section>
 <submitter>Jiang An</submitter>
 <date>26 Jan 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -21,6 +21,12 @@ the vtable, or do some non-constant-time lookup each time when calling `std::vis
 </p>
 
 <note>2025-01-01; <paper num="P3603R0"/> addresses this</note>
+
+
+<note>2025-01-30; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
 
 </discussion>
 
