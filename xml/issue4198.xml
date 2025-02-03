@@ -88,6 +88,8 @@ except with duplicate types removed.
 </blockquote>
 
 </p>
+
+<note>This touches the same text as LWG <iref ref="4203"/>.</note>
 </discussion>
 
 <resolution>

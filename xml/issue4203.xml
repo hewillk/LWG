@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4203" status="New">
+<title>constraints on `schedule_from`'s <i>`get-state`</i> function are incorrect</title>
+<section><sref ref="[exec.schedule.from]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>03 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/313">cplusplus/sender-receiver #313</a>.
+</p>
+<p>
+<sref ref="[exec.schedule.from]"/> p6 reads:
+
+<blockquote>
+The member <code><i>impls-for</i>&lt;schedule_from_t&gt;::get-state</code>
+is initialized with a callable object equivalent to the following lambda:
+<pre><code>
+  []&lt;class Sndr, class Rcvr&gt;(Sndr&amp;&amp; sndr, Rcvr&amp; rcvr) noexcept(<i>see below</i>)
+     requires sender_in&lt;<i>child-type</i>&lt;Sndr&gt;, env_of_t&lt;Rcvr&gt;&gt; {
+</code></pre>
+</blockquote>
+
+The constraint should account for the fact that the child sender will
+be connected with <code><i>FWD-ENV</i>(get_env(rcvr))</code>.
+</p>
+
+<note>The resolution touches the same text as LWG <iref ref="4198"/>.</note>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li>
+Change <sref ref="[exec.snd.expos]"/> as indicated:
+
+<blockquote>
+-2-
+For a queryable object `env`,
+<code><i>FWD-ENV</i>(env)</code> is an expression whose
+type satisfies <i>`queryable`</i> such that for a query object `q`
+and a pack of subexpressions `as`,
+the expression <code><i>FWD-ENV</i>(env).query(q, as...)</code>
+is ill-formed if `forwarding_query(q)` is `false`;
+otherwise, it is expression-equivalent to `env.query(q, as...)`.
+<ins>
+The type <code><i>FWD-ENV-T</i>(Env)</code> is
+<code>decltype(<i>FWD-ENV</i>(declval&lt;Env&gt;()))</code>.
+</ins>
+</blockquote>
+</li>
+
+<li>
+Change <sref ref="[exec.schedule.from]"/> as indicated:
+
+<blockquote>
+-6-
+The member
+<code><i>impls-for</i>&lt;schedule_from_t&gt;::<i>get-state</i></code>
+is initialized with a callable object equivalent to the following lambda:
+<pre><code>
+  []&lt;class Sndr, class Rcvr&gt;(Sndr&amp;&amp; sndr, Rcvr&amp; rcvr) noexcept(<i>see below</i>)
+   requires sender_in&lt;child-type&lt;Sndr&gt;, <ins><i>FWD-ENV-T</i>(</ins>env_of_t&lt;Rcvr&gt;<ins>)</ins>&gt; {
+</code></pre>
+<p>&hellip;</p>
+<p>
+-8-
+Let `Sigs` be a pack of the arguments to the `completion_signatures`
+specialization named by
+<code>completion_signatures_of_t&lt;child-type&lt;Sndr&gt;,
+  <ins><i>FWD-ENV-T</i>(</ins>env_of_t&lt;Rcvr&gt;<ins>)</ins>&gt;</code>.
+Let <code><i>as-tuple</i></code>
+be an alias template that transforms a completion signature
+<code>Tag(Args...)</code> into the tuple specialization
+<code><i>decayed-tuple</i>&lt;Tag, Args...&gt;</code>.
+Then <code>variant_t</code> denotes the type
+<code>variant&lt;monostate, as-tuple&lt;Sigs&gt;...&gt;</code>,
+except with duplicate types removed.
+</p>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
