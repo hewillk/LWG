@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4202" status="New">
+<title><i><code>enable-sender</code></i> should be a variable template</title>
+<section><sref ref="[exec.snd.concepts]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>03 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/305">cplusplus/sender-receiver #305</a>.
+</p>
+<p>
+We require an opt-in to satisfy the `sender` concept.
+Making your type awaitable with an empty environment is one way to opt in.
+If your awaitable requires an environment, you have two options:
+<ul>
+<li>give your awaitable type a nested `sender_concept` typedef, or</li>
+<li>specialize `enable_sender` for your awaitable type.</li>
+</ul>
+The problem is that somewhere along the way,
+the `enable_sender` variable template was turned into
+an exposition-only <i><code>enable-sender</code></i> concept.
+We should roll back that change.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
