@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4199" status="New">
+<title>constraints on user customizations of standard sender algorithms are incorrectly specified</title>
+<section><sref ref="[exec.snd.general]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>03 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/308">cplusplus/sender-receiver #308</a>.
+</p>
+<p>
+<sref ref="[exec.snd.general]"/>/p1 reads:
+
+<blockquote>
+Subclauses <sref ref="[exec.factories]"/> and <sref ref="[exec.adapt]"/> define
+customizable algorithms that return senders.
+Each algorithm has a default implementation.
+Let `sndr` be the result of an invocation of such an algorithm
+or an object equal to the result (<sref ref="[concepts.equality]"/>),
+and let `Sndr` be `decltype((sndr))`.
+Let `rcvr` be a receiver of type `Rcvr` with associated environment `env`
+of type `Env` such that <code>sender_to&lt;Sndr, Rcvr&gt;</code> is `true`.
+For the default implementation of the algorithm that produced `sndr`,
+connecting `sndr` to `rcvr` and starting the resulting operation state
+(<sref ref="[exec.async.ops]"/>) necessarily results in the potential evaluation
+(<sref ref="[basic.def.odr]"/>) of a set of completion operations
+whose first argument is a subexpression equal to `rcvr`.
+Let `Sigs` be a pack of completion signatures corresponding to this set
+of completion operations.
+<u><b>
+Then the type of the expression `get_completion_signatures(sndr, env)`
+is a specialization of the class template `completion_signatures`
+(<sref ref="[exec.util.cmplsig]"/>), the set of whose template arguments is `Sigs`.
+</b></u>
+If a user-provided implementation of the algorithm that produced `sndr`
+is selected instead of the default, any completion signature that is in
+the set of types denoted by
+<code>completion_signatures_of_t&lt;Sndr, Env&gt;</code>
+and that is not part of `Sigs`
+shall correspond to error or stopped completion operations,
+unless otherwise specified.
+</blockquote>
+The emphasized sentence is the problem. Since <paper num="P2300"/>
+got lazy customization,
+the expression `get_completion_signatures(snd, env)`
+could dispatch to a customization.
+We should define a low-level exposition-only
+<i>`get-completion-signatures`</i>
+function that does the same as `get_completion_signatures`
+except without the sender transformation.
+Then we can express `get_completion_signatures` in terms of that.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
