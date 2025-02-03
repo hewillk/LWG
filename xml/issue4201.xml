@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4201" status="New">
+<title>`with-await-transform::await_transform` should not use a deduced return type</title>
+<section><sref ref="[exec.awaitable]"/></section>
+<submitter>Brian Bi</submitter>
+<date>03 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/309">cplusplus/sender-receiver #309</a>.
+</p>
+<p>
+<sref ref="[exec.awaitable]"/>/p5
+</p>
+<p>
+The use of the deduced return type causes the definition of the sender's
+`as_awaitable` method to be instantiated too early,
+e.g., when the sender is passed to `get_completion_signatures`.
+</p>
+
+<note>Eric provides wording</note>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+<ol>
+<li>
+Modify <sref ref="[exec.awaitable]"/> as indicated:
+<blockquote>
+-5-
+Let <i><code>with-await-transform</code></i> be the exposition-only class template:
+
+<pre><code>
+namespace std::execution {
+  template&lt;class T, class Promise&gt;
+    concept <i>has-as-awaitable</i> =                                  <i>// exposition only</i>
+      requires (T&amp;&amp; t, Promise&amp; p) {
+        { std::forward&lt;T&gt;(t).as_awaitable(p) } -&gt; is-awaitable&lt;Promise&amp;&gt;;
+      };
+
+  template&lt;class Derived&gt;
+    struct <i>with-await-transform</i> {                               <i>// exposition only</i>
+      template&lt;class T&gt;
+        T&amp;&amp; await_transform(T&amp;&amp; value) noexcept {
+          return std::forward&lt;T&gt;(value);
+        }
+
+      template&lt;has-as-awaitable&lt;Derived&gt; T&gt;
+        <del>decltype(auto)</del><ins>auto</ins> await_transform(T&amp;&amp; value)
+          noexcept(noexcept(std::forward&lt;T&gt;(value).as_awaitable(declval&lt;Derived&amp;&gt;())))
+        <ins>-&gt; decltype(std::forward&lt;T&gt;(value).as_awaitable(declval&lt;Derived&amp;&gt;()))</ins> {
+          return std::forward&lt;T&gt;(value).as_awaitable(static_cast&lt;Derived&amp;&gt;(*this));
+        }
+    };
+}
+</code></pre>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
