@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4200" status="New">
+<title>The `operation_state` concept can be simplified</title>
+<section><sref ref="[exec.opstate.general]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>03 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/312">cplusplus/sender-receiver #312</a>.
+</p>
+<p>
+The current defn of the `operation_state` concept is:
+
+<pre><code>
+template&lt;class O&gt;
+  concept operation_state =
+    derived_from&lt;typename O::operation_state_concept, operation_state_t&gt; &amp;&amp;
+    requires (O&amp; o) {
+      { start(o) } noexcept;
+    };
+</code></pre>
+
+I think the <code>is_object_v&lt;O&gt;</code> constraint is not needed
+because the <code>derived_from</code> constraint has already established that
+<code>O</code> is a class type.
+</p>
+<p>
+And `start(o)` is always `noexcept` now that `start` mandates the
+`noexcept`-ness of `op.start()`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+<ol>
+<li>
+Modify <sref ref="[exec.opstate.general]"/> as indicated:
+<blockquote><pre><code>
+template&lt;class O&gt;
+  concept operation_state =
+    derived_from&lt;typename O::operation_state_concept, operation_state_t&gt; &amp;&amp;
+    <del>is_object_v&lt;O&gt; &amp;&amp;</del>
+    requires (O&amp; o) {
+      <del>{</del> start(o) <del>} noexcept;</del>
+    };
+</code></pre></blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
