@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4204" status="New">
+<title>specification of <code><i>as-sndr2</i>(Sig)</code> in [exec.let] is incomplete</title>
+<section><sref ref="[exec.let]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>03 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[exec.let]"/>/p9 reads:
+<blockquote>
+Given a type `Tag` and a pack `Args`, let <code><i>as-sndr2</i></code>
+be an alias template such that
+<code><i>as-sndr2</i>&lt;Tag(Args...)&gt;</code>
+denotes the type
+<code><i>call-result-t</i>&lt;Fn, decay_t&lt;Args&gt;&amp;...&gt;</code>.
+Then `ops2_variant_t` denotes the type
+<pre><code> variant&lt;monostate, connect_result_t&lt;<i>as-sndr2</i>&lt;LetSigs&gt;, receiver2&lt;Rcvr, Env&gt;&gt;...&gt;
+</code></pre>
+except with duplicate types removed.
+</blockquote>
+
+The type `Env` is not specified. It should be `env_t` from paragraph 7.
+</p>
+<p>
+Paragraphs 8, 9, and 10 only make sense in relation to the lambda in paragraph 7,
+but that is not at all clear from the current wording.
+I suggest making paragraphs 8, 9, and 10 sub-bullets of paragraph 7.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+<ol>
+<li>
+Change <sref ref="[exec.let]"/> as indicated,
+and nest paragraphs 8, 9, and 10 below paragraph 7:
+
+<blockquote>
+-9-
+Given a type `Tag` and a pack `Args`, let <code><i>as-sndr2</i></code>
+be an alias template such that
+<code><i>as-sndr2</i>&lt;Tag(Args...)&gt;</code>
+denotes the type
+<code><i>call-result-t</i>&lt;Fn, decay_t&lt;Args&gt;&amp;...&gt;</code>.
+Then `ops2_variant_t` denotes the type
+<pre><code> variant&lt;monostate, connect_result_t&lt;<i>as-sndr2</i>&lt;LetSigs&gt;, receiver2&lt;Rcvr, <del>Env</del><ins>env_t</ins>&gt;&gt;...&gt;
+</code></pre>
+except with duplicate types removed.
+</blockquote>
+
+</li>
+</ol>
+</resolution>
+
+</issue>
