@@ -163,7 +163,7 @@ Change <sref ref="[exec.let]"/> as indicated:
 -6-
 Let <i>`receiver2`</i> denote the following exposition-only class template:
 <pre><code>  namespace std::execution {
-    &hello;
+    &hellip;
   }
 </code></pre>
 Invocation of the function <code><i>receiver2</i>::get_env</code>
