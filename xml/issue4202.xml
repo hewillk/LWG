@@ -10,7 +10,9 @@
 
 <discussion>
 <p>
-Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/305">cplusplus/sender-receiver #305</a>.
+Imported from
+<a href="https://github.com/cplusplus/sender-receiver/issues/305">cplusplus/sender-receiver #305</a> and
+<a href="https://github.com/cplusplus/sender-receiver/issues/306">cplusplus/sender-receiver #306</a>.
 </p>
 <p>
 We require an opt-in to satisfy the `sender` concept.
@@ -29,7 +31,54 @@ We should roll back that change.
 
 <resolution>
 <p>
+This wording is relative to <paper num="N5001"/>.
 </p>
+
+<ol>
+<li>
+Change <sref ref="[exec.snd.concepts]"/> as indicated:
+<blockquote>
+<pre><code>
+  template&lt;class Sndr&gt;
+    concept <i>is-sender</i> =                                         <i>// exposition only</i>
+      derived_from&lt;typename Sndr::sender_concept, sender_t&gt;;
+
+  template&lt;class Sndr&gt;
+    concept <i>enable-sender</i> =                                     <i>// exposition only</i>
+      <i>is-sender</i>&lt;Sndr&gt; ||
+      <i>is-awaitable</i>&lt;Sndr, <i>env-promise</i>&lt;empty_env&gt;&gt;;               <i>// [exec.awaitable]</i>
+<ins>
+  template&lt;class Sndr&gt;
+    inline constexpr bool enable_sender = <i>enable-sender</i>&lt;Sndr&gt;;
+</ins>
+  template&lt;class Sndr&gt;
+    concept sender =
+      <del>bool(<i>enable-sender</i></del><ins>enable_sender</ins>&lt;remove_cvref_t&lt;Sndr&gt;&gt;<del>)</del> &amp;&amp;
+      requires (const remove_cvref_t&lt;Sndr&gt;&amp; sndr) {
+        { get_env(sndr) } -&gt; &lt;i&gt;queryable&lt;/i&gt;;
+      } &amp;&amp;
+      move_constructible&lt;remove_cvref_t&lt;Sndr&gt;&gt; &amp;&amp;
+      constructible_from&lt;remove_cvref_t&lt;Sndr&gt;, Sndr&gt;;
+</code></pre>
+<p>&hellip;</p>
+<p>
+-2-
+Given a subexpression `sndr`, [&hellip;]
+</p>
+<p>
+<ins>
+-?-
+<i>Remarks</i>:
+Pursuant to <sref ref="[namespace.std]"/>, users may specialize
+`enable_sender` to `true` for cv-unqualified program-defined types that model
+`sender`, and `false` for types that do not.
+Such specializations shall be usable in constant expressions
+(<sref ref="[expr.const]"/>) and have type `const bool`.
+</ins>
+</p>
+</blockquote>
+</li>
+</ol>
 </resolution>
 
 </issue>
