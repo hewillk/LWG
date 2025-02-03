@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4198" status="New">
+<title>`schedule_from` isn't starting the schedule sender if decay-copying results throws</title>
+<section><sref ref="[exec.schedule.from]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>03 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/304">cplusplus/sender-receiver #304</a>.
+</p>
+<p>
+<sref ref="[exec.schedule.from]"/>/p11 specifies `shedule_from`'s completion operation as follows:
+
+<pre><code>
+[]&lt;class Tag, class... Args&gt;(auto, auto&amp; state, auto&amp; rcvr, Tag, Args&amp;&amp;... args) noexcept
+    -> void {
+  using result_t = decayed-tuple&lt;Tag, Args...&gt;;
+  constexpr bool nothrow = is_nothrow_constructible_v&lt;result_t, Tag, Args...&gt;;
+
+  try {
+    state.async-result.template emplace&lt;result_t&gt;(Tag(), std::forward&lt;Args&gt;(args)...);
+  } catch (...) {
+    if constexpr (!nothrow) {
+      set_error(std::move(rcvr), current_exception());
+      return;
+    }
+  }
+  start(state.op-state);
+};
+</code></pre>
+
+so if emplacing the result tuple throws, `set_error` is immediately called on the downstream receiver. no attempt is made to post the completion to the specified scheduler. this is probably not the right behavior.
+</p>
+<p><b>Suggested resolution</b></p>
+<p>
+The right thing, i think, is to catch the exception, emplace the `exception_ptr` into the <i>`async-result`</i> variant, and then start the schedule operation, as shown below:
+
+<pre><code>
+[]&lt;class Tag, class... Args&gt;(auto, auto&amp; state, auto&amp; rcvr, Tag, Args&amp;&amp;... args) noexcept
+    -> void {
+  using result_t = decayed-tuple&lt;Tag, Args...&gt;;
+  constexpr bool nothrow = is_nothrow_constructible_v&lt;result_t, Tag, Args...&gt;;
+
+  try {
+    state.async-result.template emplace&lt;result_t&gt;(Tag(), std::forward&lt;Args&gt;(args)...);
+  } catch(...) {
+    if constexpr (nothrow)
+      state.async-result.template emplace&lt;tuple&lt;set_error_t, exception_ptr&gt;&gt;(set_error, current_exception());
+    }
+  }
+
+  start(state.op-state);
+}
+</code></pre>
+
+we also need to change how we specify the variant type of `state.async-result`:
+
+<blockquote>
+Let `Sigs` be a pack of the arguments to the `completion_signatures`
+specialization named by
+`completion_signatures_of_t<child-type<Sndr>, env_of_t<Rcvr>>`.
+Let <i><code>as-tuple</code></i> be an alias template
+<del>
+that transforms a completion signature `Tag(Args...)` into
+the tuple specialization `decayed-tuple<Tag, Args...>`.
+</del>
+<ins>
+such that `as-tuple<Tag(Args...)>` denotes
+the tuple specialization `decayed-tuple<Tag, Args...>`,
+and let is-nothrow-decay-copy-sig be
+a variable template such that
+<code>is-nothrow-decay-copy-sig&lt;Tag(Args...)&gt;</code>
+is a core constant expression of type `bool const` and whose value
+is `true` if the types `Args...` are all nothrow decay-copyable, and `false`
+otherwise.
+Let <i><code>error-completion</code></i> be a pack consisting of the type
+`set_error_t(exception_ptr)` if
+<code>(is-nothrow-decay-copy-sig&lt;Sigs&gt; &amp;&amp;...)</code>
+is `false`, and an empty pack otherwise.
+</ins>
+Then `variant_t` denotes the type
+<code>variant&lt;monostate, as-tuple&lt;Sigs&gt;...<ins>, <i>error-completion</i>...</ins>&gt;</code>,
+except with duplicate types removed.
+</blockquote>
+
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
