@@ -62,28 +62,28 @@ we also need to change how we specify the variant type of `state.async-result`:
 <blockquote>
 Let `Sigs` be a pack of the arguments to the `completion_signatures`
 specialization named by
-`completion_signatures_of_t<child-type<Sndr>, env_of_t<Rcvr>>`.
+<code>completion_signatures_of_t&lt;<i>child-type</i>&lt;Sndr&gt;, env_of_t&lt;Rcvr&gt;&gt;</code>.
 Let <i><code>as-tuple</code></i> be an alias template
 <del>
 that transforms a completion signature `Tag(Args...)` into
-the tuple specialization `decayed-tuple<Tag, Args...>`.
+the tuple specialization <code><i>decayed-tuple</i>&lt;Tag, Args...&gt;</code>.
 </del>
 <ins>
-such that `as-tuple<Tag(Args...)>` denotes
-the tuple specialization `decayed-tuple<Tag, Args...>`,
-and let is-nothrow-decay-copy-sig be
-a variable template such that
-<code>is-nothrow-decay-copy-sig&lt;Tag(Args...)&gt;</code>
+such that <code><i>as-tuple</i>&lt;Tag(Args...)&gt;</code> denotes
+the tuple specialization <code><i>decayed-tuple</i>&lt;Tag, Args...&gt;</code>,
+and let <code><i>is-nothrow-decay-copy-sig</i></code>
+be a variable template such that
+<code><i>is-nothrow-decay-copy-sig</i>&lt;Tag(Args...)&gt;</code>
 is a core constant expression of type `bool const` and whose value
 is `true` if the types `Args...` are all nothrow decay-copyable, and `false`
 otherwise.
 Let <i><code>error-completion</code></i> be a pack consisting of the type
 `set_error_t(exception_ptr)` if
-<code>(is-nothrow-decay-copy-sig&lt;Sigs&gt; &amp;&amp;...)</code>
+<code>(<i>is-nothrow-decay-copy-sig</i>&lt;Sigs&gt; &amp;&amp;...)</code>
 is `false`, and an empty pack otherwise.
 </ins>
 Then `variant_t` denotes the type
-<code>variant&lt;monostate, as-tuple&lt;Sigs&gt;...<ins>, <i>error-completion</i>...</ins>&gt;</code>,
+<code>variant&lt;monostate, <i>as-tuple</i>&lt;Sigs&gt;...<ins>, <i>error-completion</i>...</ins>&gt;</code>,
 except with duplicate types removed.
 </blockquote>
 
