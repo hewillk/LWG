@@ -21,7 +21,8 @@ Let `sndr` and `env` be subexpressions, and let `Sndr` be `decltype((sndr))`.
 If
 <code><i>sender-for</i>&lt;Sndr, <i>decayed-typeof</i>&lt;<i>let-cpo</i>&gt;&gt;</code>
 is <code>false</code>,
-then the expression `<i>let-cpo</i>.transform_env(sndr, env)` is ill-formed.
+then the expression <code><i>let-cpo</i>.transform_env(sndr, env)</code>
+is ill-formed.
 Otherwise, it is equal to
 <code><i>JOIN-ENV</i>(<i>let-env</i>(sndr), <i>FWD-ENV</i>(env))</code>.
 </blockquote>
