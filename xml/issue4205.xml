@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4205" status="New">
+<title>`let_[*].transform_env` is specified in terms of the `let_*` sender itself instead of its child</title>
+<section><sref ref="[exec.let]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>04 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/319">cplusplus/sender-receiver #319</a>.
+</p>
+<p>
+<sref ref="[exec.let]"/> para 13 reads:
+
+<blockquote>
+13.
+Let `sndr` and `env` be subexpressions, and let `Sndr` be `decltype((sndr))`.
+If
+<code><i>sender-for</i>&lt;Sndr, <i>decayed-typeof</i>&lt;<i>let-cpo</i>&gt;&gt;</code>
+is <code>false</code>,
+then the expression `let-cpo</i>.transform_env(sndr, env)` is ill-formed.
+Otherwise, it is equal to
+<code><i>JOIN-ENV</i>(<i>let-env</i>(sndr), <i>FWD-ENV</i>(env))</code>.
+</blockquote>
+
+The sender passed to <i>`let-env`</i> here should be the <i>child</i> of `sndr`.
+
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li>
+Modify <sref ref="[exec.let]"/> as indicated:
+<blockquote>
+-13-
+Let `sndr` and `env` be subexpressions, and let `Sndr` be `decltype((sndr))`.
+If
+<code><i>sender-for</i>&lt;Sndr, <i>decayed-typeof</i>&lt;<i>let-cpo</i>&gt;&gt;</code>
+is <code>false</code>,
+then the expression `let-cpo</i>.transform_env(sndr, env)` is ill-formed.
+Otherwise, it is equal to
+<del>
+<code><i>JOIN-ENV</i>(<i>let-env</i>(sndr), <i>FWD-ENV</i>(env))</code>.
+</del>
+<ins><pre><code>
+   auto&amp; [_, _, child] = sndr;
+   return <i>JOIN-ENV</i>(<i>let-env</i>(child), <i>FWD-ENV</i>(env));
+</code></pre></ins>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
