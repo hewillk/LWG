@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4206" status="New">
+<title>Alias template `connect_result_t` should be constrained with `sender_to`</title>
+<section><sref ref="[exec.syn]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>04 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/320">cplusplus/sender-receiver #320</a>.
+</p>
+<p>
+Since turning `execution::connect(sndr, rcvr)`'s <i>constraints</i>
+to a <i>mandates</i>, the `connect` customization point is now unconstrained.
+</p>
+<p>
+But there is at least one place in the algorithms (<sref ref="[exec.let]"/>)
+that is using `connect_result_t` in an immediate context of a function template
+with the expectation that <code>connect_result_t&lt;Sndr, Rcvr&gt;</code>
+will be well-formed only when `Sndr` and `Rcvr` can actually be connected.
+with the current definition, <code>connect_result_t&lt;Sndr, Rcvr&gt;</code>
+could very well cause a hard error; it will never cuase a substitution failure.
+</p>
+<p>
+The solution is to constrain the `connect_result_t` alias template.
+Just as <code>completion_signatures_of_t&lt;Sndr, Env&gt;</code>
+is constrained with <code>sender_in&lt;Sndr, Env&gt;</code>,
+so too should <code>connect_result_t&lt;Sndr, Rcvr&gt;</code>
+be constrained with <code>sender_to&lt;Sndr, Rcvr&gt;</code>.
+</p>
+<p>
+For reference, the `sender_to` concept is defined as follows:
+
+<pre><code>
+template&lt;class Sndr, class Rcvr&gt;
+    concept sender_to =
+      sender_in&lt;Sndr, env_of_t&lt;Rcvr&gt;&gt; &amp;&amp;
+      receiver_of&lt;Rcvr, completion_signatures_of_t&lt;Sndr, env_of_t&lt;Rcvr&gt;&gt;&gt; &amp;&amp;
+      requires (Sndr&amp;&amp; sndr, Rcvr&amp;&amp; rcvr) {
+        connect(std::forward&lt;Sndr&gt;(sndr), std::forward&lt;Rcvr&gt;(rcvr));
+      };
+</code></pre>
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li>
+Modify <sref ref="[exec.syn]"/> as indicated:
+<blockquote>
+<pre><code>
+  template&lt;class Sndr, class Rcvr&gt;
+    <ins>requires sender_to&lt;Sndr, Rcvr&gt;</ins>
+    using connect_result_t =
+      decltype(connect(declval&lt;Sndr&gt;(), declval&lt;Rcvr&gt;()));
+</code></pre>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
