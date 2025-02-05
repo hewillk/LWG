@@ -52,10 +52,9 @@ Otherwise, it is equal to
 <del>
 <code><i>JOIN-ENV</i>(<i>let-env</i>(sndr), <i>FWD-ENV</i>(env))</code>.
 </del>
-<ins><pre><code>
-   auto&amp; [_, _, child] = sndr;
-   return <i>JOIN-ENV</i>(<i>let-env</i>(child), <i>FWD-ENV</i>(env));
-</code></pre></ins>
+<pre><code><ins>  auto&amp; [_, _, child] = sndr;
+  return <i>JOIN-ENV</i>(<i>let-env</i>(child), <i>FWD-ENV</i>(env));</ins>
+</code></pre>
 </blockquote>
 </li>
 </ol>
