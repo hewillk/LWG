@@ -19,6 +19,7 @@ The current defn of the `operation_state` concept is:
 template&lt;class O&gt;
   concept operation_state =
     derived_from&lt;typename O::operation_state_concept, operation_state_t&gt; &amp;&amp;
+    is_object_v&lt;O&gt; &amp;&amp;
     requires (O&amp; o) {
       { start(o) } noexcept;
     };
@@ -47,7 +48,7 @@ template&lt;class O&gt;
     derived_from&lt;typename O::operation_state_concept, operation_state_t&gt; &amp;&amp;
     <del>is_object_v&lt;O&gt; &amp;&amp;</del>
     requires (O&amp; o) {
-      <del>{</del> start(o) <del>} noexcept;</del>
+      <del>{</del> start(o) <del>} noexcept</del>;
     };
 </code></pre></blockquote>
 </li>
