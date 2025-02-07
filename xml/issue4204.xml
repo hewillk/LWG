@@ -6,7 +6,7 @@
 <section><sref ref="[exec.let]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>03 Feb 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -30,6 +30,12 @@ Paragraphs 8, 9, and 10 only make sense in relation to the lambda in paragraph 7
 but that is not at all clear from the current wording.
 I suggest making paragraphs 8, 9, and 10 sub-bullets of paragraph 7.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
@@ -42,6 +48,44 @@ Change <sref ref="[exec.let]"/> as indicated,
 and nest paragraphs 8, 9, and 10 below paragraph 7:
 
 <blockquote>
+<p>
+-7-
+<code><i>impls-for</i>&lt;<i>decayed-typeof</i>&lt;<i>let-cpo</i>&gt;&gt;::<i>get-state</i></code>
+is initialized with a callable object equivalent to the following:
+<pre><code>
+  []&lt;class Sndr, class Rcvr&gt;(Sndr&amp;&amp; sndr, Rcvr&amp; rcvr) requires <i>see below</i> {
+    auto&amp; [_, fn, child] = sndr;
+    using fn_t = decay_t&lt;decltype(fn)&gt;;
+    using env_t = decltype(<i>let-env</i>(child));
+    using args_variant_t = <i>see below</i>;
+    using ops2_variant_t = <i>see below</i>;
+
+    struct state-type {
+      fn_t fn;                    <i>// exposition only</i>
+      env_t env;                  <i>// exposition only</i>
+      args_variant_t args;        <i>// exposition only</i>
+      ops2_variant_t ops2;        <i>// exposition only</i>
+    };
+    return <i>state-type</i>{std::forward_like&lt;Sndr&gt;(fn), <i>let-env</i>(child), {}, {}};
+  }
+</code></pre>
+</p>
+<p>
+-8-
+Let `Sigs` be a pack of the arguments to the `completion_signatures`
+specialization named by
+<code>completion_signatures_of_t&lt;<i>child-type</i>&lt;Sndr&gt;,
+env_of_t&lt;Rcvr&gt;&gt;</code>.
+Let `LetSigs` be a pack of those types in `Sigs` with a return type of
+<code><i>decayed-typeof</i>&lt;<i>set-cpo</i>&gt;</code>.
+Let `as-tuple` be an alias template such that
+<code><i>as-tuple</i>&lt;Tag(Args...)&gt;</code>
+denotes the type <code><i>decayed-tuple</i>&lt;Args...&gt;</code>.
+Then `args_variant_t` denotes the type
+<code>variant&lt;monostate, <i>as-tuple</i>&lt;LetSigs&gt;...&gt;</code>
+except with duplicate types removed.
+</p>
+<p>
 -9-
 Given a type `Tag` and a pack `Args`, let <code><i>as-sndr2</i></code>
 be an alias template such that
@@ -52,6 +96,12 @@ Then `ops2_variant_t` denotes the type
 <pre><code> variant&lt;monostate, connect_result_t&lt;<i>as-sndr2</i>&lt;LetSigs&gt;, receiver2&lt;Rcvr, <del>Env</del><ins>env_t</ins>&gt;&gt;...&gt;
 </code></pre>
 except with duplicate types removed.
+</p>
+<p>
+-10-
+The <i>requires-clause</i> constraining the above lambda is satisfied
+if and only if the types `args_variant_t` and `ops2_variant_t` are well-formed.
+</p>
 </blockquote>
 
 </li>
