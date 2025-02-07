@@ -26,9 +26,7 @@ Set priority to 3 after reflector poll.
 </p>
 <p>"I'd very much like to see `nullptr` added to the footnote."</p>
 
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5001"/>.
 </p>
@@ -49,6 +47,34 @@ This wording is relative to <paper num="N5001"/>.
 </li>
 
 </ol>
+</superseded>
+
+<note>2025-02-07; Jonathan provides improved wording</note>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[support.types.nullptr]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The macro `NULL` is an implementation-defined null pointer constant <ins>that is a literal 
+(<sref ref="[lex.icon]"/>, <sref ref="[lex.nullptr]"/>)</ins>.<sup>footnote 161</sup>
+<p/>
+<small>161) Possible definitions include <ins>`nullptr`,</ins> `0` and `0L`,
+but not `(void*)0`.</small>
+</p>
+</blockquote>
+
+</li>
+
+</ol>
+
 </resolution>
 
 </issue>
