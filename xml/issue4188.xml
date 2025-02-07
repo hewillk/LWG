@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4188" status="New">
+<issue num="4188" status="Tentatively Ready">
 <title><code>ostream::sentry</code> destructor should handle exceptions</title>
 <section><sref ref="[ostream.sentry]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -37,6 +37,12 @@ Libstdc++ does terminate if `pubsync()` throws when called by `~sentry`.
 Both MSVC and Libc++ silently swallow exceptions.
 It seems preferable to handle the exception and report an error,
 just as we do when `pubsync()` returns -1.
+</p>
+
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
 </p>
 
 </discussion>
