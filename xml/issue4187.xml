@@ -57,9 +57,7 @@ Set priority to 3 after reflector poll.
 "The `swap` part belongs in LWG <iref ref="3638"/>."
 </p>
 
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5001"/>.
 </p>
@@ -98,6 +96,48 @@ namespace std {
 </li>
 
 </ol>
+</superseded>
+
+<note>2025-02-07; Jonathan provides improved wording</note>
+<p>Moved `swap` changes to LWG <iref ref="3638"/>.</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[template.bitset.general]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;size_t N&gt; class bitset {
+  public:
+    // <i>bit reference</i>
+    class reference {
+    public:
+      constexpr reference(const reference&amp;) = default;
+      constexpr ~reference();
+      constexpr reference&amp; operator=(bool x) noexcept;           // <i>for b[i] = x;</i>
+      constexpr reference&amp; operator=(const reference&amp;) noexcept; // <i>for b[i] = b[j];</i>
+      <ins>constexpr const reference&amp; operator=(bool x) const noexcept;</ins>
+      constexpr bool operator~() const noexcept;                 // <i>flips the bit</i>
+      constexpr operator bool() const noexcept;                  // <i>for x = b[i];</i>
+      constexpr reference&amp; flip() noexcept;                      // <i>for b[i].flip();</i>
+    };
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+</ol>
+
 </resolution>
 
 </issue>
