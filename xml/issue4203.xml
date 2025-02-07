@@ -6,7 +6,7 @@
 <section><sref ref="[exec.schedule.from]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>03 Feb 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -97,6 +97,12 @@ It should be testing its child for single-sender-ness.
 <p>
 In addition, it should be applying <i>`FWD-ENV-T`</i> to `Env`
 so that only forwarding queries are forwarded.
+</p>
+
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
 </p>
 
 </discussion>

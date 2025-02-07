@@ -6,7 +6,7 @@
 <section><sref ref="[exec.syn]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>04 Feb 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -43,6 +43,12 @@ template&lt;class Sndr, class Rcvr&gt;
         connect(std::forward&lt;Sndr&gt;(sndr), std::forward&lt;Rcvr&gt;(rcvr));
       };
 </code></pre>
+</p>
+
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
 </p>
 
 </discussion>

@@ -6,7 +6,7 @@
 <section><sref ref="[exec.let]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>04 Feb 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -30,6 +30,17 @@ Otherwise, it is equal to
 The sender passed to <i>`let-env`</i> here should be the <i>child</i> of `sndr`.
 
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"We seem to be missing a guarantee that `auto [_,_,child] = sndr;` works.
+We guarantee that it can be used in a structured binding, but not that it
+must work with a size of three."
+</p>
+
 </discussion>
 
 <resolution>

@@ -6,7 +6,7 @@
 <section><sref ref="[format.functions]"/></section>
 <submitter>Jan Schultke</submitter>
 <date>24 Apr 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <blockquote><pre>
@@ -35,6 +35,15 @@ which would forbid the output range of the output iterator to overlap ranges of 
 A friend of mine has suggested to add a <i>Preconditions</i> to the <i>BasicFormatter</i> requirements 
 instead, dealing with the issue at the root (<tt>f.format(u, fc)</tt>).
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+We should prohibit aliasing, so this is undefined.
+</p>
+
 </discussion>
 
 <resolution>

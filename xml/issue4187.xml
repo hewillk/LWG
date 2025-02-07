@@ -6,7 +6,7 @@
 <section><sref ref="[template.bitset]"/></section>
 <submitter>Arthur O'Dwyer</submitter>
 <date>21 Dec 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -43,6 +43,20 @@ both types' copy constructors as simply `constexpr` and `noexcept`; and then if 
 we should say so in English prose.</p>
 </li>
 </ol>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"Just const-quality the existing assignment operators."
+"Would need to change the return type (breaking) or use `const_cast` (weird)."
+"And it would be needlessly inconsistent with <code>vector&lt;bool&gt;::reference</code>."
+</p>
+<p>
+"The `swap` part belongs in LWG <iref ref="3638"/>."
+</p>
+
 </discussion>
 
 <resolution>

@@ -6,7 +6,7 @@
 <section><sref ref="[format.range.fmtmap]"/></section>
 <submitter>Victor Zverovich</submitter>
 <date>18 May 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -64,6 +64,14 @@ and <tt>tuple</tt>s, and make map be responsible for its own structural formatti
 part of it to other formatters in an arbitrary way. This resolution has been applied to {fmt}'s implementation 
 of range formatting to address <a href="https://github.com/fmtlib/fmt/issues/3685">#3685</a>.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+Several votes for NAD (a specialization must provide `set_brackets` etc.),
+and suggestions it's a design change that LEWG should see.
+</p>
+
 </discussion>
 
 <resolution>

@@ -6,7 +6,7 @@
 <section><sref ref="[exec.snd.general]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>03 Feb 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -54,6 +54,12 @@ function that does the same as `get_completion_signatures`
 except without the sender transformation.
 Then we can express `get_completion_signatures` in terms of that.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

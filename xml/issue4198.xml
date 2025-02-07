@@ -6,7 +6,7 @@
 <section><sref ref="[exec.schedule.from]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>03 Feb 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -90,6 +90,12 @@ except with duplicate types removed.
 </p>
 
 <note>This touches the same text as LWG <iref ref="4203"/>.</note>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
