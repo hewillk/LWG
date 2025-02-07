@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4179" status="New">
+<issue num="4179" status="Tentatively Ready">
 <title>Wrong range in [alg.search]</title>
 <section><sref ref="[alg.search]"/></section>
 <submitter>Oscar Slotosch</submitter>
@@ -35,6 +35,12 @@ The mentioned wording issue is present in all previous standard versions, includ
 <a href="https://sgistl.github.io/search.html">SGI STL</a>. It needs to be fixed in all search 
 variants specified in <sref ref="[alg.search]"/> (except for the form using a `Searcher`).
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after ten votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
