@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4189" status="New">
+<issue num="4189" status="Tentatively Ready">
 <title>`cache_latest_view` should be freestanding</title>
 <section><sref ref="[version.syn]"/><sref ref="[ranges.syn]"/></section>
 <submitter>Hewill Kang</submitter>
@@ -55,6 +55,12 @@ While we are here, we can use the new convention from <paper num="P2407"/> to dr
 <tt>&lt;ranges&gt;</tt>. Most future additions to this header should have no problem being freestanding, 
 so that is the right default.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after nine votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
