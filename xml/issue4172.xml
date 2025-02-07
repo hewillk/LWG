@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4172" status="New">
+<issue num="4172" status="Tentatively Ready">
 <title>unique_lock self-move-assignment is broken</title>
 <section><sref ref="[thread.lock.unique.cons]"/> <sref ref="[thread.lock.shared.cons]"/></section>
 <submitter>Casey Carter</submitter>
@@ -33,6 +33,16 @@ Also, the move assignment operator doesn't specify what it returns.
 <p>
 `shared_lock` has the same problems, and can be fixed in the same way.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after seven votes in favour during reflector poll.
+</p>
+<p>
+"Should use parentheses not braces for the initializations."
+Jonathan volunteers to do that editorially after this gets approved.
+</p>
+
 </discussion>
 
 <resolution>
