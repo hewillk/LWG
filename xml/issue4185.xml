@@ -6,7 +6,7 @@
 <section><sref ref="[linalg.helpers]"/><sref ref="[concept.swappable]"/><sref ref="[iterator.cust.swap]"/></section>
 <submitter>Jiang An</submitter>
 <date>18 Dec 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,12 @@ the selected function returns can be completely dependent on the runtime environ
 Likewise, <sref ref="[concept.swappable]"/> and <sref ref="[iterator.cust.swap]"/> also contain such weird 
 usage. Presumably we should say the behavior is undefined in these cases.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

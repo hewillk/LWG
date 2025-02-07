@@ -6,7 +6,7 @@
 <section><sref ref="[ios.base.cons]"/><sref ref="[ios.base.locales]"/></section>
 <submitter>S. B. Tam</submitter>
 <date>12 Jan 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -38,6 +38,16 @@ If no locale has been imbued, a copy of the global C++ locale, `locale()`, in ef
 However, according to <sref ref="[ios.base.cons]"/>, the corresponding member is not initialized 
 until `basic_ios::init` is called.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"First part is NAD, can use e.g. placement new to force indeterminate values,
+and it's not observable by well-defined progams anyway."
+</p>
+
 </discussion>
 
 <resolution>

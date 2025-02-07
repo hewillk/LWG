@@ -6,7 +6,7 @@
 <section><sref ref="[range.subrange.general]"/><sref ref="[range.subrange.general]"/></section>
 <submitter>Hewill Kang</submitter>
 <date>16 Dec 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -26,6 +26,20 @@ is more efficient.
 However, `subrange` does not have a `data()` member, which seems worth considering 
 because this function can always be `noexcept` given that `to_address` is always `noexcept`.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+Lots or NAD votes. "If we care about `data` being noexcept, we should add
+conditional noexcept to `view_interface` overloads. Seems like design."
+</p>
+<p>
+"I don't care about noexcept (impls can strengthen it if it matters),
+but it's a good idea to avoid the extra iterator copy."
+</p>
+
 </discussion>
 
 <resolution>
@@ -77,7 +91,7 @@ constexpr <i>make-unsigned-like-t</i>&lt;iter_difference_t&lt;I&gt;&gt; size() c
 </pre>
 <blockquote>
 <p>
-<ins>-?- <i>Effects</i>: Equivalent to: <code>to_address(<i>begin_</i>);</code></ins>
+<ins>-?- <i>Effects</i>: Equivalent to: <code>return to_address(<i>begin_</i>);</code></ins>
 </p>
 </blockquote>
 </blockquote>
