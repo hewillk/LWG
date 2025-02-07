@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4150" status="New">
+<issue num="4150" status="Resolved">
 <title>The preconditions on <tt>run_loop::run()</tt> are too strict</title>
 <section><sref ref="[exec.run.loop.members]"/></section>
 <submitter>Eric Niebler</submitter>
@@ -30,6 +30,9 @@ loop.run();
 If <tt>sndr</tt> completes synchronously, the <tt>sync_wait_receiver</tt> will call <tt>finish()</tt> 
 on the loop before <tt>loop.run()</tt> is called, violating <tt>run</tt>'s precondition.
 </p>
+<note>2025-02-07 Status changed: New &rarr; Resolved.</note>
+<p>Resolved by <paper num="P3396R1"/>.</p>
+
 </discussion>
 
 <resolution>
