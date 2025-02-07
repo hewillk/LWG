@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4177" status="New">
+<issue num="4177" status="SG1">
 <title>&sect;[atomics.order] p8 "circularly depend on their own computation" is unclear for loop</title>
 <section><sref ref="[atomics.order]"/></section>
 <submitter>jim x</submitter>
 <date>29 Nov 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -51,6 +51,55 @@ if the loop doesn't exit.
  Either accurately specify what "circularly depend on their own computation" means, or add a paradigmatic 
  example regarding loop to indicate what it means.
 </p>
+
+<note>Additional discussion from submitter:</note>
+<p>
+I meant, that for a classic spin-lock, the code after the loop won't be
+executed until the loop exits, and the operation is just a pure load with
+relaxed memory order during the busy wait.
+The loop for a spin-lock can have three possible cases:
+<ol>
+<li>CAS immediately succeeds </li>
+<li>the loop exits after certain times of iterations</li>
+<li>the loop cannot be exited(e.g. the lock is not released)</li>
+</ol>
+</p>
+<p>
+The compiler cannot assume which case the loop for the spin-lock is.
+The code after the loop won't be reordered(during the busy waiting with
+a relaxed memory order); otherwise, implementing the spin-lock would be
+an issue based on the assumption that the codes after the loop wouldn't
+be reached when the loop was busy waiting.
+</p>
+<p>
+In this example, the loop has the same possible cases as the loop
+in the spin-lock. So, the execution of `#5` seems to depend on the loop
+and the loop depends on the `pre`. why I mention the spin-lock just is to
+justify that the code after the loop won't be reordered in both compile-time
+and runtime even though the condition of the loop is a pure load with a relaxed
+memory order(otherwise, the foundation for which the busy-waiting of a
+spink-lock is based on won't be true.). So, the loop has a similar effect
+to the `if` statement on the control flow: the code in the block of
+the `if` statement won't be executed if the condition is false, as well,
+the code after the loop won't be executed if the loop hasn't yet exited.
+</p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll. Send to SG1.
+</p>
+<p>
+"Should the example use `unsigned` so there's no chance of UB due to `int`
+overflowing?"
+</p>
+<p>
+"Contrived example showing well-known fact that OOTA prohibition is just
+hand-waving. <paper num="N3786"/> introduced the current wording and made
+no secret of that. <paper num="P1217"/> explored the issue further,
+as have other SG1 papers. Hard problems. Solutions welcome. Don't think this
+is the place to focus however."
+</p>
+
 </discussion>
 
 <resolution>
