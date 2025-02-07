@@ -6,7 +6,7 @@
 <section><sref ref="[flat.multiset.modifiers]"/><sref ref="[flat.map.modifiers]"/></section>
 <submitter>Arthur O'Dwyer</submitter>
 <date>09 Dec 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -34,6 +34,13 @@ While we're touching this paragraph, also resolve the vague word "initializes" t
 Editorially, <tt>pair&lt;&hellip;&gt;</tt> is a verbose way to spell the `value_type` of a `flat_map`; we should 
 be consistent and just say `value_type`.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+See reflector discussion for comments about proposed resolution.
+</p>
+
 </discussion>
 
 <resolution>

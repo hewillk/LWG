@@ -6,7 +6,7 @@
 <section><sref ref="[exec.snd.concepts]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>03 Feb 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -27,6 +27,12 @@ the `enable_sender` variable template was turned into
 an exposition-only <i><code>enable-sender</code></i> concept.
 We should roll back that change.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

@@ -6,7 +6,7 @@
 <section><sref ref="[containers]"/></section>
 <submitter>Jonathan Wakely</submitter>
 <date>22 Nov 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -24,6 +24,12 @@ in full, and sometimes rely on distant wording that applies to all containers.
 It would be easier if `vector::erase` referred back to
 <sref ref="[sequence.reqmts]"/>.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

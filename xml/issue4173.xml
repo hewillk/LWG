@@ -6,7 +6,7 @@
 <section><sref ref="[containers]"/></section>
 <submitter>Jonathan Wakely</submitter>
 <date>21 Nov 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -19,6 +19,35 @@ could be confused with node handles for associative containers, and
 (based on Wikipedia) has connotations of additional indirection, and something
 which would <i>not</i> be invalidated when the underlying storage changes.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"Maybe 'pointer to elements' or a longer phrase that includes the verb
+'invalidates', which has special meaning in this section."
+</p>
+<p>
+"Note that there are cases where we invalidate iterators but not pointers/references."
+</p>
+<p>
+"Maybe define 'addresses' to mean 'pointers and references' since they're
+always invalidated at the same time, but iterators are sometimes separate."
+</p>
+<p>
+"Referential element accessors"
+</p>
+<p>
+"Define 'pointer-invalidating' (for both pointers and references) and
+'iterator-invalidating', and say that the former always implies the latter.
+Maybe also introduce antonyms 'pointer-preserving' and 'iterator-preserving'."
+</p>
+<p>
+"Should be defined in terms of affected elements, e.g.
+'pointer-invalidating for any erased elements'."
+</p>
+
 </discussion>
 
 <resolution>

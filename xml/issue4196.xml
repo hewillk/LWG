@@ -6,7 +6,7 @@
 <section><sref ref="[alg.merge]"/></section>
 <submitter>Stephen Howe</submitter>
 <date>22 Jan 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -61,6 +61,16 @@ sequence is over, so the 2nd sequence is copied. Only 1 comparison is done, not 
 <p>
 The <a href="https://sgistl.github.io/inplace_merge.html">SGI STL archive</a> correctly says "at most" as well.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+There were nine votes for P0 (Tentatively Ready), but also several for
+NAD Editorial, because <sref ref="[structure.specifications]"/>/7 explicitly
+says that all complexity requirements are upper bounds and it's conforming to
+do less work. The consensus was that this is still a clarifying improvement.
+</p>
+
 </discussion>
 
 <resolution>

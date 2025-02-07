@@ -6,7 +6,7 @@
 <section><sref ref="[iterator.range]"/><sref ref="[range.prim.ssize]"/></section>
 <submitter>Casey Carter</submitter>
 <date>13 Dec 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,19 @@ Perhaps the `ssize` overloads should return
 <tt>static_cast&lt;common_type_t&lt;ptrdiff_t, iter_difference_t&lt;decltype(<i>meow</i>.begin())&gt;&gt;&gt;(<i>meow</i>.size())</tt> 
 instead when the argument <tt><i>meow</i></tt> models `range`?
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"The behaviour for Ranges regressed due to LWG <iref ref="3403"/>.
+It might have been a mistake to broaden the domain of `ranges::ssize` to match
+that of `ranges::size`.  The latter includes some non-Range arguments to ease
+the transition from `std::size`, but thjere was no existing body of pre-C++20
+code calling `std::ssize` that needed a transition path."
+</p>
+
 </discussion>
 
 <resolution>
