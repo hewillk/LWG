@@ -6,7 +6,7 @@
 <section><sref ref="[complex.numbers]"/></section>
 <submitter>Jiang An</submitter>
 <date>29 Sep 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -23,6 +23,18 @@ floating-point type. However, it's unclear to me how to handle cases where the i
 <tt>complex&lt;X&gt;</tt> (where <tt>X</tt> is not a program-defined type) as extension, and whether <i>Mandates</i> 
 should be used.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"Program-defined specializations of `std::complex`
+(i.e. explicit specializations and program-defined partial specializations)
+seem unsupportably broken. We should say so explicitly until somebody writes
+a paper to fix them."
+</p>
+
 </discussion>
 
 <resolution>

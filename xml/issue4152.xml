@@ -6,7 +6,7 @@
 <section><sref ref="[char.traits.require]"/></section>
 <submitter>Jiang An</submitter>
 <date>08 Sep 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,24 @@ it might be better to explicitly say that instantiation of the primary template 
 Also, it seems outdated to say "explicit specializations" as partial specializations are possible 
 since C++20.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+<sref ref="[char.traits.general]"/>/1 says that the subclause
+"defines a class template <code>char_traits&lt;charT&gt;</code>",
+but we never provided a definition.
+</p>
+<p>
+"Libc++ started to warn that the primary template is deprecated and will
+be removed. The proposed resolution doesn't improve matters though."
+</p>
+<p>
+"The definition should be cross-platform. Unspecified doesn't help."
+</p>
+
 </discussion>
 
 <resolution>

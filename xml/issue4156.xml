@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4156" status="New">
+<issue num="4156" status="SG16">
 <title><code>error_category</code> messages have unspecified encoding</title>
 <section><sref ref="[syserr.errcat.virtuals]"/></section>
 <submitter>Victor Zverovich</submitter>
 <date>18 Sep 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -61,6 +61,19 @@ The proposed resolution is similar to the one of LWG <iref ref="4087"/>.
 <note>2024-09-18; Jonathan comments</note>
 <p>It might make sense to stop using the word "encoding" in
 <sref ref="[syserr.errcat.overview]"/>.
+</p>
+
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"Do we need to say something about `name()` too? Does this requirement apply
+to user overrides? If it does, what's the consequence of a violation? UB?
+This 'encoding for strings returned by the library' questions feels like it
+should be comprehensively addressed in a paper rather than as a patchwork of
+individual issues."
 </p>
 
 </discussion>
