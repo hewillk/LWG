@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4175" status="New">
+<issue num="4175" status="Tentatively Ready">
 <title>`get_env()` specified in terms of `as_const()` but this doesn't work with rvalue senders</title>
 <section><sref ref="[exec.get.allocator]"/><sref ref="[exec.get.stop.token]"/><sref ref="[exec.get.env]"/>
          <sref ref="[exec.get.domain]"/><sref ref="[exec.get.scheduler]"/>         
@@ -26,6 +26,15 @@ allows prvalues to bind to it. We basically just want to require that `get_env()
 member-function. The use of `as_const()` does not seem to mirror the semantics of a function with a 
 <tt>const T&amp;</tt> parameter, so I suggest we change it to something else that expresses the intent.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
+</p>
+<p>
+This could use the "reified object" idea from <sref ref="[range.access]"/>.
+</p>
+
 </discussion>
 
 <resolution>
