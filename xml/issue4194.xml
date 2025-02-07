@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4194" status="New">
+<issue num="4194" status="Tentatively NAD">
 <title><tt>atomic&lt;void*&gt;</tt> should use generic class template</title>
 <section><sref ref="[atomics.types.pointer]"/></section>
 <submitter>Gonzalo Brito</submitter>
@@ -39,6 +39,14 @@ and the proposed fix would make them compliant: see libstdc++, libc++ and MSVC S
 <a href="https://godbolt.org/z/dso3P6fKf">here</a>. These standard libraries require a 
 pointer-to-object type, <tt>atomic&lt;void*&gt;</tt> uses the general template. Therefore, no user 
 code seems to be impacted.
+</p>
+
+<note>2025-02-07; Reflector poll: NAD</note>
+<p>
+The `fetch_OP` members have "<i>Mandates</i>: `T` is a complete object type."
+and a note explaining that this means arithmetic on `void*` is ill-formed.
+So implementations are expected to use the partial specialization for `void*`
+but to reject attempts at arithmetic. They all do this correctly today.
 </p>
 </discussion>
 
