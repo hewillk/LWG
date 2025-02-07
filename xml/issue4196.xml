@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4196" status="New">
+<issue num="4196" status="Tentatively Ready">
 <title>Complexity of `inplace_merge()` is incorrect</title>
 <section><sref ref="[alg.merge]"/></section>
 <submitter>Stephen Howe</submitter>
@@ -64,7 +64,7 @@ The <a href="https://sgistl.github.io/inplace_merge.html">SGI STL archive</a> co
 
 <note>2025-02-07; Reflector poll</note>
 <p>
-Set priority to 4 after reflector poll.
+Set status to Tentatively Ready after seven votes in favour during reflector poll.
 There were nine votes for P0 (Tentatively Ready), but also several for
 NAD Editorial, because <sref ref="[structure.specifications]"/>/7 explicitly
 says that all complexity requirements are upper bounds and it's conforming to
