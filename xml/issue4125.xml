@@ -33,10 +33,14 @@ only requires the underlying iterator to be <code>input_iterator</code> which ma
 <note>2024-08-02; Reflector poll</note>
 <p>
 Set priority to 3 after reflector poll.
-Five P0 (tentatively rady) votes but one for NAD:
+Six P0 (tentatively ready) votes but one for NAD:
 "design change, needs paper. Not constraining this seems to be intended by
 <paper num="p2325r3"/>. Even if we want to constrain it,
 why `default_initializable` rather than just `is_constructible_v`?"
+Author of <paper num="p2325r3"/> had no such intent and voted P0.
+Issue submitter used `default_initializable` to align with `forward_iterator`
+requirements, but would not object to implementers using `is_constructible_v`
+for backported DRs.
 </p>
 
 </discussion>
