@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3508" status="Open">
+<issue num="3508" status="Resolved">
 <title><tt>atomic_ref&lt;<i>cv</i> T&gt;</tt> is not well-specified</title>
 <section><sref ref="[atomics.ref.generic.general]"/></section>
 <submitter>Casey Carter</submitter>
@@ -50,6 +50,9 @@ Set priority to 2 during reflector discussions.
 SG1 forwarded <paper num="P3323R0"/> to LEWG to resolve LWG issues
 <iref ref="3508"/> and <iref ref="4069"/>.
 </p>
+
+<note>2025-02-07 Status changed: Open &rarr; Resolved.</note>
+<p>Resolved by <paper num="P3323R0"/> in Wrocław.</p>
 
 </discussion>
 

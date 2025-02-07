@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4069" status="Open">
+<issue num="4069" status="Resolved">
 <title><code>std::atomic&lt;volatile T&gt;</code> should be ill-formed</title>
 <section><sref ref="[atomics.types.generic]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -58,6 +58,9 @@ Set priority to 2 after reflector poll and send to SG1.
 SG1 forwarded <paper num="P3323R0"/> to LEWG to resolve LWG issues
 <iref ref="3508"/> and <iref ref="4069"/>.
 </p>
+
+<note>2025-02-07 Status changed: Open &rarr; Resolved.</note>
+<p>Resolved by <paper num="P3323R0"/> in Wrocław.</p>
 
 </discussion>
 
