@@ -6,7 +6,7 @@
 <section><sref ref="[time.zone.db]"/></section>
 <submitter>S. B. Tam</submitter>
 <date>16 Jan 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -38,6 +38,18 @@
 The standard does not define what "thread-safe" means, which makes the meaning of these sentences unclear. 
 Does it mean that "concurrent calls do not introduce data races", or does it additionally require a single 
 total order on these operations? In either case, it should be specified clearly.
+</p>
+
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"We're missing a guarantee that `reload_tzdb()` strongly happens before
+a call to `get_tzdb_list().front()` that retrieves a newly added element.
+Otherwise accessing any `time_zone` obtained from `get_tzdb_list().front()`
+could race with the call to `reload_tzdb()` that writes the front of the list."
 </p>
 
 </discussion>

@@ -6,7 +6,7 @@
 <section><sref ref="[futures.task.general]"/></section>
 <submitter>Casey Carter</submitter>
 <date>28 Sep 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -21,6 +21,15 @@ Presumably the design intent &mdash; which the implementers all inferred &mdash;
 should be ill-formed when `get_future` is not instantiable. The spec should say so explicitly rather than 
 relying on the fact that one of the basis operations is unusable.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"Shouldn't it be ill-formed only if instantiated?"
+</p>
+
 </discussion>
 
 <resolution>

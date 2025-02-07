@@ -6,7 +6,7 @@
 <section><sref ref="[support.types.nullptr]"/></section>
 <submitter>Janet Cobb</submitter>
 <date>09 Dec 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -19,6 +19,13 @@ Together, these imply that `#define NULL (::std::unreachable(), nullptr)` is a c
 a prvalue of type `std::nullptr_t`, so it is a null pointer constant. This makes it implementation-defined whether 
 any program that evaluates `NULL` has undefined behavior.
 </p>
+
+<note>2025-02-07; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>"I'd very much like to see `nullptr` added to the footnote."</p>
+
 </discussion>
 
 <resolution>
