@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4210" status="New">
+<title>Issue with <tt>cache_latest_view::<i>iterator</i></tt>'s reference type </title>
+<section><sref ref="[range.cache.latest.iterator]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>09 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<code>cache_latest_view::<i>iterator</i></code> can be roughly regarded as an iterator that
+transforms the original iterator's reference, because its reference is <i>always</i> an lvalue 
+which is <code>range_reference_t&lt;V&gt;&amp;</code>, even if the original iterator returns 
+an rvalue.
+<p/>
+In this case, it seems a bit odd to still specialize <code>iter_move</code> and return the rvalue 
+reference type of the original iterator, because the original reference has changed, so the former 
+may not form a valid common reference with the original rvalue reference.
+<p/>
+That is, in some rare cases even if the <code>cache_latest_view</code> can be legally constructed, 
+it may not be an <code>input_range</code> as <code>indirectly_readable</code> is not satisfied.
+<p/>
+A contrived example could be:
+</p>
+<blockquote><pre>
+struct I {
+  using value_type = int;
+  using difference_type = int;
+
+  struct move_only_ref {
+    move_only_ref(const int&amp;);
+    move_only_ref(move_only_ref&amp;&amp;) = default;
+  };
+
+  move_only_ref operator*() const;
+  I&amp; operator++();
+  void operator++(int);
+};
+
+using R = ranges::cache_latest_view&lt;ranges::subrange&lt;I, unreachable_sentinel_t&gt;&gt;; // ok
+
+static_assert(input_iterator&lt;I&gt;);
+static_assert(ranges::input_range&lt;R&gt;); // failed
+</pre></blockquote>
+<p>
+It's unclear whether we should change the reference type to <code>range_reference_t&lt;V&gt;&amp;&amp;</code> 
+to preserve the original ref-qualifiers as much as possible (I don't see any discussion of this option 
+in the original paper), or not provide a specialized <code>iter_move</code>, since it's intuitive to have 
+the default <code>iter_move</code> return an rvalue when it always returns an lvalue.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
