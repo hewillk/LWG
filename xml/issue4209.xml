@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4209" status="New">
+<title><tt>default_domain::transform_env</tt> should be returning <tt><i>FWD-ENV</i>(env)</tt></title>
+<section><sref ref="[exec.domain.default]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>07 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/168">cplusplus/sender-receiver #168</a>.
+</p>
+<p>
+When writing a generic recursive sender transform, you need to ability to unpack an unknown sender 
+`S` and recursively transform the children.
+<p/>
+For that, it can be useful to know the type of the environment that `S` will use when connecting its 
+child senders, which is why `transform_env` exists.
+<p/>
+For an environment `E` and a sender `S` with tag `T` child `C`, the expression 
+`default_domain().transform_env(S, E)` should return an environment `E2` that is identical to the 
+environment of the receiver that `S` uses to connect `C`.
+<p/>
+`default_domain().transform_env(S, E)` will first check whether `T().transform_env(S, E)` is 
+well-formed. If so, it will return that (e.g. `when_all_t` has a `transform_env` that adds a stop token 
+to the environment).
+<p/>
+If `T().transform_env(S, E)` is not well-formed, what should `default_domain::transform_env` do? At 
+present, it returns `E` unmodified.
+<p/>
+But <sref ref="[exec.adapt.general]"/> has this:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+[unless otherwise specified, when] a parent sender is connected to a receiver `rcvr`, any receiver used 
+to connect a child sender has an associated environment equal to <tt><i>FWD-ENV</i>(get_env(rcvr))</tt>.
+</p>
+</blockquote>
+<p>
+So the correct thing for `default_domain::transform_env` to do is to return <tt><i>FWD-ENV</i>(get_env(rcvr))</tt>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li>
+<p>Modify <sref ref="[exec.domain.default]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;sender Sndr, <i>queryable</i> Env&gt;
+  constexpr <i>queryable</i> decltype(auto) transform_env(Sndr&amp;&amp; sndr, Env&amp;&amp; env) noexcept;
+</pre>
+<blockquote>
+<p>
+-5- Let `e` be the expression
+</p>
+<blockquote><pre>
+tag_of_t&lt;Sndr&gt;().transform_env(std::forward&lt;Sndr&gt;(sndr), std::forward&lt;Env&gt;(env))
+</pre></blockquote>
+<p>
+if that expression is well-formed; otherwise, <tt><del>static_cast&lt;Env&gt;</del><ins><i>FWD-ENV</i></ins>(std::forward&lt;Env&gt;(env))</tt>.
+<p/>
+-6- <i>Mandates</i>: `noexcept(e)` is `true`.
+<p/>
+-7- <i>Returns</i>: `e`.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
