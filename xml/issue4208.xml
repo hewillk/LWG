@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4208" status="New">
+<title>Wording needs to ensure that in `connect(sndr, rcvr)` that `rcvr` expression is only evaluated once</title>
+<section><sref ref="[exec.connect]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>07 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/325">cplusplus/sender-receiver #325</a>.
+</p>
+<p>
+The current wording of `connect(sndr, rcvr)` defines the `new_sndr` expression as 
+<tt>transform_sender(decltype(<i>get-domain-late</i>(sndr, get_env(rcvr))){}, sndr, get_env(rcvr))</tt>.
+<p/>
+It then defines `connect(sndr, rcvr)` as expression equivalent to `new_sndr.connect(rcvr)`.
+<p/>
+As currently worded, this requires evaluating the `rcvr` expression twice. Note that the first
+usage in the `new_sndr` expression is unevaluated, but the second usage in `get_env(rcvr)` is evaluated.
+<p/>
+I think we need to add an extra sentence at the end of this section saying "Where the expression 
+`rcvr` is only evaluated once." or similar.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li>
+<p>Modify <sref ref="[exec.connect]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-6- The expression `connect(sndr, rcvr)` is expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+<li><p>(6.1) &mdash; `new_sndr.connect(rcvr)` if that expression is well-formed.
+<p/>
+<i>Mandates</i>: The type of the expression above satisfies `operation_state`.
+</p>
+</li>
+<li><p>(6.2) &mdash; Otherwise, <tt><i>connect-awaitable</i>(new_sndr, rcvr)</tt>.</p></li>
+</ol>
+<p>
+<ins>except that `rcvr` is evaluated only once.</ins>
+<p/>
+<i>Mandates</i>: <tt>sender&lt;Sndr&gt; &amp;&amp; receiver&lt;Rcvr&gt;</tt> is <tt>true</tt>.
+<p/>
+</p>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
