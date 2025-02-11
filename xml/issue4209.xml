@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4209" status="New">
+<issue num="4209" status="Ready">
 <title><tt>default_domain::transform_env</tt> should be returning <tt><i>FWD-ENV</i>(env)</tt></title>
 <section><sref ref="[exec.domain.default]"/></section>
 <submitter>Eric Niebler</submitter>
@@ -41,6 +41,9 @@ to connect a child sender has an associated environment equal to <tt><i>FWD-ENV<
 <p>
 So the correct thing for `default_domain::transform_env` to do is to return <tt><i>FWD-ENV</i>(get_env(rcvr))</tt>.
 </p>
+
+<note>Hagenberg 2025-02-10; move to Ready</note>
+
 </discussion>
 
 <resolution>

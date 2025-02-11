@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4204" status="New">
+<issue num="4204" status="Ready">
 <title>specification of <code><i>as-sndr2</i>(Sig)</code> in [exec.let] is incomplete</title>
 <section><sref ref="[exec.let]"/></section>
 <submitter>Eric Niebler</submitter>
@@ -36,6 +36,9 @@ I suggest making paragraphs 8, 9, and 10 sub-bullets of paragraph 7.
 Set priority to 1 after reflector poll.
 </p>
 
+<note>Hagenberg 2025-02-10; move to Ready</note>
+<p>Dropped the suggestion to nest p8-10 under p7.</p>
+
 </discussion>
 
 <resolution>
@@ -44,8 +47,7 @@ This wording is relative to <paper num="N5001"/>.
 </p>
 <ol>
 <li>
-Change <sref ref="[exec.let]"/> as indicated,
-and nest paragraphs 8, 9, and 10 below paragraph 7:
+Change <sref ref="[exec.let]"/> as indicated:
 
 <blockquote>
 <p>
