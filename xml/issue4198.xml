@@ -56,7 +56,8 @@ The right thing, i think, is to catch the exception, emplace the `exception_ptr`
 }
 </code></pre>
 
-we also need to change how we specify the variant type of `state.async-result`:
+we also need to change how we specify the variant type of
+<code>state.<i>async-result</i></code>:
 
 <blockquote>
 Let `Sigs` be a pack of the arguments to the `completion_signatures`
