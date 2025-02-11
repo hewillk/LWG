@@ -61,7 +61,7 @@ Change <sref ref="[exec.snd.concepts]"/> as indicated:
     concept sender =
       <del>bool(<i>enable-sender</i></del><ins>enable_sender</ins>&lt;remove_cvref_t&lt;Sndr&gt;&gt;<del>)</del> &amp;&amp;
       requires (const remove_cvref_t&lt;Sndr&gt;&amp; sndr) {
-        { get_env(sndr) } -&gt; &lt;i&gt;queryable&lt;/i&gt;;
+        { get_env(sndr) } -&gt; <i</i>queryable</i</i>;
       } &amp;&amp;
       move_constructible&lt;remove_cvref_t&lt;Sndr&gt;&gt; &amp;&amp;
       constructible_from&lt;remove_cvref_t&lt;Sndr&gt;, Sndr&gt;;
