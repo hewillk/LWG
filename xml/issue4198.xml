@@ -13,7 +13,7 @@
 Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/304">cplusplus/sender-receiver #304</a>.
 </p>
 <p>
-<sref ref="[exec.schedule.from]"/>/p11 specifies `shedule_from`'s completion operation as follows:
+<sref ref="[exec.schedule.from]"/>/p11 specifies `schedule_from`'s completion operation as follows:
 
 <pre><code>
 []&lt;class Tag, class... Args&gt;(auto, auto&amp; state, auto&amp; rcvr, Tag, Args&amp;&amp;... args) noexcept
