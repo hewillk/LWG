@@ -42,7 +42,7 @@ to connect a child sender has an associated environment equal to <tt><i>FWD-ENV<
 So the correct thing for `default_domain::transform_env` to do is to return <tt><i>FWD-ENV</i>(get_env(rcvr))</tt>.
 </p>
 
-<note>Hagenberg 2025-02-10; move to Ready</note>
+<note>Hagenberg 2025-02-11; move to Ready</note>
 
 </discussion>
 
