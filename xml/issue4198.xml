@@ -101,11 +101,76 @@ Set priority to 1 after reflector poll.
 Direction seems right. Decay-copyable is not a defined term.
 </p>
 
+<note>2025-02-12 Tim adds PR</note>
+<p>This also corrects the issue that `nothrow` is currently relying
+on the unspecified exception specification of `tuple`'s constructor.</p>
 </discussion>
 
 <resolution>
 <p>
+This wording is relative to <paper num="N5001"/>.
 </p>
+
+<ol>
+<li>
+Modify <sref ref="[exec.schedule.from]"/> p8 as indicated:
+<blockquote>
+<p>
+-8- Let `Sigs` be a pack of the arguments to the `completion_signatures`
+specialization named by
+<code>completion_signatures_of_t&lt;<i>child-type</i>&lt;Sndr&gt;, env_of_t&lt;Rcvr&gt;&gt;</code>.
+Let <i><code>as-tuple</code></i> be an alias template
+<del>
+that transforms a completion signature `Tag(Args...)` into
+the tuple specialization <code><i>decayed-tuple</i>&lt;Tag, Args...&gt;</code>.
+</del>
+<ins>
+such that <code><i>as-tuple</i>&lt;Tag(Args...)&gt;</code> denotes
+the type <code><i>decayed-tuple</i>&lt;Tag, Args...&gt;</code>,
+and let <code><i>is-nothrow-decay-copy-sig</i></code>
+be a variable template such that
+<code>auto(<i>is-nothrow-decay-copy-sig</i>&lt;Tag(Args...)&gt;)</code>
+is a constant expression of type `bool` and equal to 
+<code>(is_nothrow_constructible_v&lt;decay_t&lt;Args&gt;, Args&gt; &amp;&amp; ...)</code>.
+Let <i><code>error-completion</code></i> be a pack consisting of the type
+`set_error_t(exception_ptr)` if
+<code>(<i>is-nothrow-decay-copy-sig</i>&lt;Sigs&gt; &amp;&amp;...)</code>
+is `false`, and an empty pack otherwise.
+</ins>
+Then `variant_t` denotes the type
+<code>variant&lt;monostate, <i>as-tuple</i>&lt;Sigs&gt;...<ins>, <i>error-completion</i>...</ins>&gt;</code>,
+except with duplicate types removed.
+</p>
+</blockquote>
+</li>
+<li>
+<p>Modify <sref ref="[exec.schedule.from]"/> p11 as indicated:</p>
+<blockquote><p>
+-11- The member <code><i>impls-for</i>&lt;schedule_from_t&gt;::<i>complete</i></code> 
+is initialized with a callable object equivalent to the following lambda:
+</p>
+<blockquote><pre><code>
+[]&lt;class Tag, class... Args&gt;(auto, auto&amp; state, auto&amp; rcvr, Tag, Args&amp;&amp;... args) noexcept
+    -&gt; void {
+  using result_t = <i>decayed-tuple</i>&lt;Tag, Args...&gt;;
+  constexpr bool nothrow = <del>is_nothrow_constructible_v&lt;result_t, Tag, Args...&gt;</del>
+                           <ins>(is_nothrow_constructible_v&lt;decay_t&lt;Args&gt;, Args&gt; &amp;&amp; ...)</ins>;
+
+  try {
+    state.<i>async-result</i>.template emplace&lt;result_t&gt;(Tag(), std::forward&lt;Args&gt;(args)...);
+  } catch (...) {
+    if constexpr (!nothrow) <del>{</del>
+      <ins>state.<i>async-result</i>.template emplace&lt;tuple&lt;set_error_t, exception_ptr&gt;&gt;(set_error, current_exception());</ins>
+      <del>set_error(std::move(rcvr), current_exception());</del>
+      <del>return;</del>
+    <del>}</del>
+  }
+  start(state.<i>op-state</i>);
+};
+</code></pre></blockquote>
+</blockquote>
+</li>
+</ol>
 </resolution>
 
 </issue>
