@@ -96,7 +96,7 @@ except with duplicate types removed.
 Set priority to 1 after reflector poll.
 </p>
 
-<note>Hagenberg 2025-02-10; LWG</note>
+<note>Hagenberg 2025-02-11; LWG</note>
 <p>
 Direction seems right. Decay-copyable is not a defined term.
 </p>

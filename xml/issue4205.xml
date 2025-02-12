@@ -41,7 +41,7 @@ We guarantee that it can be used in a structured binding, but not that it
 must work with a size of three."
 </p>
 
-<note>Hagenberg 2025-02-10; move to Ready</note>
+<note>Hagenberg 2025-02-11; move to Ready</note>
 
 </discussion>
 
