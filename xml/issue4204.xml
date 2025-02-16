@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4204" status="Voting">
+<issue num="4204" status="WP">
 <title>specification of <code><i>as-sndr2</i>(Sig)</code> in [exec.let] is incomplete</title>
 <section><sref ref="[exec.let]"/></section>
 <submitter>Eric Niebler</submitter>
@@ -39,6 +39,7 @@ Set priority to 1 after reflector poll.
 <note>Hagenberg 2025-02-11; move to Ready</note>
 <p>Dropped the suggestion to nest p8-10 under p7.</p>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

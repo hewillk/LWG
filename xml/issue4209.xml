@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4209" status="Voting">
+<issue num="4209" status="WP">
 <title><tt>default_domain::transform_env</tt> should be returning <tt><i>FWD-ENV</i>(env)</tt></title>
 <section><sref ref="[exec.domain.default]"/></section>
 <submitter>Eric Niebler</submitter>
@@ -44,6 +44,7 @@ So the correct thing for `default_domain::transform_env` to do is to return <tt>
 
 <note>Hagenberg 2025-02-11; move to Ready</note>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

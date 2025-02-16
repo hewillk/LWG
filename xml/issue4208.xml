@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4208" status="Voting">
+<issue num="4208" status="WP">
 <title>Wording needs to ensure that in `connect(sndr, rcvr)` that `rcvr` expression is only evaluated once</title>
 <section><sref ref="[exec.connect]"/></section>
 <submitter>Eric Niebler</submitter>
@@ -27,6 +27,7 @@ I think we need to add an extra sentence at the end of this section saying "Wher
 
 <note>Hagenberg 2025-02-11; move to Ready</note>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

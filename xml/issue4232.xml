@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4232" status="Voting">
+<issue num="4232" status="WP">
 <title>`datapar::resize` does not resize</title>
 <section>
 <sref ref="[simd.traits]"/>
@@ -20,6 +20,7 @@ The wording actually requires the size to be left unchanged.
 Set status to Tentatively Ready after seven votes in favour during reflector poll.
 </p>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

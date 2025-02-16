@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4234" status="Voting">
+<issue num="4234" status="WP">
 <title>Including <tt>&lt;hive&gt;</tt> doesn't provide <tt>std::begin/end</tt></title>
 <section>
 <sref ref="[iterator.range]"/>
@@ -21,6 +21,7 @@ a series of range access member functions such as <tt>begin/end</tt>.
 Set status to Tentatively Ready after six votes in favour during reflector poll.
 </p>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4217" status="Voting">
+<issue num="4217" status="WP">
 <title>Clarify `mdspan` layout mapping requirements for `rank == 0`</title>
 <section>
 <sref ref="[mdspan.layout.reqmts]"/>
@@ -43,6 +43,7 @@ discussion.
 Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

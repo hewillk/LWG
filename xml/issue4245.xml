@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4245" status="Voting">
+<issue num="4245" status="WP">
 <title>Operators that interact with `counted_iterator` and `default_sentinel_t` should be `noexcept`</title>
 <section>
 <sref ref="[counted.iterator]"/><sref ref="[counted.iter.nav]"/><sref ref="[counted.iter.cmp]"/>
@@ -23,6 +23,7 @@ In this case, it is reasonable to declare them as <code>noexcept</code>.
 Set status to Tentatively Ready after seven votes in favour during reflector poll.
 </p>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>

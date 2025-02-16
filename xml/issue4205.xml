@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4205" status="Voting">
+<issue num="4205" status="WP">
 <title>`let_[*].transform_env` is specified in terms of the `let_*` sender itself instead of its child</title>
 <section><sref ref="[exec.let]"/></section>
 <submitter>Eric Niebler</submitter>
@@ -43,6 +43,7 @@ must work with a size of three."
 
 <note>Hagenberg 2025-02-11; move to Ready</note>
 
+<note>Sofia 2025-06-21; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>
