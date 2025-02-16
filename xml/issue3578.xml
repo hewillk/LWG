@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3578" status="Voting">
+<issue num="3578" status="WP">
 <title>Iterator SCARYness in the context of associative container merging</title>
 <section><sref ref="[associative.reqmts.general]"/></section>
 <submitter>Joaqu&iacute;n M L&oacute;pez Mu&ntilde;oz</submitter>
@@ -76,6 +76,7 @@ and MSVC STL iterators are SCARY even when `/D_ITERATOR_DEBUG_LEVEL` is used.
 Set status to Tentatively Ready after eight votes in favour during reflector poll.
 </p>
 
+<note>Hagenberg 2025-02-16; Status changed: Voting &rarr; WP.</note>
 </discussion>
 
 <resolution>
