@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4211" status="New">
+<title>IANA time zone database allows links to refer to links</title>
+<section>
+<sref ref="[time.zone.db.tzdb]"/>
+</section>
+<submitter>Jonathan Wakely</submitter>
+<date>22 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Since
+<a href="https://github.com/eggert/tz/commit/4878b644b25020568d4dda346c5cea91826c0c7c">October 2022</a>
+the IANA Time Zone Database's `tzfile` data format allows a Link to refer
+to another Link, instead of referring directly to a Zone.
+The <a href="https://man7.org/linux/man-pages/man8/zic.8.html#FILES">zic(8)</a>
+man page says:
+<blockquote>
+The TARGET field should appear as the NAME field in some zone line
+or as the LINK-NAME field in some link line.
+The LINK-NAME  field  is  used as an alternative name for that zone;
+it has the same syntax as a zone line's NAME field.
+Links can chain together, although the behavior is unspecified if
+a chain of one or more links does not terminate in a Zone name.
+</blockquote>
+Because chains of links were introduced to `tzfile` after `chrono::tzdb`
+was standardized, C++ does not properly support chains of links.
+</p>
+<p>
+The `time_zone_link::target()` member function is required to return
+"The name of the `time_zone` for which this `time_zone_link` provides
+an alternative name."
+This doesn't allow returning the name of another `time_zone_link`,
+which implies that the implementation should flatten a series of links so
+that the target is a `time_zone`. However, this discards information which
+is present in the `tzdb`, so that the information exposed to a C++ program
+does not preserve the original structure of a chain of links.
+</p>
+<p>
+The standard could be adjusted to support chains of links by allowing
+`time_zone_link::target()` to refer to another link, and then altering the
+algorithm used by `tzdb::locate_zone(string_view)` to find a `time_zone` from
+a name that might be a zone or a link.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li>
+Modify <sref ref="[time.zone.db.tzdb]"/> as indicated:
+<blockquote>
+<pre><code>
+const time_zone* locate_zone(string_view tz_name) const;
+</code></pre>
+<p>
+-2- <i>Returns</i>:
+<ol style="list-style-type:none">
+<li>
+(2.1) &mdash;
+If `zones` contains an element `tz` for which `tz.name() == tz_name`,
+a pointer to `tz`;
+</li>
+<li>
+(2.2) &mdash;
+otherwise, if `links` contains an element `tz_l` for which
+`tz_l.name() == tz_name`, then
+<del>a pointer to the element `tz` of zones for which
+`tz.name() == tz_l.target()`</del>
+<ins>
+the result of `locate_zone(tz_l.target())`.
+</ins>.
+</li>
+</ol>
+</p>
+<p>
+[<i>Note 1</i>: A `time_zone_link` specifies an alternative name for a
+`time_zone`. &mdash; <i>end note</i>]
+</p>
+<p>
+-3- <i>Throws</i>:
+If a `const time_zone*` cannot be found as described in the <i>Returns</i>:
+element, throws a `runtime_error`.
+</p>
+<p>
+[<i>Note 2</i>: On non-exceptional return, the return value is always a
+pointer to a valid `time_zone`. &mdash; <i>end note</i>]
+</p>
+<p>
+<ins>
+-?- <i>Remarks</i>:
+If both `zones` and `links` contain elements that match `tz_name` then
+it is unspecified whether <code>&amp;tz</code>
+or <code>locate_zone(tz_l.target())</code> is returned.
+</ins>
+</p>
+<note>Drafting note:
+This gives flexibility how to implement the lookup in `locate_zone`.
+</note>
+</blockquote>
+</li>
+<li>
+Modify <sref ref="[time.zone.link.overview]"/> as indicated:
+<blockquote>
+<p>
+-1-
+A `time_zone_link` specifies an alternative name for a `time_zone`.
+`time_zone_links` are constructed when the time zone database is initialized.
+<ins>
+The name of a `time_zone_link` can be used as an argument to
+`tzdb::locate_zone` (<sref ref="[time.zone.db.tzdb]"/>).
+A `time_zone_link` can refer directly to a `time_zone`,
+or to another `time_zone_link`, forming a chain of links.
+</ins>
+</p>
+</blockquote>
+</li>
+<li>
+Modify <sref ref="[time.zone.link.members]"/> as indicated:
+<blockquote>
+<pre><code>
+string_view name() const noexcept;
+</code></pre>
+-1- <i>Returns</i>:
+The alternative name for the time zone.
+<pre><code>
+string_view target() const noexcept;
+</code></pre>
+<p>
+-2- <i>Returns</i>:
+The name of the `time_zone`
+for which this `time_zone_link` provides an alternative name
+<ins>or the name of another `time_zone_link`</ins>.
+</p>
+<p>
+<ins>
+[<i>Note 1</i>:
+`tzdb::locate_zone` follows a chain of links formed when
+a link's target is the name of a `time_zone_link`,
+throwing an exception if the
+chain of links does not terminate in a `time_zone`.
+&mdash; <i>end note</i>]
+</ins>
+</p>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
