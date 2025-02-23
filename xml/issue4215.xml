@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4215" status="New">
+<title>`run_loop::finish` should be `noexcept`</title>
+<section>
+<sref ref="[exec.run.loop]"/>
+</section>
+<submitter>Eric Niebler</submitter>
+<date>13 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/329">cplusplus/sender-receiver #329</a>.
+</p>
+<p>
+`run_loop::finish` puts the `run_loop` into the <tt><i>finishing</i></tt> state so that the next 
+time the work queue is empty, `run_loop::run` will return instead of waiting for more work.
+<p/>
+Calling `.finish()` on a `run_loop` instance can potentially throw (`finish()` is not marked `noexcept`), 
+that is because one valid implementation involves acquiring a lock on a `std::mutex` &mdash; a potentially throwing operation.
+<p/>
+But failing to put the `run_loop` into the <tt><i>finishing</i></tt> state is problematic in the same way 
+that a failing destructor is problematic: shutdown and clean-up code depends on it succeeding.
+<p/>
+Consider `sync_wait`'s use of `run_loop`:
+</p>
+<blockquote><pre>
+<i>sync-wait-state</i>&lt;Sndr&gt; state;
+auto op = connect(sndr, <i>sync-wait-receiver</i>&lt;Sndr&gt;{&amp;state});
+start(op);
+
+state.loop.run();
+if (state.error) {
+  rethrow_exception(std::move(state.error));
+}
+return std::move(state.result);
+</pre></blockquote>
+<p>
+It is the job of <tt><i>sync-wait-receiver</i></tt> to put the `run_loop` into the <tt><i>finishing</i></tt> state 
+so that the invocation of `state.loop.run()` will return. It does that in its completion functions, like so:
+</p>
+<blockquote><pre>
+void set_stopped() &amp;&amp; noexcept;
+</pre>
+<blockquote>
+<p>
+<i>Effects</i>: Equivalent to <tt>state-&gt;loop.finish()</tt>.
+</p>
+</blockquote>
+</blockquote>
+<p>
+Here we are not handling the fact that <tt>state-&gt;loop.finish()</tt> is potentially throwing. Given that this 
+function is `noexcept`, this will lead to the application getting terminated. Not good.
+<p/>
+But even if we handle the exception and save it into `state.result` to be rethrown later, we still have a problem. 
+Since `run_loop::finish()` threw, the `run_loop` has not been placed into the <tt><i>finishing</i></tt> state. 
+That means that `state.loop.run()` will never return, and `sync_wait` will hang forever.
+<p/>
+Simply put, `run_loop::finish()` has to be `noexcept`. The implementation must find a way to put the `run_loop` 
+into the <tt><i>finishing</i></tt> state. If it cannot, it should terminate. Throwing an exception and foisting the 
+problem on the caller &mdash; who has no recourse &mdash; is simply wrong.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[exec.run.loop.general]"/> as indicated:</p>
+
+<blockquote><pre>
+namespace std::execution {
+  class run_loop {
+    <i>// <sref ref="[exec.run.loop.types]"/>, associated types</i>
+    class <i>run-loop-scheduler</i>; <i>// exposition only</i>
+    class <i>run-loop-sender</i>;    <i>// exposition only</i>
+    struct <i>run-loop-opstate-base</i> { <i>// exposition only</i>
+      virtual void <i>execute</i>() = 0;  <i>// exposition only</i>
+      run_loop* <i>loop</i>;              <i>// exposition only</i>
+      run-loop-opstate-base* <i>next</i>; <i>// exposition only</i>
+    };
+    template&lt;class Rcvr&gt;
+      using <i>run-loop-opstate</i> = <i>unspecified</i>; <i>// exposition only</i>
+
+    <i>// <sref ref="[exec.run.loop.members]"/>, member functions</i>
+    <i>run-loop-opstate-base</i>* <i>pop-front</i>(); <i>// exposition only</i>
+    void <i>push-back</i>(<i>run-loop-opstate-base</i>*); <i>// exposition only</i>
+
+  public:
+    <i>// <sref ref="[exec.run.loop.ctor]"/>, constructor and destructor</i>
+    run_loop() noexcept;
+    run_loop(run_loop&amp;&amp;) = delete;
+    ~run_loop();
+
+    <i>// <sref ref="[exec.run.loop.members]"/>, member functions</i>
+    <i>run-loop-scheduler</i> get_scheduler();
+    void run();
+    void finish() <ins>noexcept</ins>;
+  };
+}
+</pre></blockquote>
+</li>
+
+<li><p>Modify <sref ref="[exec.run.loop.members]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+void finish() <ins>noexcept</ins>;
+</pre>
+<blockquote>
+<p>
+-8- <i>Preconditions</i>: <tt><i>state</i></tt> is either <tt><i>starting</i></tt> or <tt><i>running</i></tt>.
+<p/>
+-9- <i>Effects</i>: Changes <tt><i>state</i></tt> to <tt><i>finishing</i></tt>.
+<p/>
+-10- <i>Synchronization</i>: `finish` synchronizes with the <tt><i>pop-front</i></tt> operation that returns <tt>nullptr</tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
