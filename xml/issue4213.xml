@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4213" status="New">
+<title>Sender spec depends on unspecified order of evaluation</title>
+<section>
+<sref ref="[exec.snd]"/>
+</section>
+<submitter>Frank Birbacher</submitter>
+<date>14 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In certain clauses for defining senders the unspecified order of evaluation of function arguments can 
+lead to retrieving values from a move-from state of a sender. An example is <sref ref="[exec.continues.on]"/> 
+where paragraph 3 states:
+</p>
+<blockquote><pre>
+transform_sender(<i>get-domain-early</i>(sndr), <i>make-sender</i>(continues_on, sch, sndr))
+</pre></blockquote>
+<p>
+In this expression the evaluation of <tt><i>get-domain-early</i>(sndr)</tt> can happen before or after 
+the <tt><i>make-sender</i></tt>. The latter can steal the value from `sndr` by moving from it. So 
+<tt><i>get-domain-early</i></tt> may see the moved-from state of `sndr` and fail to obtain anything.
+<p/>
+Repetitions are at least in:
+</p>
+<ol>
+<li><p><sref ref="[exec.then]"/> p3</p></li>
+<li><p><sref ref="[exec.let]"/> p4</p></li>
+<li><p><sref ref="[exec.bulk]"/> p2</p></li>
+<li><p><sref ref="[exec.split]"/> p4</p></li>
+<li><p><sref ref="[exec.when.all]"/> p3</p></li>
+<li><p><sref ref="[exec.into.variant]"/> p3</p></li>
+<li><p><sref ref="[exec.stopped.opt]"/> p2</p></li>
+<li><p><sref ref="[exec.stopped.err]"/> p2</p></li>
+<li><p><sref ref="[exec.sync.wait.var]"/> p1</p></li>
+</ol>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
