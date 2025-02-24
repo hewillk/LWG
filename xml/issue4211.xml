@@ -100,9 +100,9 @@ it is unspecified whether <code>&amp;tz</code>
 or <code>locate_zone(tz_l.target())</code> is returned.
 </ins>
 </p>
-<note>Drafting note:
-This gives flexibility how to implement the lookup in `locate_zone`.
-</note>
+<blockquote class="note">[<i>Drafting note</i>:
+This gives flexibility how to implement the lookup in `locate_zone`.]
+</blockquote>
 </blockquote>
 </li>
 <li>
