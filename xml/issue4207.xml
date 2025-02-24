@@ -65,10 +65,12 @@ Any call to `current` that appears as a default argument
 (<sref ref="[dcl.fct.default]"/>), or as a subexpression thereof,
 should correspond to the location of the invocation of the function that
 uses the default argument (<sref ref="[expr.call]"/>).
+<ins>
 Any call to `current` that appears as a default template argument
 (<sref ref="[temp.param]"/>), or as a subexpression thereof,
 should correspond to the location where the default template argument
 is specified.
+</ins>
 </blockquote>
 </li>
 </ol>
