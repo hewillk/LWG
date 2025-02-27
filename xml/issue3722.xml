@@ -50,7 +50,12 @@ the "reserve" branch of the decision tree."
 </li>
 </ul>
 
-<note>2025-02-27; needs rebasing after <paper num="P2846R6"/> acceptance</note>
+<note>2025-02-27; post-Hagenberg status</note>
+<p>
+The proposed resolution needs rebasing after <paper num="P2846R6"/>
+was approved in Hagenberg.
+It also conflicts with LWG <iref ref="4066"/>.
+</p>
 
 </discussion>
 

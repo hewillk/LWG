@@ -17,6 +17,14 @@ pair satisfies <tt>sized_sentinel_for</tt>.
 Given that we have specifically designed the decision tree, I see no reason not to reserve in this case, 
 since we'd be calling <tt>ranges::begin(r)</tt> anyway.
 </p>
+
+<note>2025-02-27; post-Hagenberg status</note>
+<p>
+The proposed resolution needs rebasing after <paper num="P2846R6"/>
+was approved in Hagenberg.
+It also conflicts with LWG <iref ref="3722"/>.
+</p>
+
 </discussion>
 
 <resolution>
