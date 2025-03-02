@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4216" status="New">
+<title>`num_put::do_put` and `void` pointers</title>
+<section>
+<sref ref="[facet.num.put.virtuals]"/>
+</section>
+<submitter>Nikolas Klauser</submitter>
+<date>26 Feb 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The `num_put::do_put` overloads are defined in terms of `printf`.
+However, it is not clear what the intended behaviour of pointers is.
+<p/>
+While the `num_put` wording makes a quite clear statement that it should
+be whatever `printf("%p", ptr)` would be, `num_get` is entirely silent
+on which function should be used. This makes it entirely unclear whether
+round-tripping is supposed to work. It's also not clear whether
+`num_put` was just simple to specify via `printf` or whether the intent
+was that the output matches in all cases. Round-tripping between
+`num_put` and `num_get` was broken in libc++ until recently. However, to
+fix that, the output of `num_put::do_put` no longer matches the libc's
+`printf` in all cases. libstdc++ had this behaviour since at least two
+decades, indicating that nobody seems to have a problem with
+`num_put::do_put` and `printf` having different results in some rare cases.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[facet.num.put.virtuals]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+iter_type do_put(iter_type out, ios_base&amp; str, char_type fill, long val) const;
+iter_type do_put(iter_type out, ios_base&amp; str, char_type fill, long long val) const;
+iter_type do_put(iter_type out, ios_base&amp; str, char_type fill, unsigned long val) const;
+iter_type do_put(iter_type out, ios_base&amp; str, char_type fill, unsigned long long val) const;
+iter_type do_put(iter_type out, ios_base&amp; str, char_type fill, double val) const;
+iter_type do_put(iter_type out, ios_base&amp; str, char_type fill, long double val) const;
+iter_type do_put(iter_type out, ios_base&amp; str, char_type fill, const void* val) const;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: [&hellip;]
+<p/>
+-2- The details of this operation occur in several stages: [&hellip;]
+<p/>
+-3- Detailed descriptions of each stage follow.
+<p/>
+-4- <i>Returns</i>: <tt>out</tt>.
+<p/>
+<b>Stage 1</b>: The first action of stage 1 is to determine a conversion specifier. [&hellip;]
+<p/>
+For conversion from `void*` the specifier is `%p`.
+<p/>
+The representations at the end of stage 1 consists of the `char`'s that would be printed by a call of
+`printf(s, val)` where `s` is the conversion specifier determined above<ins>, except that any 
+implementation-defined behavior of `printf` may be different from a call to `printf`</ins>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
