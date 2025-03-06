@@ -51,6 +51,18 @@ required to provide equivalent semantics, to the named locale's facet, not to ac
 <p>NM: Effects: doesn't make sense.</p>
 <p>JW, NM, Martin Sebor to come up with new wording.</p>
 
+<note>2025-03-06; Jonathan comments</note>
+<p>
+LWG <iref ref="4186"/> fixed the missing `(getloc())` part.
+Maybe we can resolve this differently, by changing <sref ref="[re.traits]"/>
+to:
+<blockquote>
+Let `C` be <code>use_facet&lt;collate&lt;charT&gt; &gt;(getloc())</code>.
+If <code>typeid(C) == typeid(collate_byname&lt;charT&gt;)
+|| typeid(C) == typeid(collate&lt;charT&gt;)</code> and the form of ...
+</blockquote>
+</p>
+
 </discussion>
 
 <resolution>
