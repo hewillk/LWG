@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4221" status="New">
+<title>Cannot format const-iterable only ranges</title>
+<section>
+<sref ref="[format.range]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>06 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The standard does not explicitly prohibit ranges that are only const-iterable, i.e. a range with
+<code>const begin()</code> and deleted or invalid non-<code>const begin()</code>.
+</p>
+<p>
+Unfortunately, those ranges cannot be formatted because the <code>R</code> in
+<code>formatter&lt;R&gt;</code> is always without the <code>const</code>-qualifier,
+which makes it never satisfy the <code>range</code> concept
+(<a href="https://godbolt.org/z/68T6EjKG4">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;print&gt;
+#include &lt;ranges&gt;
+
+struct R {
+  int* begin() = delete;
+  int* end() = delete;
+  const int* begin() const;
+  const int* end() const;
+};
+
+int main() {
+  const R r;
+  static_assert(std::ranges::contiguous_range&lt;decltype(r)&gt;);
+
+  for (auto&amp;&amp; elem : r)
+    std::print("{} ", elem); // ok
+
+  std::ranges::for_each(
+    r, [](auto&amp;&amp; elem) { std::print("{} ", elem); }
+  );                         // ok
+
+  std::print("{}", r);       // <span style="color:red;font-weight:bolder">not ok</span>
+}
+</pre></blockquote>
+<p>
+Although such type might be relatively rare, it does reflect an inconsistency in the general usage of formatting
+ranges, which do not support all valid ranges.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
