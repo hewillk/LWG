@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4219" status="New">
+<title><tt>std::vector::erase[_if]</tt> should be based on ranges `remove`</title>
+<section>
+<sref ref="[vector.erasure]"/>
+</section>
+<submitter>Peter Kasting</submitter>
+<date>05 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+C++20 added <tt>std::vector::erase[_if]</tt>. Per <sref ref="[vector.erasure]"/>, these are equivalent 
+to a call to <tt>std::remove[_if]</tt> followed by an appropriate <tt>erase</tt>.
+<p/>
+This is unfortunate, because `std::remove_if` is specified (by <sref ref="[alg.remove]"/>) as invoking 
+its predicate as `pred(*i)`, while `std::ranges::remove_if` uses the more flexible 
+`invoke(pred, invoke(proj, *i))`. Disregarding the projection, the latter allows the use of member function 
+pointers as predicates, while the former does not.
+<p/>
+I assume the committee intentionally did not change the non-ranges version to use `invoke` because it 
+caused a backwards-compatibility risk. (If I am mistaken and this was an oversight, perhaps this and 
+other non-ranges algorithms that take predicates should be updated to use invoke() to invoke them.)
+<p/>
+If that's true, though, it's perplexing why a new-to-c++20 function like `std::vector::erase_if` 
+should suffer the same drawback.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[vector.erasure]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class Allocator, class U = T&gt;
+  constexpr typename vector&lt;T, Allocator&gt;::size_type
+    erase(vector&lt;T, Allocator&gt;&amp; c, const U&amp; value);
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+auto <ins>r</ins><del>it</del> = <ins>ranges::</ins>remove(c<del>.begin(), c.end()</del>, value);
+<del>auto r = distance(it, c.end());</del>
+c.erase(<ins>r.begin()</ins><del>it</del>, <ins>r</ins><del>c</del>.end());
+return r<ins>.size()</ins>;
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class Allocator, class Predicate&gt;
+  constexpr typename vector&lt;T, Allocator&gt;::size_type
+    erase_if(vector&lt;T, Allocator&gt;&amp; c, Predicate pred);
+</pre>
+<blockquote>
+<p>
+-2- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+auto <ins>r</ins><del>it</del> = <ins>ranges::</ins>remove_if(c<del>.begin(), c.end()</del>, pred);
+<del>auto r = distance(it, c.end());</del>
+c.erase(<ins>r.begin()</ins><del>it</del>, <ins>r</ins><del>c</del>.end());
+return r<ins>.size()</ins>;
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
