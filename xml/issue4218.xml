@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4218" status="New">
+<title>Constraint recursion in `basic_const_iterator`'s relational operators due to ADL + CWG 2369</title>
+<section>
+<sref ref="[const.iterators.ops]"/>
+</section>
+<submitter>Patrick Palka</submitter>
+<date>03 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider the example (devised by Hewill Kang)
+</p>
+<blockquote><pre>
+using RCI = reverse_iterator&lt;basic_const_iterator&lt;vector&lt;int&gt;::iterator&gt;&gt;;
+static_assert(std::totally_ordered&lt;RCI&gt;);
+</pre></blockquote>
+<p>
+Checking `RCI` is `totally_ordered` entails checking
+</p>
+<blockquote><pre>
+requires (RCI x) { x <i>RELOP</i> x; } for each <i>RELOP</i> in {&lt;, &gt;, &lt;=, &gt;=}
+</pre></blockquote>
+<p>
+which we expect to be straightforwardly satisfied by `reverse_iterator`'s
+namespace-scope operators (<sref ref="[reverse.iter.cmp]"/>):
+</p>
+<blockquote><pre>
+template&lt;class Iterator1, class Iterator2&gt;
+  constexpr bool operator&lt;(
+    const reverse_iterator&lt;Iterator1&gt;&amp; x,
+    const reverse_iterator&lt;Iterator2&gt;&amp; y);
+// etc
+</pre></blockquote>
+<p>
+But due to ADL we find ourselves also considering the `basic_const_iterator`
+relop friends (<sref ref="[const.iterators.ops]"/>/24).
+</p>
+<blockquote><pre>
+template&lt;input_iterator Iterator&gt;
+class basic_const_iterator {
+  template&lt;<i>not-a-const-iterator</i> I&gt;
+    friend constexpr bool operator&lt;(const I&amp; x, const basic_const_iterator&amp; y)
+      requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;
+  // etc
+};
+</pre></blockquote>
+<p>
+Before <a href="https://wg21.link/cwg2369">CWG 2369</a> these candidates would quickly get 
+discarded since for the second operand RCI clearly isn't convertible to `basic_const_iterator`.  
+But after CWG 2369 implementations must first check these operators' constraints
+(with <tt>Iterator = vector&lt;int&gt;::iterator</tt> and <tt>I = RCI</tt>), which entails 
+checking <tt>totally_ordered&lt;RCI&gt;</tt> recursively, causing the example to be ill-formed.
+<p/>
+The constraint recursion is diagnosed by GCC (<a href="https://godbolt.org/z/dr1dK1dnj">See godbolt demo</a>).
+Other compilers accept the example because they don't implement CWG 2369, as
+far as I know.
+<p/>
+GCC trunk works around this issue by giving these friend relational operators
+a dependent second operand of the form <tt>basic_const_iterator&lt;J&gt;</tt> where `J` is
+constrained to match `Iterator`:
+</p>
+<blockquote><pre>
+template&lt;<i>not-a-const-iterator</i> I, same_as&lt;Iterator&gt; J>
+  friend constexpr bool operator&lt;(const I&amp; x, const basic_const_iterator&lt;J&gt;&amp; y)
+    requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;
+// etc
+</pre></blockquote>
+<p>
+So that deduction fails earlier, before constraints get checked, for a second
+operand that isn't a specialization of `basic_const_iterator` (or derived from one).
+<p/>
+LWG <iref ref="3769"/> is an earlier issue about constraint recursion in `basic_const_iterator`'s
+operators, but there the recursion was independent of CWG 2369.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[const.iterators.iterator]"/>, class template `basic_const_iterator` synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  [&hellip;]
+  template&lt;input_iterator Iterator&gt;
+  class basic_const_iterator {
+    [&hellip;]
+    template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+      friend constexpr bool operator&lt;(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+        requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+    template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+      friend constexpr bool operator&gt;(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+        requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+    template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+      friend constexpr bool operator&lt;=(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+        requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+    template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+      friend constexpr bool operator&gt;=(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+        requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[const.iterators.ops]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+  friend constexpr bool operator&lt;(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+    requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+  friend constexpr bool operator&gt;(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+    requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+  friend constexpr bool operator&lt;=(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+    requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+template&lt;<i>not-a-const-iterator</i> I<ins>, same_as&lt;Iterator&gt; J</ins>&gt;
+  friend constexpr bool operator&gt;=(const I&amp; x, const basic_const_iterator<ins>&lt;J&gt;</ins>&amp; y)
+    requires random_access_iterator&lt;Iterator&gt; &amp;&amp; totally_ordered_with&lt;Iterator, I&gt;;
+</pre>
+<blockquote>
+<p>
+-23- Let <tt><i>op</i></tt> be the operator.
+<p/>
+-24- <i>Effects</i>: Equivalent to: <tt>return x <i>op</i> y.<i>current_</i>;</tt>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
