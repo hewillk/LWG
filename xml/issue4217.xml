@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4217" status="New">
+<title>Clarify `mdspan` layout mapping requirements for `rank == 0`</title>
+<section>
+<sref ref="[mdspan.layout.reqmts]"/>
+</section>
+<submitter>Mark Hoemmen</submitter>
+<date>03 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[mdspan.layout.reqmts]"/> p19-21 says that a layout mapping needs to
+provide `m.stride(r)`. However, <sref ref="[mdspan.layout.left.obs]"/> p5 constrains
+<tt>layout_left::mapping&lt;Extents&gt;::stride(r)</tt> on <tt>Extents::rank() &gt; 0</tt>
+being `true`. The same is true of `layout_right::mapping`
+(<sref ref="[mdspan.layout.right.obs]"/> p5). (The other Standard mappings in
+<sref ref="[views.multidim]"/> and <sref ref="[linalg]"/> do not have this constraint.)  
+This suggests that a rank-zero `layout_{left,right}::mapping` does not
+conform with the layout mapping requirements.
+<p/>
+On the other hand, other parts of <sref ref="[mdspan.layout.reqmts]"/> imply that
+`r` must be in the range [0, `rank()`) for the layout mapping's
+extents type. If such an `r` does not exist, which is the case for a
+rank-zero layout mapping, then the `m.stride(r)` requirement is
+vacuous. This implies that a rank-zero `layout_{left,right}::mapping`
+fully conforms with the layout mapping requirements.
+<p/>
+It is definitely the design intent for rank-zero `mdspan` to work, and
+for it to represent a view of a single element. Users can create
+rank-zero `mdspan` by invoking its constructor, or by using
+`submdspan` where all the slice arguments are convertible to
+`index_type`. Even though the normative wording permits this, adding
+a <i>Note</i> would clarify the design intent without making the wording
+redundant. This was the preferred change per LWG reflector
+discussion.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[mdspan.layout.reqmts]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+m.stride(r)
+</pre>
+<blockquote>
+<p>
+-19- <i>Preconditions</i>: `m.is_strided()` is `true`.
+<p/>
+-20- <i>Result</i>: `typename M::index_type`
+<p/>
+-21- <i>Returns</i>: `sr` as defined in `m.is_strided()` above.
+<p/>
+<ins>[<i>Note ?</i>: It is not required for `m.stride(r)` to be well-formed if
+`m.extents().rank()` is zero, even if `m.is_always_strided()` is `true`. &mdash; 
+<i>end note</i>]</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
