@@ -60,9 +60,8 @@ mentioning this point.
 A similar issue had been reported as <iref ref="3385"/>, which was eventually adopted as a C++20 DR. This 
 DR indicates that LWG approved the decision to require `copyable` in order to model a `common_iterator`.
 </p>
-</discussion>
 
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N4993"/>.
 </p>
@@ -93,6 +92,44 @@ if constexpr (<ins>(semiregular&lt;iterator_t&lt;<i>maybe-const</i>&lt;<i>is-con
 </blockquote>
 </blockquote>
 </li>
-</ol></resolution>
+</ol>
+</superseded>
+
+<note>2025-03-05; Hewill Kang provides improved wording</note>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[range.concat.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr auto end() const
+  requires (range&lt;const Views&gt; &amp;&amp; ...) &amp;&amp; <i>concatable</i>&lt;const Views...&gt;;
+</pre>
+<blockquote>
+<p>
+-7- <i>Effects</i>: Let <tt><i>is-const</i></tt> be `true` for the const-qualified overload, and `false` 
+otherwise. Equivalent to:
+</p>
+<blockquote><pre>
+constexpr auto N = sizeof...(Views);
+if constexpr (<ins><i>all-forward</i>&lt;<i>is-const</i>, Views...&gt; &amp;&amp;</ins> 
+              common_range&lt;<i>maybe-const</i>&lt;<i>is-const</i>, Views...[N - 1]&gt;&gt;) {
+  return <i>iterator</i>&lt;<i>is-const</i>&gt;(this, in_place_index&lt;N - 1&gt;,
+                            ranges::end(std::get&lt;N - 1&gt;(<i>views_</i>)));
+} else {
+  return default_sentinel;
+}
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
 
 </issue>
