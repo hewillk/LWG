@@ -41,7 +41,7 @@ ones without semantics:
 *r++ = o // output iterator
 *r--     // bidirectional iterator
 </pre></blockquote><p>
-According to the <a href="http://www.sgi.com/tech/stl/OutputIterator.html">SGI specification</a>
+According to the <a href="https://www.boost.org/sgi/stl/OutputIterator.html">SGI specification</a>
 these correspond to
 </p><blockquote><pre>
 { *r = o; ++r; }                         // output iterator
@@ -280,7 +280,7 @@ that are not associated with any sequence. [&hellip;]
 <sref ref="[input.iterators]"/>, as indicated [<i>Rationale</i>: The wording changes attempt
 to define a minimal "independent" set of operations, namely <tt>*a</tt> and <tt>++r</tt>, and 
 to specify the semantics of the remaining ones. This approach seems to be in agreement with the 
-original <a href="http://www.sgi.com/tech/stl/InputIterator.html">SGI specification</a> 
+original <a href="https://www.boost.org/sgi/stl/InputIterator.html">SGI specification</a>
 &mdash; <i>end rationale</i>]:</p>
 
 <blockquote>
@@ -366,7 +366,7 @@ return tmp; }
 <sref ref="[output.iterators]"/>, as indicated [<i>Rationale</i>: The wording changes attempt
 to define a minimal "independent" set of operations, namely <tt>*r = o</tt> and <tt>++r</tt>,
 and to specify the semantics of the remaining ones. This approach seems to be in agreement with
-the original <a href="http://www.sgi.com/tech/stl/OutputIterator.html">SGI specification</a> 
+the original <a href="https://www.boost.org/sgi/stl/OutputIterator.html">SGI specification</a>
 &mdash; <i>end rationale</i>]:</p>
 
 <blockquote>

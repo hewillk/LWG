@@ -43,10 +43,10 @@ struct binary_function {
 which <i>may</i> be used as base classes (similarly to the iterator template),
 but were originally <i>not</i> intended as a customization point. The SGI
 documentation introduced the concept 
-<a href="http://www.sgi.com/tech/stl/AdaptableUnaryFunction.html">Adaptable Unary
+<a href="https://www.boost.org/sgi/stl/AdaptableUnaryFunction.html">Adaptable Unary
 Function</a> as function objects "with nested typedefs that define its argument
 type and result type" and a similar definition for 
-<a href="http://www.sgi.com/tech/stl/AdaptableBinaryFunction.html">Adaptable Binary
+<a href="https://www.boost.org/sgi/stl/AdaptableBinaryFunction.html">Adaptable Binary
 Function</a> related to <tt>binary_function</tt>. But as of TR1 a protocol was
 introduced that relies on inheritance relations based on these types. <sref
 ref="[refwrap]"/>/3 b. 3 requires that a specialization of

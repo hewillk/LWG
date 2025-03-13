@@ -16,9 +16,9 @@ The iterator requirements for partition() and stable_partition() [25.2.12]
 are listed as BidirectionalIterator, however, there are efficient algorithms
 for these functions that only require ForwardIterator that have been known
 since before the standard existed. The SGI implementation includes these (see
-<a href="http://www.sgi.com/tech/stl/partition.html">http://www.sgi.com/tech/stl/partition.html</a>
+<a href="https://www.boost.org/sgi/stl/partition.html">https://www.boost.org/sgi/stl/partition.html</a>
 and
-<a href="http://www.sgi.com/tech/stl/stable_partition.html">http://www.sgi.com/tech/stl/stable_partition.html</a>).
+<a href="https://www.boost.org/sgi/stl/stable_partition.html">https://www.boost.org/sgi/stl/stable_partition.html</a>).
 </p>
 
 <note>

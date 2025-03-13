@@ -94,7 +94,7 @@ e.g. <sref ref="[alg.find]"/> p2, which talks about "<tt>pred(*i) != false</tt>"
 While we could simply fix all these places by proper wording to be considered in a "contextual conversion to
 <tt>bool</tt>", I think that this is not the correct solution: Many third-party libraries already refer to
 the previous C++03 <tt>Predicate</tt> definition &mdash; it actually predates C++98 and is as old as the 
-<a href="http://www.sgi.com/tech/stl/Predicate.html">SGI specification</a>. It seems to be a high price to
+<a href="https://www.boost.org/sgi/stl/Predicate.html">SGI specification</a>. It seems to be a high price to
 pay to switch to direct initialization here instead of fixing a completely different specification problem.
 <p/>
 A final observation is that we have another definition for a <tt>Predicate</tt> in <sref ref="[thread.req.paramname]"/> p2:

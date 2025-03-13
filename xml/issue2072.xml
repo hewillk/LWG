@@ -29,7 +29,7 @@ or a pair of 0 values if no storage can be obtained or if <tt>n &lt;= 0</tt>.
 I read this as prohibiting to return a buffer of which capacity is less than <tt>n</tt>, because 
 such a buffer is not sufficient to store <tt>n</tt> objects.
 <p/>
-The corresponding description in <a href="http://www.sgi.com/tech/stl/get_temporary_buffer.html">SGI STL</a> 
+The corresponding description in <a href="https://www.boost.org/sgi/stl/get_temporary_buffer.html">SGI STL</a>
 is clear on this point, but I think it is a bit too verbose:
 </p>
 

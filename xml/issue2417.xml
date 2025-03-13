@@ -28,7 +28,7 @@ requirements (see <iref ref="2114"/>) for the result type of <tt>T</tt>'s <tt>op
 <p/>
 Arguably, corresponding operators for <tt>pair</tt> and <tt>tuple</tt> do not impose <tt>LessThanComparable</tt> (nor
 <tt>EqualityComparable</tt>), albeit the definition of the "derived" relation functions depend on properties ensured by
-<tt>LessThanComparable</tt>. According to the <a href="https://www.sgi.com/tech/stl/pair.html">SGI definition</a>, the intention was
+<tt>LessThanComparable</tt>. According to the <a href="https://www.boost.org/sgi/stl/pair.html">SGI definition</a>, the intention was
 to imposed both <tt>EqualityComparable</tt> and <tt>LessThanComparable</tt>. If this is not intended, the standard should clarify
 this position.
 </p>

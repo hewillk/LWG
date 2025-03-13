@@ -63,7 +63,7 @@ The new definition goes beyond the original hash requirements as specified
 by SGI library in regard to the exception requirement:
 </p>
 <blockquote><p>
-<a href="http://www.sgi.com/tech/stl/HashFunction.html">http://www.sgi.com/tech/stl/HashFunction.html</a>
+<a href="https://www.boost.org/sgi/stl/HashFunction.html">https://www.boost.org/sgi/stl/HashFunction.html</a>
 </p></blockquote>
 </li>
 

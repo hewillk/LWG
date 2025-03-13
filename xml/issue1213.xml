@@ -43,7 +43,7 @@ First, issue <iref ref="208"/> intentionally removed the earlier constraint that
 values are always non-singular. The reason for this was to support null
 pointers as past-the-end iterators of e.g. empty sequences. But there
 seem to exist different views on what a singular (iterator) value is. E.g.
-according to the <a href="http://www.sgi.com/tech/stl/trivial.html">SGI definition</a>
+according to the <a href="https://www.boost.org/sgi/stl/trivial.html">SGI definition</a>
 a null pointer is <em>not</em> a singular value:
 </p>
 
@@ -55,7 +55,7 @@ involving null pointers) even thought it is not dereferenceable.
 </p></blockquote>
 
 <p>
-and <a href="http://www.sgi.com/tech/stl/InputIterator.html">proceeds</a>:
+and <a href="https://www.boost.org/sgi/stl/InputIterator.html">proceeds</a>:
 </p>
 
 <blockquote><p>
