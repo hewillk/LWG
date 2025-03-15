@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4226" status="New">
+<title><code>to_input_view::<i>iterator</i></code> cannot be compared to its `const` sentinel</title>
+<section>
+<sref ref="[range.to.input.view]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>15 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`to_input_view` was recently added to the working draft by <paper num="P3137R3"/>.
+<p/>
+Consider: (<a href="https://godbolt.org/z/7s1hPscrG">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;ranges&gt;
+
+int main() {
+  auto r = std::views::single(0)
+         | std::views::chunk(1)
+         | std::views::to_input;
+
+  r.begin() == std::as_const(r).end(); // <span style="color:red;font-weight:bolder">#1, error</span>
+  r.begin() ==               r.cend(); // <span style="color:red;font-weight:bolder">#2, error</span>
+}
+</pre></blockquote>
+<p>
+In <code>#1</code>, <code>r.begin()</code> returns <code>to_input_view&lt;chunk_view&gt;::<i>iterator</i>&lt;false&gt;</code>,
+while the latter returns <code>chunk_view::<i>iterator</i>&lt;true&gt;</code>.
+Since the former can only be compared with <code>chunk_view::<i>iterator</i>&lt;false&gt;</code> that cannot
+be converted from <code>chunk_view::<i>iterator</i>&lt;true&gt;</code>, the two are incomparable.
+<p/>
+This can be fixed by adding the following overload to <code>to_input_view::<i>iterator</i></code>:
+</p>
+<blockquote><pre>
+template&lt;bool OtherConst = !Const&gt;
+  requires sentinel_for&lt;sentinel_t&lt;<i>maybe-const</i>&lt;OtherConst, V&gt;&gt;, iterator_t&lt;<i>Base</i>&gt;&gt;
+friend constexpr bool operator==(const <i>iterator</i>&amp; x, const sentinel_t&lt;<i>maybe-const</i>&lt;OtherConst, V&gt;&gt;&amp; y)
+{ return x.<i>current_</i> == y; }
+</pre></blockquote>
+<p>
+Unfortunately, it still doesn't resolve <code>#2</code>, because <code>r.cend()</code> returns
+<code>basic_const_iterator&lt;chunk_view::iterator&lt;true&gt;&gt;</code>, which cannot be compared to any
+non-copyable iterators as its <code>operator==(const S&amp; s)</code> requires <code>S</code> to be a 
+sentinel type, which rules out <code>to_input_view::<i>iterator</i></code>, so the constraint is not satisfied.
+<p/>
+I believe we may need to introduce a custom sentinel class for <code>to_input_view</code>.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
