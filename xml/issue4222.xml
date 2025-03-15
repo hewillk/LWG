@@ -2,12 +2,12 @@
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
 <issue num="4222" status="New">
-<title> `expected` constructor from a single value missing a constraint</title>
+<title>`expected` constructor from a single value missing a constraint</title>
 <section>
 <sref ref="[expected.object.cons]"/>
 </section>
 <submitter>Bronek Kozicki</submitter>
-<date>06 Mar 2025</date>
+<date>12 Mar 2025</date>
 <priority>99</priority>
 
 <discussion>
