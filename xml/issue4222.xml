@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4222" status="New">
+<title> `expected` constructor from a single value missing a constraint</title>
+<section>
+<sref ref="[expected.object.cons]"/>
+</section>
+<submitter>Bronek Kozicki</submitter>
+<date>06 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+When an `expected` object is initialized with a constructor taking first parameter of type `unexpect_t` , 
+the expectation is that the object will be always initialized in disengaged state (i.e. the user expected 
+postcondition is that `has_value()` will be `false`), as in the example:
+</p>
+<blockquote><pre>
+struct T { explicit T(auto) {} };
+struct E { E() {} };
+
+int main() {
+  expected&lt;T, E&gt; a(unexpect);
+  assert(!a.has_value());
+}
+</pre></blockquote>
+<p>
+This does not hold when both value type `T` and error type `E` have certain properties. Observe:
+</p>
+<blockquote><pre>
+struct T { explicit T(auto) {} };
+struct E { E(int) {} }; // <span style="color:red;font-weight:bolder">Only this line changed from the above example</span>
+
+int main() {
+  expected&lt;T, E&gt; a(unexpect);
+  assert(!a.has_value()); // <span style="color:red;font-weight:bolder">This assert will now fail</span>
+}
+</pre></blockquote>
+<p>
+In the example above the overload resolution of `a` finds the universal single parameter constructor for 
+initializing `expected` in engaged state (<sref ref="[expected.object.cons]"/> p23):
+</p>
+<blockquote><pre>
+template&lt;class U = remove_cv_t&lt;T&gt;&gt;
+  constexpr explicit(!is_convertible_v&lt;U, T&gt;) expected(U&amp;&amp; v);
+</pre></blockquote>
+<p>
+This constructor has a list of constraints which does not mention `unexpect_t` (but it mentions e.g. `unexpected` and 
+`in_place_t`). Email exchange with the author of `expected` confirmed that it is an omission.
+<p/>
+The proposed resolution is to add the following additional constraint to this constructor:
+</p>
+<blockquote><p>
+<ins><tt>is_same_v&lt;remove_cvref_t&lt;U&gt;, unexpect_t&gt;</tt> is `false`</ins>
+</p></blockquote>
+<p>
+This will result in the above, most likely buggy, program to become ill-formed. If the user intent was for the object 
+to be constructed in an engaged state, passing `unexpect_t` to the `T` constructor, they can fix the compilation error 
+like so:
+</p>
+<blockquote><pre>
+expected&lt;T, E&gt; a(in_place, unexpect);
+</pre></blockquote>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[expected.object.cons]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U = remove_cv_t&lt;T&gt;&gt;
+constexpr explicit(!is_convertible_v&lt;U, T&gt;) expected(U&amp;&amp; v);
+</pre>
+<blockquote>
+<p>
+-23- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>(23.1) &mdash; <tt>is_same_v&lt;remove_cvref_t&lt;U&gt;, in_place_t&gt;</tt> is `false`; and</p></li>
+<li><p>(23.2) &mdash; <tt>is_same_v&lt;expected, remove_cvref_t&lt;U&gt;&gt;</tt> is `false`; and</p></li>
+<li><p><ins>(23.?) &mdash; <tt>is_same_v&lt;remove_cvref_t&lt;U&gt;, unexpect_t&gt;</tt> is `false`; and</ins></p></li>
+<li><p>(23.3) &mdash; <tt>remove_cvref_t&lt;U&gt;</tt> is not a specialization of `unexpected`; and</p></li>
+<li><p>(23.4) &mdash; <tt>is_constructible_v&lt;T, U&gt;</tt> is `true`; and</p></li>
+<li><p>(23.5) &mdash; if `T` is <i>cv</i> `bool`, <tt>remove_cvref_t&lt;U&gt;</tt> is not a specialization of `expected`.</p></li>
+</ol>
+<p>
+-24- <i>Effects</i>: Direct-non-list-initializes <tt><i>val</i></tt> with <tt>std::forward&lt;U&gt;(v)</tt>.
+<p/>
+-25- <i>Postconditions</i>: `has_value()` is `true`.
+<p/>
+-26- <i>Throws</i>: Any exception thrown by the initialization of <tt><i>val</i></tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
