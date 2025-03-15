@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4225" status="New">
+<title>What should happen when an exception is thrown on resizing `std::deque`, `std::forward_list`, or `std::list`?</title>
+<section>
+<sref ref="[deque.capacity]"/><sref ref="[forward.list.modifiers]"/><sref ref="[list.capacity]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>15 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, `std::vector` and `std::inplace_vector`'s `resize` functions are specified to have no effects 
+on the container when an exception is throwing on appending. However, such specification seem to be missing 
+for `std::deque`, `std::forward_list`, and `std::list`.
+<p/>
+Is such difference intented? Do we want to roll back the status of container when the appending is partially done?
+<p/>
+<b>Daniel:</b>
+<p/>
+The specific `resize` exception guarantee for `std::vector` came from resolving LWG <iref ref="2033"/> and were
+later effectively copied to `std::inplace_vector` because that container's specification should resemble 
+as much as possible that of `std::vector`.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
