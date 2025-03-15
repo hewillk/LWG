@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4223" status="New">
+<title>Deduction guides for maps are mishandling tuples and references</title>
+<section>
+<sref ref="[associative.general]"/>
+</section>
+<submitter>Tomasz Kaminski</submitter>
+<date>14 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The `from_range` deduction guide for maps currently do not handle ranges of tuple of two elements:
+</p>
+<blockquote><pre>
+std::vector&lt;int&gt; v;
+auto zv = std::views::zip(v, v);
+std::map m4(std::from_range, zv); // <span style="color:red;font-weight:bolder">Ill-formed, no-deduction guide</span>
+</pre></blockquote>
+<p>
+This seems to be result of merge conflict between <paper num="P2165"/> (Compatibility between tuple, pair and tuple-like objects) 
+and <paper num="P1206R4"/> (Conversions from ranges to containers): The helper <tt><i>range-key-type</i></tt> and 
+<tt><i>range-mapped-type</i></tt> aliases introduced by the later use the old formulation of `::first_type`, 
+`::second::type` instead of `tuple_element`.
+<p/>
+Furthermore, both iterator and range deduction guides do not correctly handle iterators with a pair of references as 
+value types, and deduce key or value type as reference, which is ill-formed:
+</p>
+<blockquote><pre>
+std::flat_map&lt;int, float&gt; fm; // iterator value_type is pair&lt;int, float&gt;
+std::map m1(fm.begin(), fm.end()); // OK, deduces std::map&lt;int, float&gt;
+
+auto tv = fm | std::views::transform(std::identity{}); // iterator value value_type is pair&lt;int const&amp;, float const&amp;&gt;
+std::map m3(tv.begin(), tv.end()); // <span style="color:red;font-weight:bolder">Ill-formed, deduces std::map&lt;int const&amp;, float&amp;&gt;</span>
+</pre></blockquote>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: The proposed change also strips `const` from the value type of the `map`, 
+changing the behavior of previously working code:
+</p>
+<blockquote><pre>
+std::pair&lt;int const, float const&gt; tp[2];
+std::map m(std::begin(tp), std::end(tp)); // Was std::map&lt;int, float const&gt;, now std::map&lt;int, float&gt;
+</pre></blockquote>
+]
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[associative.general]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class InputIterator&gt;
+  using <i>iter-value-type</i> =
+    typename iterator_traits&lt;InputIterator&gt;::value_type; // <i>exposition only</i>
+
+template&lt;class InputIterator&gt;
+  using <i>iter-key-type</i> = <del>remove_const_t</del><ins>remove_cvref_t</ins>&lt;
+    tuple_element_t&lt;0, <i>iter-value-type</i>&lt;InputIterator&gt;&gt;&gt;; // <i>exposition only</i>
+
+template&lt;class InputIterator&gt;
+  using <i>iter-mapped-type</i> = <ins>remove_cvref_t&lt;</ins>
+    tuple_element_t&lt;1, <i>iter-value-type</i>&lt;InputIterator&gt;&gt;<ins>&gt;</ins>; // <i>exposition only</i>
+
+template&lt;class InputIterator&gt;
+  using <i>iter-to-alloc-type</i> = pair&lt;
+    add_const_t&lt;
+      <del>tuple_element_t&lt;0, <i>iter-value-type</i>&lt;InputIterator&gt;&gt;</del>
+      <ins><i>iter-key-type</i>&lt;InputIterator&gt;</ins>
+    &gt;,
+    <del>tuple_element_t&lt;1, <i>iter-value-type</i>&lt;InputIterator&gt;&gt;</del>
+    <ins><i>iter-mapped-type</i>&lt;InputIterator&gt;</ins>
+    &gt;; // <i>exposition only</i>
+
+template&lt;ranges::input_range Range&gt;
+  using <i>range-key-type</i> =
+    <del>remove_const_t&lt;typename ranges::range_value_t&lt;Range&gt;::first_type&gt;</del>
+    <ins>remove_cvref_t&lt;tuple_element_t&lt;0, ranges::range_value_t&lt;Range&gt;&gt;&gt;</ins>; // <i>exposition only</i>
+
+template&lt;ranges::input_range Range&gt;
+  using <i>range-mapped-type</i> = 
+    <del>typename ranges::range_value_t&lt;Range&gt;::second_type</del>
+    <ins>remove_cvref_t&lt;tuple_element_t&lt;1, ranges::range_value_t&lt;Range&gt;&gt;&gt;</ins>; // <i>exposition only</i>
+
+template&lt;ranges::input_range Range&gt;
+  using <i>range-to-alloc-type</i> =
+    pair&lt;add_const_t&lt;
+      <del>typename ranges::range_value_t&lt;Range&gt;::first_type</del>
+      <ins><i>range-key-type</i>&lt;Range&gt;</ins>
+    &gt;,
+      <del>typename ranges::range_value_t&lt;Range&gt;::second_type</del>
+      <ins><i>range-mapped-type</i>&lt;Range&gt;</ins>
+    &gt;; // <i>exposition only</i>
+</pre>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
