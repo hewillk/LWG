@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4224" status="New">
+<title>Philox engines should be freestanding</title>
+<section>
+<sref ref="[rand.eng.philox]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>15 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Philox engines don't seem to require floating-point operations or support from the operating system, 
+so they are probably suitable for freestanding. However, as <paper num="P2976R1"/> was finished before 
+the adoption of <paper num="P2075R6"/>, these engines are not made freestanding yet.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5001"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[rand.synopsis]"/>, header <tt>&lt;random&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+// <i><sref ref="[rand.eng.philox]"/>, class template philox_engine</i>
+template&lt;class UIntType, size_t w, size_t n, size_t r, UIntType... consts&gt;
+  class philox_engine;               <ins>// <i>partially freestanding</i></ins>
+
+[&hellip;]
+using philox4x32 = <i>see below</i>; <ins>// <i>freestanding</i></ins>
+using philox4x64 = <i>see below</i>; <ins>// <i>freestanding</i></ins>
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[rand.eng.philox]"/>, class template `philox_engine` synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class UIntType, size_t w, size_t n, size_t r, UIntType... consts&gt;
+  class philox_engine {
+    [&hellip;]  
+    // <i>inserters and extractors</i>
+    template&lt;class charT, class traits&gt;
+      friend basic_ostream&lt;charT, traits&gt;&amp;
+        operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const philox_engine&amp; x); <ins>// <i>hosted</i></ins>
+    template&lt;class charT, class traits&gt;
+      friend basic_istream&lt;charT, traits&gt;&amp;
+        operator&gt;&gt;(basic_istream&lt;charT, traits&gt;&amp; is, philox_engine&amp; x);       <ins>// <i>hosted</i></ins>
+  };
+}
+</pre>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
