@@ -18,7 +18,7 @@ running the destructor for <tt>d</tt> only when the last <tt>weak_ptr</tt> is de
 but ensuring that <tt>d(p)</tt> completes before the <tt>shared_ptr</tt> gives up its weak reference; making a copy of 
 <tt>d</tt> in the destructor before manipulating the weak count, and then using this copy to run <tt>d(p)</tt>, even while 
 the control-block could be concurrently reclaimed with an expiring <tt>weak_ptr</tt> in another thread. Note that this 
-may be related to LWG <iref ref="2751"/>. (Also, see the note in 20.11.2.2.10 p1 [util.smartptr.getdeleter])</p>
+may be related to LWG <iref ref="2751"/>. (Also, see the note in <sref ref="[util.smartptr.getdeleter]"/> p1)</p>
 
 <p>Proposed change: Clarify that the <tt>shared_ptr</tt> weak ownership of the control block is released at the end of the 
 destructor, and not as the destructor begins. Otherwise, the deleter might be destroyed even before the destructor gets to 

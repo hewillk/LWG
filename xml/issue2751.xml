@@ -54,6 +54,10 @@ I'd like to withdraw my NAD suggestion. The value of <tt>use_count()</tt> is alr
 <tt>shared_ptr</tt> and <tt>weak_ptr</tt> objects that share ownership, so specifying when it changes ensures correct 
 behaviour.
 </p>
+
+<note>2025-03-18, Jonathan comments</note>
+<p>See also <iref ref="2907"/>.</p>
+
 </discussion>
 
 <resolution>
