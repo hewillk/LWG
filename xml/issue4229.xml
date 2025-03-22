@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4229" status="New">
+<title>`std::ranges::to` with union return type</title>
+<section>
+<sref ref="[range.utility.conv.to]"/><sref ref="[range.utility.conv.adaptors]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>20 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+LWG <iref ref="3847"/> made `std::ranges::to` require the return type (or the target type for the overload 
+returning range adaptor closure object) to be a <i>cv</i>-unqualified class type. Although the term 
+"class type" in core language specification also covers union types, implementations (libstdc++ and MSVC STL) 
+tend to implement this part of the <i>Mandates</i> only with `std::is_class_v`, which rejects union types.
+<p/>
+E.g. the following program is rejected by libstdc++ and MSVC STL 
+(<a href="https://godbolt.org/z/MnsY4Tzen">https://godbolt.org/z/MnsY4Tzen</a>):
+</p>
+<blockquote><pre>
+#include &lt;memory&gt;
+#include &lt;ranges&gt;
+#include &lt;type_traits&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
+
+template&lt;class T, class A = std::allocator&lt;T&gt;&gt;
+union weird_vector {
+  std::vector&lt;T, A&gt; vec_;
+
+  constexpr weird_vector() : vec_() {}
+  constexpr weird_vector(const weird_vector&amp; other) : vec_(other.vec_) {}
+  constexpr weird_vector(weird_vector&amp;&amp; other) noexcept : vec_(std::move(other.vec_)) {}
+
+  template&lt;class U&gt;
+    requires (!std::same_as&lt;std::remove_cvref_t&lt;U&gt;, weird_vector&gt;) &amp;&amp;
+      (!std::same_as&lt;std::remove_cvref_t&lt;U&gt;, std::vector&lt;T, A&gt;&gt;) &amp;&amp;
+      requires(U&amp;&amp; u) { std::vector&lt;T, A&gt;(std::forward&lt;U&gt;(u)); }
+  constexpr explicit weird_vector(U&amp;&amp; u) : vec_(std::forward&lt;U&gt;(u)) {}
+
+  template&lt;class T1, class T2, class... Ts&gt;
+    requires requires(T1&amp;&amp; t1, T2&amp;&amp; t2, Ts&amp;&amp;... ts) {
+      std::vector&lt;T, A&gt;(std::forward&lt;T1&gt;(t1), std::forward&lt;T2&gt;(t2), std::forward&lt;Ts&gt;(ts)...);
+    }
+  constexpr weird_vector(T1&amp;&amp; t1, T2&amp;&amp; t2, Ts&amp;&amp;... ts)
+    : vec_(std::forward&lt;T1&gt;(t1), std::forward&lt;T2&gt;(t2), std::forward&lt;Ts&gt;(ts)...) {}
+
+  constexpr weird_vector&amp; operator=(const weird_vector&amp; other) {
+    vec_ = other.vec_;
+    return *this;
+  }
+  constexpr weird_vector&amp; operator=(weird_vector&amp;&amp; other)
+    noexcept(std::is_nothrow_move_assignable_v&lt;std::vector&lt;T, A&gt;&gt;) {
+    vec_ = std::move(other.vec_);
+    return *this;
+  }
+
+  constexpr ~weird_vector() {
+    vec_.~vector();
+  }
+};
+
+int main() {
+  int arr[]{42, 1729};
+  auto v [[maybe_unused]] = std::ranges::to&lt;weird_vector&lt;int&gt;&gt;(arr);
+}
+</pre></blockquote>
+<p>
+Although libc++ currently accepts this example, the acceptance seems to be a bug, because libc++ hasn't 
+implemented the "class" part in the <i>Mandates</i> at all 
+(<a href="https://github.com/llvm/llvm-project/issues/132133">llvm/llvm-project#132133</a>).
+<p/>
+It's unclear whether union types were intended to be accepted. Perhaps we should follow implementations' 
+choices and reject them.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[range.utility.conv.to]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class C, input_range R, class... Args&gt; requires (!view&lt;C&gt;)
+  constexpr C to(R&amp;&amp; r, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: `C` is a cv-unqualified <ins>non-union</ins> class type.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.utility.conv.adaptors]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class C, class... Args&gt; requires (!view&lt;C&gt;)
+  constexpr auto to(Args&amp;&amp;... args);
+template&lt;template&lt;class...&gt; class C, class... Args&gt;
+  constexpr auto to(Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: For the first overload, `C` is a cv-unqualified <ins>non-union</ins> class type.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
