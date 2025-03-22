@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4231" status="New">
+<title><tt>datapar::chunk&lt;N&gt;</tt> should use <tt><i>simd-size-type</i></tt> instead of <tt>size_t</tt></title>
+<section>
+<sref ref="[simd.syn]"/><sref ref="[simd.creation]"/>
+</section>
+<submitter>Matthias Kretz</submitter>
+<date>22 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+All index values and simd widths in subclause "Data-parallel types" use the
+type <tt><i>simd-size-type</i></tt>. Specifically, the NTTP of `std::datapar::resize` 
+uses <tt><i>simd-size-type</i></tt> and `std::datapar::chunk` is "implemented" 
+using `std::datapar::resize`.
+<p/>
+For <tt>chunk&lt;N&gt;</tt>, <tt>N</tt> is of type `size_t` and needs to be 
+converted to <tt><i>simd-size-type</i></tt> in the effects clause where it is 
+passed to resize. The NTTP of chunk should use <tt><i>simd-size-type</i></tt> 
+instead of `size_t`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.syn]"/>, header <tt>&lt;simd&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::datapar {
+  [&hellip;]
+  template&lt;<ins><i>simd-size-type</i></ins><del>size_t</del> N, class T, class Abi&gt;
+    constexpr auto chunk(const basic_simd&lt;T, Abi&gt;&amp; x) noexcept;
+  template&lt;<ins><i>simd-size-type</i></ins><del>size_t</del> N, size_t Bytes, class Abi&gt;
+    constexpr auto chunk(const basic_simd_mask&lt;Bytes, Abi&gt;&amp; x) noexcept;
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.creation]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<ins><i>simd-size-type</i></ins><del>size_t</del> N, class T, class Abi&gt;
+  constexpr auto chunk(const basic_simd&lt;T, Abi&gt;&amp; x) noexcept;
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: Equivalent to: <tt>return chunk&lt;resize_t&lt;N, basic_simd&lt;T, Abi&gt;&gt;&gt;(x);</tt>
+</p>
+</blockquote>
+<pre>
+template&lt;<ins><i>simd-size-type</i></ins><del>size_t</del> N, size_t Bytes, class Abi&gt;
+  constexpr auto chunk(const basic_simd_mask&lt;Bytes, Abi&gt;&amp; x) noexcept;
+</pre>
+<blockquote>
+<p>
+-5- <i>Effects</i>: Equivalent to: <tt>return chunk&lt;resize_t&lt;N, basic_simd_mask&lt;Bytes, Abi&gt;&gt;&gt;(x);</tt>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
