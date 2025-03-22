@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4228" status="New">
+<title>Does <tt>vector&lt;bool, Allocator&gt;</tt> mandate that `Allocator::value_type` is `bool`?</title>
+<section>
+<sref ref="[vector.bool.pspc]"/>
+</section>
+<submitter>Stephan T. Lavavej</submitter>
+<date>18 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<paper num="N5008"/> <sref ref="[vector.bool.pspc]"/>/2 says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+Unless described below, all operations have the same requirements and semantics as the primary `vector` template, 
+except that operations dealing with the `bool` value type map to bit values in the container storage and 
+`allocator_traits::construct` (<sref ref="[allocator.traits.members]"/>) is not used to construct these values.
+</p>
+</blockquote>
+<p>
+<sref ref="[container.alloc.reqmts]"/>/5 says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Mandates</i>: `allocator_type::value_type` is the same as `X::value_type`.
+</p>
+</blockquote>
+<p>
+Is <tt>vector&lt;bool, allocator&lt;int&gt;&gt;</tt> forbidden? There's implementation divergence: 
+MSVC's STL enforces the mandate, while libc++ and libstdc++ accept this code, discovered while 
+running libc++'s tests with MSVC's STL.
+<p/>
+Preferred resolution: I would be satisfied with resolving this as NAD, with a record that LWG believes 
+that "all operations have the same requirements" means that the <i>Mandate</i> applies. I suppose that 
+an editorial note could also be added to this effect, although I don't believe it's necessary.
+<p/>
+Alternate resolution: If LWG believes that the <i>Mandate</i> does not apply, and that <tt>vector&lt;bool&gt;</tt> 
+should be unique among containers in accepting <tt>allocator&lt;Anything&gt;</tt>, then I believe that 
+a normative sentence should be added to <sref ref="[vector.bool.pspc]"/>/2, specifically creating an exemption 
+to <sref ref="[container.alloc.reqmts]"/>/5.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
