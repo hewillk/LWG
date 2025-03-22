@@ -40,9 +40,125 @@ class types provided by the standard library via <tt>volatile</tt> glvalues are 
 
 <note>Kona 2022-11-12; Set priority to 2</note>
 
+<note>2025-03-22; Jiang An comments and provides wording</note>
+<p>
+The proposed resolution relaxes the `input_iterator` concept (which in turn relaxes stronger iterator concepts) 
+and extends `iter_const_reference_t` and the exposition only <tt><i>iter-const-rvalue-reference-t</i></tt> 
+aliases. Another approach can be just relaxing the `indirectly_readable` concept, but its impact may be larger 
+than expected.
+</p>
 </discussion>
 
 <resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[iterator.synopsis]"/>, header <tt>&lt;iterator&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+<i>// <sref ref="[iterator.concept.input]"/>, concept input_iterator</i>
+<ins>template&lt;class I&gt;
+  concept <i>deref-to-value-t</i> = <i>see below</i>;            <i>// freestanding</i>
+
+template&lt;class I&gt;
+  concept <i>weakly-indirectly-readable</i> = <i>see below</i>;  <i>// freestanding</i></ins>
+
+template&lt;class I&gt;
+concept input_iterator = <i>see below</i>;                <i>// freestanding</i>
+
+[&hellip;]
+
+<i>// <sref ref="[const.iterators.alias]"/>, alias templates</i>
+template&lt;<del>indirectly_readable</del><ins><i>weakly-indirectly-readable</i></ins> I&gt;
+  using iter_const_reference_t = <i>see below</i>;
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[iterator.concept.input]"/>, concept <tt>input_iterator</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+<ins>template&lt;class I&gt;
+  concept <i>deref-to-value-t-impl</i> =      <i>// exposition only</i>
+    same_as&lt;remove_cvref_t&lt;iter_reference_t&lt;I&gt;&gt;, iter_value_t&lt;I&gt;&gt; &amp;&amp;
+    is_object_v&lt;iter_value_t&lt;I&gt;&gt;;
+
+template&lt;class I&gt;
+  concept <i>deref-to-value-t</i> =           <i>// exposition only</i>
+    <i>deref-to-value-t-impl</i>&lt;remove_cvref_t&lt;I&gt;&gt;;
+
+template&lt;class I&gt;
+  concept <i>weakly-indirectly-readable</i> = <i>// exposition only</i>
+    <i>deref-to-value-t</i>&lt;I&gt; ||
+    indirectly_readable&lt;I&gt;;</ins>
+
+template&lt;class I&gt;
+  concept input_iterator =
+    input_or_output_iterator&lt;I&gt; &amp;&amp;
+    <del>indirectly_readable</del><ins><i>weakly-indirectly-readable</i></ins>&lt;I&gt; &amp;&amp;
+    requires { typename <i>ITER_CONCEPT</i>(I); } &amp;&amp;
+    derived_from&lt;<i>ITER_CONCEPT</i>(I), input_iterator_tag&gt;;
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[const.iterators.alias]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+<ins>template&lt;class T&gt;
+  using <i>ref-add-const-t</i> = <i>see below</i>;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Result</i>: If <tt>is_lvalue_reference_v&lt;T&gt;</tt> is `true`, 
+<tt>const remove_reference_t&lt;T&gt;&amp;</tt>. Otherwise, if <tt>is_rvalue_reference_v&lt;T&gt;</tt> 
+is `true`, <tt>const remove_reference_t&lt;T&gt;&amp;&amp;</tt>. Otherwise, <tt>T</tt>.</ins>
+</p>
+</blockquote>
+<pre>
+template&lt;<del>indirectly_readable</del><ins><i>weakly-indirectly-readable</i></ins> It&gt;
+  using iter_const_reference_t = <ins>see below;</ins>
+    <del>common_reference_t&lt;const iter_value_t&lt;It&gt;&amp;&amp;, iter_reference_t&lt;It&gt;&gt;;</del>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Result</i>: If `It` models <tt><i>deref-to-value-t</i></tt>, 
+<tt><i>ref-add-const-t</i>&lt;iter_reference_t&lt;It&gt;&gt;</tt>. Otherwise, 
+<tt>common_reference_t&lt;const iter_value_t&lt;It&gt;&amp;&amp;, iter_reference_t&lt;It&gt;&gt;</tt>.</ins>
+</p>
+</blockquote>
+</blockquote>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: The simple <tt><i>deref-to-value-t</i></tt> case should be detected first, 
+which avoids unnecessary instantiations and IFNDR-ness.]
+</p>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[const.iterators.iterator]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+template&lt;<del>indirectly_readable</del><ins><i>weakly-indirectly-readable</i></ins> I&gt;
+  using <i>iter-const-rvalue-reference-t</i> =              <i>// exposition only</i>
+    common_reference_t&lt;const iter_value_t&lt;I&gt;&amp;&amp;, iter_rvalue_reference_t&lt;I&gt;&gt;;
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+</ol>
 </resolution>
 
 </issue>
