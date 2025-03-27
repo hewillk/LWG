@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4234" status="New">
+<title>Including <tt>&lt;hive&gt;</tt> doesn't provide <tt>std::begin/end</tt></title>
+<section>
+<sref ref="[iterator.range]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>25 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[iterator.range]"/> should add <tt>&lt;hive&gt;</tt> to the list as the latter provides
+a series of range access member functions such as <tt>begin/end</tt>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[iterator.range]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- In addition to being available via inclusion of the <tt>&lt;iterator&gt;</tt> header, the function
+templates in <sref ref="[iterator.range]"/> are available when any of the following headers are included: 
+<tt>&lt;array&gt;</tt>,
+<tt>&lt;deque&gt;</tt>, <tt>&lt;flat_map&gt;</tt>, <tt>&lt;flat_set&gt;</tt>,
+<tt>&lt;forward_list&gt;</tt>,
+<ins><tt>&lt;hive&gt;</tt>,</ins>
+<tt>&lt;inplace_vector&gt;</tt>, <tt>&lt;list&gt;</tt>, <tt>&lt;map&gt;</tt>,
+<tt>&lt;regex&gt;</tt>, <tt>&lt;set&gt;</tt>, <tt>&lt;span&gt;</tt>, <tt>&lt;string&gt;</tt>,
+<tt>&lt;string_view&gt;</tt>,
+<tt>&lt;unordered_map&gt;</tt>, <tt>&lt;unordered_set&gt;</tt>, and <tt>&lt;vector&gt;</tt>.
+</p>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
