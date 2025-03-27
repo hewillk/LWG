@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4232" status="New">
+<title>`datapar::resize` does not resize</title>
+<section>
+<sref ref="[simd.traits]"/>
+</section>
+<submitter>Tim Song</submitter>
+<date>24 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The wording actually requires the size to be left unchanged.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.traits]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<i>simd-size-type</i> N, class V&gt; struct resize { using type = <i>see below</i>; };
+</pre>
+<blockquote>
+<p>
+[&hellip;]
+<p/>
+-9- If `V` is a specialization of `basic_simd`, let `Abi1` denote an ABI tag such that 
+<tt>basic_simd&lt;T, Abi1&gt;::size()</tt> equals <tt><del>V::size()</del><ins>N</ins></tt>. 
+If `V` is a specialization of `basic_simd_mask`, let `Abi1` denote an ABI tag such that 
+<tt>basic_simd_mask&lt;sizeof(T), Abi1&gt;::size()</tt> equals <tt><del>V::size()</del><ins>N</ins></tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
