@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4235" status="New">
+<title><code>cache_latest_view</code> and <code>to_input_view</code> miss <code>reserve_hint</code></title>
+<section>
+<sref ref="[range.cache.latest.view]"/><sref ref="[range.to.input.view]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>25 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Intuitively, both view classes should also have <code>reserve_hint</code> members.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[range.cache.latest.view]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std::ranges {
+  template&lt;input_range V&gt;
+    requires view&lt;V&gt;
+  class cache_latest_view : public view_interface&lt;cache_latest_view&lt;V&gt;&gt; {
+    [&hellip;]
+    constexpr auto size() requires sized_range&lt;V&gt;;
+    constexpr auto size() const requires sized_range&lt;const V&gt;;
+
+    <ins>constexpr auto reserve_hint() requires approximately_sized_range&lt;V&gt;;
+    constexpr auto reserve_hint() const requires approximately_sized_range&lt;const V&gt;;</ins>
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+constexpr auto size() requires sized_range&lt;V&gt;;
+constexpr auto size() const requires sized_range&lt;const V&gt;;
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: Equivalent to: <tt>return ranges::size(<i>base_</i>);</tt>
+</p>
+</blockquote>
+<pre><ins>
+constexpr auto reserve_hint() requires approximately_sized_range&lt;V&gt;;
+constexpr auto reserve_hint() const requires approximately_sized_range&lt;const V&gt;;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Effects</i>: Equivalent to: <tt>return ranges::reserve_hint(<i>base_</i>);</tt></ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[range.to.input.view]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+template&lt;input_range V&gt;
+  requires view&lt;V&gt;
+class to_input_view : public view_interface&lt;to_input_view&lt;V&gt;&gt; {
+  [&hellip;]
+  constexpr auto size() requires sized_range&lt;V&gt;;
+  constexpr auto size() const requires sized_range&lt;const V&gt;;
+
+  <ins>constexpr auto reserve_hint() requires approximately_sized_range&lt;V&gt;;
+  constexpr auto reserve_hint() const requires approximately_sized_range&lt;const V&gt;;</ins>
+};
+[&hellip;]
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+constexpr auto size() requires sized_range&lt;V&gt;;
+constexpr auto size() const requires sized_range&lt;const V&gt;;
+</pre>
+<blockquote>
+<p>
+-5- <i>Effects</i>: Equivalent to: <tt>return ranges::size(<i>base_</i>);</tt>
+</p>
+</blockquote>
+<pre><ins>
+constexpr auto reserve_hint() requires approximately_sized_range&lt;V&gt;;
+constexpr auto reserve_hint() const requires approximately_sized_range&lt;const V&gt;;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Effects</i>: Equivalent to: <tt>return ranges::reserve_hint(<i>base_</i>);</tt></ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
