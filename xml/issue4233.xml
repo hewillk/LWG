@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4233" status="New">
+<title>The helper lambda of <code>std::erase</code> for <code>hive</code> should specify return type as
+    <code>bool</code></title>
+<section>
+<sref ref="[hive.erasure]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>24 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+This is a follow up to LWG <iref ref="4135"/>, which incidentally adds a default template 
+parameter for <code>U</code> to be consistent with other <code>erase</code> functions, 
+which is editorial since the declaration already has it.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[hive.erasure]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class Allocator, class U <ins>= T</ins>&gt;
+  typename hive&lt;T, Allocator&gt;::size_type
+    erase(hive&lt;T, Allocator&gt;&amp; c, const U&amp; value);
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return erase_if(c, [&amp;](<ins>const</ins> auto&amp; elem) <ins>-&gt; bool</ins> { return elem == value; });
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
