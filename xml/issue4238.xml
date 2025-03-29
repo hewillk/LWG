@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4238" status="New">
+<title><tt>simd_mask&lt;complex&lt;double&gt;&gt;::operator+/-/~</tt> return a disabled `simd` specialization</title>
+<section>
+<sref ref="[simd.mask.unary]"/>
+</section>
+<submitter>Matthias Kretz</submitter>
+<date>27 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider:
+</p>
+<blockquote><pre>
+simd&lt;complex&lt;double&gt;&gt; c = {};
+simd_mask&lt;complex&lt;double&gt;&gt; k = (c == c); // sizeof(complex&lt;double&gt;) == 16
+auto i = -k; // simd&lt;__int128&gt; !
+</pre></blockquote>
+<p>
+`basic_simd_mask` unary `+`, `-`, and `~` return <tt>basic_simd&lt;<i>integer-from</i>&lt;Bytes, Abi&gt;&gt;</tt>.
+<sref ref="[simd.expos.defn]"/>/2 says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<tt><i>integer-from</i>&lt;Bytes&gt;</tt> is an alias for a signed integer type `T` such that `sizeof(T)` equals `Bytes`.
+</p>
+</blockquote>
+<p>
+But `__int128` isn't a vectorizable type. Consequently, <tt>simd&lt;__int128&gt;</tt> currently
+is a disabled specialization. So it seems <tt>simd&lt;complex&lt;double&gt;&gt;</tt> wants `__int128`
+to be added to the list of vectorizable types.
+<p/>
+<b>Options:</b>
+</p>
+<ol style="list-style-type:lower-alpha">
+<li><p>"Specialize" <tt>basic_simd_mask&lt;16, Abi&gt;</tt> to return 
+<tt>rebind_t&lt;<i>integer-from</i>&lt;8&gt;, basic_simd_mask&lt;<i>integer-from</i>&lt;16&gt;, Abi&gt;&gt;</tt> 
+(reduces a 128-bit value of a vector-mask to a 64-bit value in the simd)</p></li>
+<li><p>"Specialize" <tt>basic_simd_mask&lt;16, Abi&gt;</tt> to return 
+<tt>resize_t&lt;size() * 2, rebind_t&lt;<i>integer-from</i>&lt;8&gt;, 
+basic_simd_mask&lt;<i>integer-from</i>&lt;16&gt;, Abi&gt;&gt;&gt;</tt> 
+(duplicates a 128-bit value of a vector-mask to two 64-bit values in the simd)</p></li>
+<li><p>delete unary `+`, `-`, and `~` for <tt>basic_simd_mask&lt;16, Abi&gt;</tt> 
+(closest to the status quo)</p></li>
+</ol>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.mask.unary]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr basic_simd_mask operator!() const noexcept;
+constexpr basic_simd&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt; operator+() const noexcept;
+constexpr basic_simd&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt; operator-() const noexcept;
+constexpr basic_simd&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt; operator~() const noexcept;
+</pre>
+<blockquote>
+<p>
+-1- Let <tt><i>op</i></tt> be the operator.
+<p/>
+-2- <i>Returns</i>: A data-parallel object where the <tt><i>i</i></tt><sup>th</sup> element 
+is initialized to the results of applying <tt><i>op</i></tt> to <tt>operator[](<i>i</i>)</tt> 
+for all <tt><i>i</i></tt> in the range of <tt>[0, size())</tt>.
+<p/>
+<ins>-?- <i>Remarks</i>: If <tt>Bytes</tt> is greater than <tt>8</tt>, `operator+()`, `operator-()`, and
+`operator~()` are deleted.
+</ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
