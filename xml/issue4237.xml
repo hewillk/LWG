@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4237" status="New">
+<title>The standard library iterator adaptor does not handle <code>iterator_category</code> correctly</title>
+<section>
+<sref ref="[const.iterators.iterator]"/><sref ref="[range.adaptors]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>27 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, <code>basic_const_iterator</code>, and several range adaptors such as 
+<code>filter_view</code>'s iterators provide <code>iterator_category</code> only when the 
+underlying iterator models <code>forward_iterator</code>, implying that they expect those 
+iterators should have a valid <code>iterator_category</code>.
+</p>
+<p>
+However, this is incorrect because being a <code>forward_iterator</code> does not 
+necessarily mean it is a <i>Cpp17InputIterator</i>, it just means that it <i>probably</i> 
+meets the syntactic requirements of <i>Cpp17InputIterator</i>.
+</p>
+<p>
+Any iterator that specializes <code>iterator_traits</code> and provides only
+<code>iterator_concept</code> without <code>iterator_category</code> is not a
+<i>Cpp17InputIterator</i>, for example, <code>common_iterator</code> with a 
+<code>difference_type</code> of integer-class type.
+</p>
+<p>
+In this case, instantiating these iterator adaptors will result in a hard error because the
+<code>iterator_category</code> they expect does not exist. The following illustrates the 
+problem (<a href="https://godbolt.org/z/j7x8bKzo4">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;iterator&gt;
+#include &lt;ranges&gt;
+
+int main() {
+  auto r = std::views::iota(0ULL)
+         | std::views::take(5)
+         | std::views::common;
+
+  static_assert(std::ranges::forward_range&lt;decltype(r)&gt;);
+  
+  std::basic_const_iterator ci(r.begin()); // <span style="color:red;font-weight:bolder">'iterator_category': is not a member of 'std::iterator_traits'</span>
+
+  auto f = r | std::views::filter([](auto) { return true; });
+  auto b = f.begin();                      // <span style="color:red;font-weight:bolder">'iterator_category': is not a member of 'std::iterator_traits'</span>
+}
+</pre></blockquote>
+<p>
+I believe that checking if the underlying iterator is a <code>forward_iterator</code> is not an appropriate
+mechanism to provide <code>iterator_category</code>, but rather checking if its <code>iterator_traits</code> 
+specialization provides <code>iterator_category</code>.
+</p>
+<p>
+This issue is somewhat related to LWG <iref ref="3763"/>, which is a further consideration after LWG 
+<iref ref="3749"/> has been resolved.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
