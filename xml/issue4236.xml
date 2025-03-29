@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4236" status="New">
+<title><tt>chunk_view::<i>outer-iterator</i>::value_type</tt> should provide <tt>reserve_hint</tt></title>
+<section>
+<sref ref="[range.chunk.outer.value]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>26 Mar 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider:
+</p>
+<blockquote><pre>
+views::istream&lt;int&gt;(is) | views::chunk(N) | ranges::to&lt;std::list&lt;std::vector&lt;int&gt;&gt;&gt;();
+</pre></blockquote>
+<p>
+When the stream is large enough, each chunk will be of size <tt>N</tt> in most cases, except it is the
+last chunk.
+</p>
+<p>
+In this case, there is no reason not to provide a <code>reserve_hint</code> as this can be easily done by just
+return <code><i>remainder_</i></code>. Otherwise, when <tt>N</tt> is large, each vector will be reallocated
+multiple times unnecessarily.
+</p>
+<p>
+This is also consistent with the <code>forward_range</code> version, since its value type is
+<code>views::take(subrange(<i>current_</i>, <i>end_</i>), <i>n_</i>)</code>, which always has a
+<code>reserve_hint</code> as <code>take_view</code> unconditionally provides it.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[range.chunk.outer.value]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std::ranges {
+  template&lt;view V&gt;
+    requires input_range&lt;V&gt;
+  struct chunk_view&lt;V&gt;::<i>outer-iterator</i>::value_type : view_interface&lt;value_type&gt; {
+    [&hellip;]
+    constexpr auto size() const
+      requires sized_sentinel_for&lt;sentinel_t&lt;V&gt;, iterator_t&lt;V&gt;&gt;;
+
+    <ins>constexpr auto reserve_hint() const noexcept;</ins>
+  };
+}  
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+constexpr auto size() const
+  requires sized_sentinel_for&lt;sentinel_t&lt;V&gt;, iterator_t&lt;V&gt;&gt;;
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return <i>to-unsigned-like</i>(ranges::min(<i>parent_</i>-&gt;remainder_,
+                                    ranges::end(<i>parent_</i>-&gt;<i>base_</i>) - *<i>parent_</i>-&gt;<i>current_</i>));
+</pre></blockquote>
+</blockquote>
+<pre>
+<ins>constexpr auto reserve_hint() const noexcept;</ins>
+</pre>
+<blockquote>
+<p>
+<ins> -?- <i>Effects</i>: Equivalent to:</ins>
+</p>
+<blockquote><pre>
+<ins>return <i>to-unsigned-like</i>(<i>parent_</i>-><i>remainder_</i>);</ins>
+</pre></blockquote>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
