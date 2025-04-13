@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4241" status="New">
+<title>`ranges::for_each(_n)` should be less constrained</title>
+<section>
+<sref ref="[alg.foreach]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>08 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, `ranges::for_each(_n)` are constrained with `indirectly_unary_invocable`, 
+which doesn't meet the actual use of the range elements. These algorithms are only 
+expected to invoke the callable object with the possibly projected elements, and not 
+to use any element as the value type. Moreover, `indirectly_unary_invocable` requires 
+the callable object to be copy constructible, which might be undesired because the 
+corresponding `std::for_each(_n)` only require move constructibilty.
+<p/>
+LWG <iref ref="4171"/> talked about the breakage around `ranges::for_each` introduced 
+by <paper num="P2609R3"/>. P2609R3 looks like a reasonable fix as long as the affected 
+algorithms potentially use the intermediate element values copied as 
+<tt>std::iter_value_t&lt;I&gt;</tt>. However, when the algorithm is not expected to or 
+even required not to do this, P2609R3 can bring unexpected impacts. It seems that 
+constraints around `iter_value_t` should be avoided for such an algorithm.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[algorithm.syn]"/>, header <tt>&lt;algorithm&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+namespace ranges {
+  template&lt;class I, class F&gt;
+  using for_each_result = in_fun_result&lt;I, F&gt;;
+  
+  template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class Proj = identity,
+           <del>indirectly_unary_invocable&lt;projected&lt;I, Proj&gt;&gt;</del><ins>move_constructible</ins> Fun&gt;
+    <ins>requires invocable&lt;Fun&amp;, iter_reference_t&lt;projected&lt;I, Proj&gt;&gt;&gt;</ins>
+    constexpr for_each_result&lt;I, Fun&gt;
+      for_each(I first, S last, Fun f, Proj proj = {});
+  template&lt;input_range R, class Proj = identity,
+           <del>indirectly_unary_invocable&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt;</del><ins>move_constructible</ins> Fun&gt;
+    <ins>requires invocable&lt;Fun&amp;, iter_reference_t&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt;&gt;</ins>
+    constexpr for_each_result&lt;borrowed_iterator_t&lt;R&gt;, Fun&gt;
+      for_each(R&amp;&amp; r, Fun f, Proj proj = {});
+}
+[&hellip;]
+namespace ranges {
+  template&lt;class I, class F&gt;
+  using for_each_n_result = in_fun_result&lt;I, F&gt;;
+
+  template&lt;input_iterator I, class Proj = identity,
+           <del>indirectly_unary_invocable&lt;projected&lt;I, Proj&gt;&gt;</del><ins>move_constructible</ins> Fun&gt;
+     <ins>requires invocable&lt;Fun&amp;, iter_reference_t&lt;projected&lt;I, Proj&gt;&gt;&gt;</ins>
+    constexpr for_each_n_result&lt;I, Fun&gt;
+      for_each_n(I first, iter_difference_t&lt;I&gt; n, Fun f, Proj proj = {});
+}
+[&hellip;]
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[alg.foreach]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class Proj = identity,
+         <del>indirectly_unary_invocable&lt;projected&lt;I, Proj&gt;&gt;</del><ins>move_constructible</ins> Fun&gt;
+  <ins>requires invocable&lt;Fun&amp;, iter_reference_t&lt;projected&lt;I, Proj&gt;&gt;&gt;</ins>
+  constexpr ranges::for_each_result&lt;I, Fun&gt;
+    ranges::for_each(I first, S last, Fun f, Proj proj = {});
+template&lt;input_range R, class Proj = identity,
+         <del>indirectly_unary_invocable&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt;</del><ins>move_constructible</ins> Fun&gt;
+  <ins>requires invocable&lt;Fun&amp;, iter_reference_t&lt;projected&lt;iterator_t&gt;R&gt;, Proj&gt;&gt;&gt;</ins>
+  constexpr ranges::for_each_result&lt;borrowed_iterator_t&lt;R&gt;, Fun&gt;
+    ranges::for_each(R&amp;&amp; r, Fun f, Proj proj = {});
+</pre>
+<blockquote>
+<p>
+[&hellip;]
+<p/>
+<del>-15- [<i>Note 6</i>: The overloads in namespace `ranges` require `Fun` to model `copy_constructible`. &mdash; <i>end note</i>]</del>
+</p>
+</blockquote>
+<p>
+[&hellip;]
+</p>
+<pre>
+template&lt;input_iterator I, class Proj = identity,
+         <del>indirectly_unary_invocable&lt;projected&lt;I, Proj&gt;&gt;</del><ins>move_constructible</ins> Fun&gt;
+  <ins>requires invocable&lt;Fun&amp;, iter_reference_t&lt;projected&lt;I, Proj&gt;&gt;&gt;</ins>
+  constexpr ranges::for_each_n_result&lt;I, Fun&gt;
+    ranges::for_each_n(I first, iter_difference_t&lt;I&gt; n, Fun f, Proj proj = {});
+</pre>
+<blockquote>
+<p>
+[&hellip;]
+<p/>
+<del>-30- [<i>Note 11</i>: The overload in namespace `ranges` requires `Fun` to model `copy_constructible`. &mdash; <i>end note</i>]</del>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
