@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4242" status="New">
+<title>`ranges::distance` does not work with volatile iterators</title>
+<section>
+<sref ref="[range.iter.op.distance]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>12 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+After LWG <iref ref="3664"/>, `ranges::distance` computes the distance between `last` and `first`
+by returning <code>last - static_cast&lt;const decay_t&lt;I&gt;&amp;&gt;(first)</code> when the 
+two are subtractable. However, this will cause a hard error if <code>first</code> is volatile-qualified
+(<a href="https://godbolt.org/z/5M3d9rMjE">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;iterator&gt;
+
+int main() {
+  int arr[] = {1, 2, 3};
+  int* volatile ptr = arr;
+  // return std::distance(ptr, arr + 3);      // this is ok
+  return std::ranges::distance(ptr, arr + 3); // <span  style="color:#C80000;font-weight:bold">hard error</span>
+}
+</pre></blockquote>
+<p>
+The resolution changes the <i>Effects</i> of LWG <iref ref="3664"/> from "cute" to "noncute".
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[range.iter.op.distance]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class I, sized_sentinel_for&lt;decay_t&lt;I&gt;&gt; S&gt;
+  constexpr iter_difference_t&lt;decay_t&lt;I&gt;&gt; ranges::distance(I&amp;&amp; first, S last);
+</pre>
+<blockquote>
+<p>
+-3- <i>Effects</i>: Equivalent to:
+</p>
+<pre>
+<ins>if constexpr (!is_array_v&lt;remove_reference_t&lt;I&gt;&gt;)
+  return last - first;
+else</ins>
+  return last - static_cast&lt;<del>const</del> decay_t&lt;I&gt;<del>&amp;</del>&gt;(first);
+</pre>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
