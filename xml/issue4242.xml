@@ -15,7 +15,7 @@
 After LWG <iref ref="3664"/>, `ranges::distance` computes the distance between `last` and `first`
 by returning <code>last - static_cast&lt;const decay_t&lt;I&gt;&amp;&gt;(first)</code> when the 
 two are subtractable. However, this will cause a hard error if <code>first</code> is volatile-qualified
-(<a href="https://godbolt.org/z/5M3d9rMjE">demo</a>):
+(<a href="https://godbolt.org/z/Pz1cGxKEW">demo</a>):
 </p>
 <blockquote><pre>
 #include &lt;iterator&gt;
