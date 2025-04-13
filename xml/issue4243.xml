@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4243" status="New">
+<title>`as_bytes`/`as_writable_bytes` is broken with <code>span&lt;volatile T&gt;</code></title>
+<section>
+<sref ref="[span.objectrep]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>12 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+They both use `reinterpret_cast` to cast the underlying pointer type of `span` to `const byte*` 
+and `byte*` respectively, which leads to a hard error when the element type is `volatile`-qualified
+(<a href="https://godbolt.org/z/Eq4ovzTEK">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;span&gt;
+
+int main() {
+  std::span&lt;volatile int&gt; span;
+  auto bytes = as_bytes(span);                   // <span  style="color:#C80000;font-weight:bold">hard error</span>
+  auto writable_bytes = as_writable_bytes(span); // <span  style="color:#C80000;font-weight:bold">hard error</span>
+}
+</pre></blockquote>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[span.syn]"/>, header <tt>&lt;span&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+namespace std {
+  [&hellip;]
+  <i>// <sref ref="[span.objectrep]"/>, views of object representation</i>
+  template&lt;class ElementType, size_t Extent&gt;
+    span&lt;const <ins>conditional_t&lt;is_volatile_v&lt;ElementType&gt;, volatile byte, </ins>byte<ins>&gt;</ins>, 
+         Extent == dynamic_extent ? dynamic_extent : sizeof(ElementType) * Extent&gt;
+      as_bytes(span&lt;ElementType, Extent&gt; s) noexcept;
+
+  template&lt;class ElementType, size_t Extent&gt;
+    span&lt;<ins>conditional_t&lt;is_volatile_v&lt;ElementType&gt;, volatile byte, </ins>byte<ins>&gt;</ins>, 
+         Extent == dynamic_extent ? dynamic_extent : sizeof(ElementType) * Extent&gt;
+      as_writable_bytes(span&lt;ElementType, Extent&gt; s) noexcept;
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[span.objectrep]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class ElementType, size_t Extent&gt;
+  span&lt;const <ins>conditional_t&lt;is_volatile_v&lt;ElementType&gt;, volatile byte, </ins>byte<ins>&gt;</ins>,
+       Extent == dynamic_extent ? dynamic_extent : sizeof(ElementType) * Extent&gt;
+    as_bytes(span&lt;ElementType, Extent&gt; s) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Equivalent to:
+<code>return R{reinterpret_cast&lt;<ins>R::pointer</ins><del>const byte*</del>&gt;(s.data()), s.size_bytes()};</code><br/>
+where `R` is the return type.
+</p>
+</blockquote>
+<pre>
+template&lt;class ElementType, size_t Extent&gt;
+  span&lt;<ins>conditional_t&lt;is_volatile_v&lt;ElementType&gt;, volatile byte, </ins>byte<ins>&gt;</ins>,
+       Extent == dynamic_extent ? dynamic_extent : sizeof(ElementType) * Extent&gt;
+    as_writable_bytes(span&lt;ElementType, Extent&gt; s) noexcept;
+</pre>
+<blockquote>
+<p>
+-2- <i>Constraints</i>: <code>is_const_v&lt;ElementType&gt;</code> is `false`.
+</p>
+</blockquote>
+<blockquote>
+<p>
+-3- <i>Effects</i>: Equivalent to:
+<code>return R{reinterpret_cast&lt;<ins>R::pointer</ins><del>byte*</del>&gt;(s.data()), s.size_bytes()};</code><br/>
+where `R` is the return type.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
