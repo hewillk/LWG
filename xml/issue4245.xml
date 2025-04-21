@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4245" status="New">
+<title>Operators that interact with `counted_iterator` and `default_sentinel_t` should be `noexcept`</title>
+<section>
+<sref ref="[counted.iterator]"/><sref ref="[counted.iter.nav]"/><sref ref="[counted.iter.cmp]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>18 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`counted_iterator` can be compared or subtracted from `default_sentinel_t`,
+which only involves simple integer arithmetic and does not have any <i>Preconditions</i>.
+<p/>
+In this case, it is reasonable to declare them as <code>noexcept</code>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[counted.iterator]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;input_or_output_iterator I&gt;
+  class counted_iterator {
+  public:
+    [&hellip;]
+    friend constexpr iter_difference_t&lt;I&gt; operator-(
+      const counted_iterator&amp; x, default_sentinel_t) <ins>noexcept</ins>;
+    friend constexpr iter_difference_t&lt;I&gt; operator-(
+      default_sentinel_t, const counted_iterator&amp; y) <ins>noexcept</ins>;
+    [&hellip;]
+    friend constexpr bool operator==(
+      const counted_iterator&amp; x, default_sentinel_t) <ins>noexcept</ins>;
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[counted.iter.nav]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+friend constexpr iter_difference_t&lt;I&gt; operator-(
+  const counted_iterator&amp; x, default_sentinel_t) <ins>noexcept</ins>;
+</pre>
+<blockquote>
+<p>
+-15- <i>Effects</i>: Equivalent to: <code>return -x.length;</code>
+</p>
+</blockquote>
+<pre>
+friend constexpr iter_difference_t&lt;I&gt; operator-(
+  default_sentinel_t, const counted_iterator&amp; y) <ins>noexcept</ins>;
+</pre>
+<blockquote>
+<p>
+-16- <i>Effects</i>: Equivalent to: <code>return y.length;</code>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[counted.iter.cmp]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+friend constexpr bool operator==(
+  const counted_iterator&amp; x, default_sentinel_t) <ins>noexcept</ins>;
+</pre>
+<blockquote>
+<p>
+-3- <i>Effects</i>: Equivalent to: <code>return x.length == 0;</code>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
