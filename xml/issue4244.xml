@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4244" status="New">
+<title>Whether the spuriously failed comparison applies to `compare_exchange_strong` is unclear</title>
+<section>
+<sref ref="[atomics.ref.ops]"/><sref ref="[atomics.types.operations]"/>
+</section>
+<submitter>jim x</submitter>
+<date>17 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Both `compare_exchange_strong` and `compare_exchange_weak` share the same specified rule
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+If and only if the comparison is `false` then, after the atomic operation, the value in 
+`expected` is replaced by the value read from the value referenced by `*ptr` during the 
+atomic comparison.
+</p>
+</blockquote>
+<p>
+However, there is a remark for the weak version
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+A weak compare-and-exchange operation may fail spuriously.
+</p>
+</blockquote>
+<p>
+That is, even when the contents of memory referred to by `expected` and `ptr` are equal, 
+it may return `false` and store back to expected the same memory contents that were 
+originally there.
+<p/>
+However, we don't explicitly say whether the strong version can have the spuriously failed 
+comparison. The status quo is that we can only infer the point from the name, namely, the 
+strong version should have a stronger guarantee than the weak version.
+<p/>
+<b>Suggested resolution:</b>
+<p/>
+Explicitly specify whether `compare_exchange_strong` can have the spurious failed comparison.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
