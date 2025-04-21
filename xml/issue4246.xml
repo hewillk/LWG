@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4246" status="New">
+<title>Redundant constraint in `range_formatter::format`</title>
+<section>
+<sref ref="[format.range.formatter]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>18 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, the signature of `range_formatter::format` is as follows:
+</p>
+<blockquote><pre>
+template&lt;ranges::input_range R, class FormatContext&gt;
+  requires formattable&lt;ranges::range_reference_t&lt;R&gt;, charT&gt; &amp;&amp;
+           same_as&lt;remove_cvref_t&lt;ranges::range_reference_t&lt;R&gt;&gt;, T&gt;
+typename FormatContext::iterator
+  format(R&amp;&amp; r, FormatContext&amp; ctx) const;
+</pre></blockquote>
+<p>
+which requires that the reference type of the range parameter must be `formattable`,
+and such type must be exactly `T` after removing the <i>cvref</i>-qualifiers.
+</p>
+<p>
+However, satisfying the latter always implies satisfying the former, as the `range_formatter` class
+already requires that `T` must be `formattable`.
+</p>
+<p>
+There is no need to perform a redundant check here.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[format.range.formatter]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class charT = char&gt;
+    requires same_as&lt;remove_cvref_t&lt;T>, T> &amp;&amp; formattable&lt;T, charT&gt;
+  class range_formatter {
+    [&hellip;]
+    template&lt;ranges::input_range R, class FormatContext&gt;
+        requires <del>formattable&lt;ranges::range_reference_t&lt;R&gt;, charT&gt; &amp;&amp;</del>
+                 same_as&lt;remove_cvref_t&lt;ranges::range_reference_t&lt;R&gt;&gt;, T&gt;
+      typename FormatContext::iterator
+        format(R&amp;&amp; r, FormatContext&amp; ctx) const;
+  };
+}
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+template&lt;ranges::input_range R, class FormatContext&gt;
+  requires <del>formattable&lt;ranges::range_reference_t&lt;R&gt;, charT&gt; &amp;&amp;</del>
+           same_as&lt;remove_cvref_t&lt;ranges::range_reference_t&lt;R&gt;&gt;, T&gt;
+typename FormatContext::iterator
+  format(R&amp;&amp; r, FormatContext&amp; ctx) const;
+</pre>
+<blockquote>
+<p>
+-11- <i>Effects</i>: Writes the following into <code>ctx.out()</code>, adjusted according to the
+<i>range-format-spec</i>:
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
