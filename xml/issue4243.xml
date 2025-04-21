@@ -25,9 +25,8 @@ int main() {
   auto writable_bytes = as_writable_bytes(span); // <span  style="color:#C80000;font-weight:bold">hard error</span>
 }
 </pre></blockquote>
-</discussion>
 
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5008"/>.
 </p>
@@ -88,6 +87,59 @@ template&lt;class ElementType, size_t Extent&gt;
 <p>
 -3- <i>Effects</i>: Equivalent to:
 <code>return R{reinterpret_cast&lt;<ins>R::pointer</ins><del>byte*</del>&gt;(s.data()), s.size_bytes()};</code><br/>
+where `R` is the return type.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</superseded>
+
+<note>2025-04-16; Hewill Kang provides alternative wording</note>
+<p>
+Based on reflector feedback, the revised wording just improves the current state of not supporting
+support for `volatile`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[span.objectrep]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class ElementType, size_t Extent&gt;
+  span&lt;const byte, Extent == dynamic_extent ? dynamic_extent : sizeof(ElementType) * Extent&gt;
+    as_bytes(span&lt;ElementType, Extent&gt; s) noexcept;
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Constraints</i>: <code>is_volatile_v&lt;ElementType&gt;</code> is `false`.</ins>
+</p>
+<p>
+-1- <i>Effects</i>: Equivalent to: <code>return R{reinterpret_cast&lt;const byte*&gt;(s.data()), s.size_bytes()};</code><br/> 
+where <code>R</code> is the return type.
+</p>
+</blockquote>
+<pre>
+template&lt;class ElementType, size_t Extent&gt;
+  span&lt;byte, Extent == dynamic_extent ? dynamic_extent : sizeof(ElementType) * Extent&gt;
+    as_writable_bytes(span&lt;ElementType, Extent&gt; s) noexcept;
+</pre>
+<blockquote>
+<p>
+-2- <i>Constraints</i>: <code>is_const_v&lt;ElementType&gt;</code> is `false` <ins>and
+<code>is_volatile_v&lt;ElementType&gt;</code> is `false`</ins>.
+</p>
+<p>
+-3- <i>Effects</i>: Equivalent to: <code>return R{reinterpret_cast&lt;byte*&gt;(s.data()), s.size_bytes()};</code><br/> 
 where `R` is the return type.
 </p>
 </blockquote>
