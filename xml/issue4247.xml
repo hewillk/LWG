@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4247" status="New">
+<title>Header <tt>&lt;stdbit.h&gt;</tt> is not yet freestanding</title>
+<section>
+<sref ref="[stdbit.h.syn]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>24 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Per C23/WG14 <a href="https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf#page=22">N3220</a> 4 p7, <tt>&lt;stdbit.h&gt;</tt> 
+is freestanding in C23, but C++ hasn't required it for a freestanding implementation. 
+LWG <iref ref="4049"/> is related but doesn't cover this, because there's no <tt>&lt;cstdbit&gt;</tt> standard header.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify Table 27 [tab:headers.cpp.fs] as indicated:</p>
+
+<blockquote>
+<table border="1">
+<caption>Table 27: C++ headers for freestanding implementations [tab:headers.cpp.fs]</caption>
+<tr align="center">
+<th></th>
+<th>Subclause</th>
+<th>Header</th>
+</tr> 
+
+<tr>
+<td colspan="3" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+
+<tr>
+<td>
+<sref ref="[bit]"/>
+</td>
+<td>
+Bit manipulation
+</td>
+<td>
+<tt>&lt;bit&gt;</tt>
+</td>
+</tr>
+
+<tr>
+<td>
+<ins><sref ref="[stdbit.h.syn]"/></ins>
+</td>
+<td>
+<ins>C-compatible bit manipulation</ins>
+</td>
+<td>
+<ins><tt>&lt;stdbit.h&gt;</tt></ins>
+</td>
+</tr>
+
+<tr>
+<td>
+<sref ref="[array]"/>
+</td>
+<td>
+Class template `array`
+</td>
+<td>
+<tt>&lt;array&gt;</tt>
+</td>
+</tr>
+
+<tr>
+<td colspan="3" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+
+</table>
+
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[stdbit.h.syn]"/>, header <tt>&lt;stdbit.h&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+<ins><i>// all freestanding</i></ins>
+#define __STDC_VERSION_STDBIT_H__ 202311L
+
+#define __STDC_ENDIAN_BIG__    <i>see below</i>
+#define __STDC_ENDIAN_LITTLE__ <i>see below</i>
+#define __STDC_ENDIAN_NATIVE__ <i>see below</i>
+
+[&hellip;]
+</pre>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
