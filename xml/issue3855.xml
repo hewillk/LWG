@@ -31,9 +31,7 @@ Only matters for pathological types.
 Maybe use <tt>requires bool_constant&lt;ranges::size(r) &lt;= 1&gt;</tt>.
 </p>
 
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N4917"/>.
 </p>
@@ -84,6 +82,94 @@ constexpr lazy_split_view(V base, Pattern pattern);
 -1- <i>Effects</i>: : Initializes <tt><i>base_</i></tt> with <tt>std::move(base)</tt>, and <tt><i>pattern_</i></tt> with 
 <tt>std::move(pattern)</tt>.
 </p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</superseded>
+
+<note>2025-04-27, Hewill provides alternative wording</note>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[range.lazy.split.view]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> This benefits from <paper num="P2280"/> that a call to a
+member function of a non-constexpr object can be a constant expression if it does 
+not actually access the member.
+<p/>
+This would make <code>views::lazy_split(r, span&lt;int, 0&gt;{})</code> 
+well-formed, which can be seen as an enhancement.]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+namespace std::ranges {
+  <del>template&lt;auto&gt; struct <i>require-constant</i>;                       // <i>exposition only</i></del>
+
+  template&lt;class R&gt;
+  concept <i>tiny-range</i> =                                          // <i>exposition only</i>
+    sized_range&lt;R&gt; &amp;&amp;
+    <ins>requires (R&amp; r) { requires bool_constant&lt;ranges::size(r) &lt;= 1&gt;::value; }</ins>
+    <del>requires { typename <i>require-constant</i>&lt;remove_reference_t&lt;R&gt;::size()>; } &amp;&amp;
+    (remove_reference_t&lt;R&gt;::size() &lt;= 1)</del>;
+
+  template&lt;input_range V, forward_range Pattern&gt;
+    requires view&lt;V&gt; &amp;&amp; view&lt;Pattern&gt; &amp;&amp;
+             indirectly_comparable&lt;iterator_t&lt;V&gt;, iterator_t&lt;Pattern&gt;, ranges::equal_to&gt; &amp;&amp;
+             (forward_range&lt;V&gt; || <i>tiny-range</i>&lt;Pattern&gt;)
+  class lazy_split_view::view_interface&lt;lazy_split_view&lt;V, Pattern&gt;&gt; {
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.lazy.split.inner]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i>
+We can't use <code>if constexpr (ranges::size(<i>i_</i>.<i>parent_</i>-&gt;<i>pattern_</i>) == 0)</code> 
+here because it is not a constant expression, and it seems more intuitive to just use 
+<code>ranges::empty</code> which is always well-formed. Note that the PR does not seek the
+aggressive optimization that minimizes the instantiation as this is not the intent of the 
+current design (for example, <code><i>outer-iterator</i>&amp; operator++()</code> can be
+specialized for the case where <code>Pattern::size() == 0</code>), library implementations 
+are free to optimize as it pleases.]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+constexpr <i>inner-iterator</i>&amp; operator++();
+</pre>
+<blockquote>
+<p>
+-5- <i>Effects:</i> Equivalent to:
+</p>
+<blockquote><pre>
+<i>incremented_</i> = true;
+if constexpr (!forward_range&lt;<i>Base</i>&gt;) {
+  <ins>if (ranges::empty(<i>i_</i>.<i>parent_</i>-&gt;<i>pattern_</i>))</ins>
+  <del>if constexpr (Pattern::size() == 0) {</del>
+    return *this;
+  }
+}
+++<i>i_</i>.<i>current</i>;
+return *this;
+</pre></blockquote>
 </blockquote>
 </blockquote>
 </li>
