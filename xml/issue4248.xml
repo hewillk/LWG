@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4248" status="New">
+<title>Late domain-based dispatching of `schedule_from` and `continues_on` are flipped</title>
+<section>
+<sref ref="[exec.snd.expos]"/>
+</section>
+<submitter>Eric Niebler</submitter>
+<date>26 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The reason for having two different customization points for transitioning between two execution contexts 
+is described in <sref ref="[exec.snd.expos]"/> bullet (14.1) Note 1, to wit:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+[<i>Note 1</i>: The `continues_on` algorithm works in tandem with `schedule_from` 
+(<sref ref="[exec.schedule.from]"/>) to give scheduler authors a way to customize 
+both how to transition onto (`continues_on`) and off of (`schedule_from`) a given 
+execution context. Thus, `continues_on` ignores the domain of the predecessor and 
+uses the domain of the destination scheduler to select a customization, a property 
+that is unique to `continues_on`. That is why it is given special treatment here. 
+&mdash; <i>end note</i>]
+</p>
+</blockquote>
+<p>
+The exposition-only <tt><i>get-domain-late</i></tt> function treats `continues_on` 
+senders specially to make sure the correct domain (that of the destination scheduler) 
+is used to find customizations at connect time.
+<p/>
+However, customizations are also searched for early when the sender is first constructed. 
+And here the dispatching of `continues_on` and `schedule_from` are reversed.
+<p/>
+`continues_on(sndr, sch)` is defined as (<sref ref="[exec.continues.on]"/>):
+</p>
+<blockquote><pre>
+transform_sender(<i>get-domain-early</i>(sndr), <i>make-sender</i>(continues_on, sch, sndr))
+</pre></blockquote>
+<p>
+which is using the domain of the predecessor rather than ignoring it as <sref ref="[exec.snd.expos]"/> p14.1 
+says it does. And `schedule_from(sch, sndr)` is currently defined as (<sref ref="[exec.schedule.from]"/>):
+</p>
+<blockquote><pre>
+transform_sender(
+  <i>query-or-default</i>(get_domain, sch, default_domain()),
+  <i>make-sender</i>(schedule_from, sch, sndr))
+</pre></blockquote>
+<p>
+which is using the domain of the destination scheduler to find customizations. The logic for 
+determining the domain to use for early customization of these two algorithms are opposite 
+what they are for late customization. This is a bug. They should be consistent.
+<p/>
+"Lazy" customization (at connect time) was added to <paper num="P2300"/> later in the process, 
+and this inconsistency was a mistake on my part. The correct thing to do is to change 
+<tt><i>get-domain-late</i></tt> to treat `schedule_from` as special, not `continues_on`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.snd.expos]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class Sndr, class Env&gt;
+  constexpr auto <i>get-domain-late</i>(const Sndr&amp; sndr, const Env&amp; env) noexcept;
+</pre>
+<blockquote>
+<p>
+-14- <i>Effects</i>: Equivalent to:
+</p>
+<ol style="list-style-type: none">
+<li><p>(14.1) &mdash; If <tt><i>sender-for</i>&lt;Sndr, <del>continues_on_t</del><ins>schedule_from_t</ins>&gt;</tt> is `true`, then</p>
+<blockquote><pre>
+return Domain();
+</pre></blockquote>
+<p>
+where `Domain` is the type of the following expression:
+</p>
+<blockquote><pre>
+[] {
+  auto [_, sch, _] = sndr;
+  return <i>query-or-default</i>(get_domain, sch, default_domain());
+}();
+</pre></blockquote>
+<p>
+[<i>Note 1</i>: The <tt><del>continues_on</del><ins>schedule_from</ins></tt> algorithm 
+works in tandem with <tt><del>schedule_from</del><ins>continues_on</ins></tt> 
+(<del><sref ref="[exec.schedule.from]"/></del><ins><sref ref="[exec.continues.on]"/></ins>) 
+to give scheduler authors a way to customize both how to transition onto 
+(<tt><del>continues_on</del><ins>schedule_from</ins></tt>) and off of 
+(<tt><del>schedule_from</del><ins>continues_on</ins></tt>) a given execution context. 
+Thus, <tt><del>continues_on</del><ins>schedule_from</ins></tt> ignores the domain of the 
+predecessor and uses the domain of the destination scheduler to select a customization, 
+a property that is unique to <tt><del>continues_on</del><ins>schedule_from</ins></tt>. 
+That is why it is given special treatment here. &mdash; <i>end note</i>]
+</p>
+</li>
+<li><p>[&hellip;]</p></li>
+</ol>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
