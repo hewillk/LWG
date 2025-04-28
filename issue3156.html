@@ -1,12 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Issue 3156: ForwardIterator should only mean forward iterator</title>
-<style type="text/css">
+<meta property="og:title" content="Issue 3156: ForwardIterator should only mean forward iterator">
+<meta property="og:description" content="C++ library issue. Status: Resolved">
+<meta property="og:url" content="https://cplusplus.github.io/LWG/issue3156.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="http://cplusplus.github.io/LWG/images/cpp_logo.png">
+<meta property="og:image:alt" content="C++ logo">
+<style>
   p {text-align:justify}
   li {text-align:justify}
+  pre code.backtick::before { content: "`" }
+  pre code.backtick::after { content: "`" }
   blockquote.note
   {
     background-color:#E0E0E0;
@@ -17,7 +24,17 @@
   }
   ins {background-color:#A0FFA0}
   del {background-color:#FFA0A0}
-  table {border-collapse: collapse;}
+  table.issues-index { border: 1px solid; border-collapse: collapse; }
+  table.issues-index th { text-align: center; padding: 4px; border: 1px solid; }
+  table.issues-index td { padding: 4px; border: 1px solid; }
+  table.issues-index td:nth-child(1) { text-align: right; }
+  table.issues-index td:nth-child(2) { text-align: left; }
+  table.issues-index td:nth-child(3) { text-align: left; }
+  table.issues-index td:nth-child(4) { text-align: left; }
+  table.issues-index td:nth-child(5) { text-align: center; }
+  table.issues-index td:nth-child(6) { text-align: center; }
+  table.issues-index td:nth-child(7) { text-align: left; }
+  table.issues-index td:nth-child(5) span.no-pr { color: red; }
   @media (prefers-color-scheme: dark) {
      html {
         color: #ddd;
@@ -45,8 +62,8 @@
 <body>
 <hr>
 <p><em>This page is a snapshot from the LWG issues list, see the <a href="lwg-active.html">Library Active Issues List</a> for more information and the meaning of <a href="lwg-active.html#Resolved">Resolved</a> status.</em></p>
-<h3><a name="3156" href="lwg-defects.html#3156">3156</a>. <tt>ForwardIterator</tt> should only mean forward iterator</h3>
-<p><b>Section:</b> 25.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> <b>Status:</b> <a href="lwg-active.html#Resolved">Resolved</a>
+<h3 id="3156"><a href="lwg-defects.html#3156">3156</a>. <code>ForwardIterator</code> should only mean forward iterator</h3>
+<p><b>Section:</b> 26.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> <b>Status:</b> <a href="lwg-active.html#Resolved">Resolved</a>
  <b>Submitter:</b> Casey Carter <b>Opened:</b> 2018-09-06 <b>Last modified:</b> 2020-05-02</p>
 <p><b>Priority: </b>3
 </p>
@@ -55,12 +72,12 @@
 <p><b>View all issues with</b> <a href="lwg-status.html#Resolved">Resolved</a> status.</p>
 <p><b>Discussion:</b></p>
 <p>
-25.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> para 1.2 describes how the specialized
-algorithms with a template parameter named <tt>ForwardIterator</tt> impose
+26.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> para 1.2 describes how the specialized
+algorithms with a template parameter named <code>ForwardIterator</code> impose
 requirements on the type passed as argument for that parameter: it must meet
-the <tt><i>Cpp17ForwardIterator</i></tt> requirements, which is consistent with
+the <code><i>Cpp17ForwardIterator</i></code> requirements, which is consistent with
 how the rest of the Library uses the template parameter name
-<tt>ForwardIterator</tt>, and many of the required operations on that type must
+<code>ForwardIterator</code>, and many of the required operations on that type must
 not throw exceptions, which is <em>not</em> consistent with how the rest of the
 Library uses that name.
 </p><p>
@@ -81,12 +98,12 @@ clarification of the existing wording.
 <p>This wording is relative to <a href="https://wg21.link/n4762">N4762</a>.</p>
 
 <ol>
-<li><p>Modify 20.10.2 <a href="https://wg21.link/memory.syn">[memory.syn]</a> as indicated:</p>
+<li><p>Modify 20.2.2 <a href="https://wg21.link/memory.syn">[memory.syn]</a> as indicated:</p>
 <blockquote>
 <pre>
 [&hellip;]
 
-// 25.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a>, specialized algorithms
+// 26.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a>, specialized algorithms
 template&lt;class T&gt;
   constexpr T* addressof(T&amp; r) noexcept;
 template&lt;class T&gt;
@@ -94,88 +111,88 @@ template&lt;class T&gt;
 template&lt;class <ins>NoThrow</ins>ForwardIterator&gt;
   void uninitialized_default_construct(<ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator&gt;
-  void uninitialized_default_construct(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  void uninitialized_default_construct(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                        <ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last);
 template&lt;class <ins>NoThrow</ins>ForwardIterator, class Size&gt;
   <ins>NoThrow</ins>ForwardIterator uninitialized_default_construct_n(<ins>NoThrow</ins>ForwardIterator first, Size n);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator, class Size&gt;
-  <ins>NoThrow</ins>ForwardIterator uninitialized_default_construct_n(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  <ins>NoThrow</ins>ForwardIterator uninitialized_default_construct_n(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                                     <ins>NoThrow</ins>ForwardIterator first, Size n);
 template&lt;class <ins>NoThrow</ins>ForwardIterator&gt;
   void uninitialized_value_construct(<ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator&gt;
-  void uninitialized_value_construct(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  void uninitialized_value_construct(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                      <ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last);
 template&lt;class <ins>NoThrow</ins>ForwardIterator, class Size&gt;
   <ins>NoThrow</ins>ForwardIterator uninitialized_value_construct_n(<ins>NoThrow</ins>ForwardIterator first, Size n);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator, class Size&gt;
-  <ins>NoThrow</ins>ForwardIterator uninitialized_value_construct_n(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  <ins>NoThrow</ins>ForwardIterator uninitialized_value_construct_n(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                                   <ins>NoThrow</ins>ForwardIterator first, Size n);
 template&lt;class InputIterator, class <ins>NoThrow</ins>ForwardIterator&gt;
   <ins>NoThrow</ins>ForwardIterator uninitialized_copy(InputIterator first, InputIterator last,
                                      <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class ExecutionPolicy, class InputIterator, class <ins>NoThrow</ins>ForwardIterator&gt;
-  <ins>NoThrow</ins>ForwardIterator uninitialized_copy(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  <ins>NoThrow</ins>ForwardIterator uninitialized_copy(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                      InputIterator first, InputIterator last,
                                      <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class InputIterator, class Size, class <ins>NoThrow</ins>ForwardIterator&gt;
   <ins>NoThrow</ins>ForwardIterator uninitialized_copy_n(InputIterator first, Size n,
                                        <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class ExecutionPolicy, class InputIterator, class Size, class <ins>NoThrow</ins>ForwardIterator&gt;
-  <ins>NoThrow</ins>ForwardIterator uninitialized_copy_n(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  <ins>NoThrow</ins>ForwardIterator uninitialized_copy_n(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                        InputIterator first, Size n,
                                        <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class InputIterator, class <ins>NoThrow</ins>ForwardIterator&gt;
   <ins>NoThrow</ins>ForwardIterator uninitialized_move(InputIterator first, InputIterator last,
                                      <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class ExecutionPolicy, class InputIterator, class <ins>NoThrow</ins>ForwardIterator&gt;
-  <ins>NoThrow</ins>ForwardIterator uninitialized_move(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  <ins>NoThrow</ins>ForwardIterator uninitialized_move(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                      InputIterator first, InputIterator last,
                                      <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class InputIterator, class Size, class <ins>NoThrow</ins>ForwardIterator&gt;
   pair&lt;InputIterator, <ins>NoThrow</ins>ForwardIterator&gt; uninitialized_move_n(InputIterator first, Size n,
                                                             <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class ExecutionPolicy, class InputIterator, class Size, class <ins>NoThrow</ins>ForwardIterator&gt;
-  pair&lt;InputIterator, <ins>NoThrow</ins>ForwardIterator&gt; uninitialized_move_n(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  pair&lt;InputIterator, <ins>NoThrow</ins>ForwardIterator&gt; uninitialized_move_n(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                                             InputIterator first, Size n,
                                                             <ins>NoThrow</ins>ForwardIterator result);
 template&lt;class <ins>NoThrow</ins>ForwardIterator, class T&gt;
   void uninitialized_fill(<ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last, const T&amp; x);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator, class T&gt;
-  void uninitialized_fill(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  void uninitialized_fill(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                           <ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last, const T&amp; x);
 template&lt;class <ins>NoThrow</ins>ForwardIterator, class Size, class T&gt;
   <ins>NoThrow</ins>ForwardIterator uninitialized_fill_n(<ins>NoThrow</ins>ForwardIterator first, Size n, const T&amp; x);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator, class Size, class T&gt;
-  <ins>NoThrow</ins>ForwardIterator uninitialized_fill_n(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  <ins>NoThrow</ins>ForwardIterator uninitialized_fill_n(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                                        <ins>NoThrow</ins>ForwardIterator first, Size n, const T&amp; x);
 template&lt;class T&gt;
   void destroy_at(T* location);
 template&lt;class <ins>NoThrow</ins>ForwardIterator&gt;
   void destroy(<ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator&gt;
-  void destroy(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  void destroy(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                <ins>NoThrow</ins>ForwardIterator first, <ins>NoThrow</ins>ForwardIterator last);
 template&lt;class <ins>NoThrow</ins>ForwardIterator, class Size&gt;
   <ins>NoThrow</ins>ForwardIterator destroy_n(<ins>NoThrow</ins>ForwardIterator first, Size n);
 template&lt;class ExecutionPolicy, class <ins>NoThrow</ins>ForwardIterator, class Size&gt;
-  <ins>NoThrow</ins>ForwardIterator destroy_n(ExecutionPolicy&amp;&amp; exec, // see 25.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
+  <ins>NoThrow</ins>ForwardIterator destroy_n(ExecutionPolicy&amp;&amp; exec, // see 26.3.5 <a href="https://wg21.link/algorithms.parallel.overloads">[algorithms.parallel.overloads]</a>
                             <ins>NoThrow</ins>ForwardIterator first, Size n);
 
-// 20.11.1 <a href="https://wg21.link/unique.ptr">[unique.ptr]</a>, class template unique_ptr
+// 20.3.1 <a href="https://wg21.link/unique.ptr">[unique.ptr]</a>, class template unique_ptr
 [&hellip;]
 </pre>
 </blockquote>
 </li>
-<li><p>Modify 25.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> as indicated:</p>
+<li><p>Modify 26.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> as indicated:</p>
 <blockquote>
 <p>
 [&hellip;]
 </p><p>
 (1.2) &mdash; If an algorithm's template parameter is named
-<tt><ins>NoThrow</ins>ForwardIterator</tt>, the template argument shall satisfy
-the <tt><i>Cpp17ForwardIterator</i></tt> requirements
-(23.3.5.5 <a href="https://wg21.link/forward.iterators">[forward.iterators]</a>), and is required to have the property that
+<code><ins>NoThrow</ins>ForwardIterator</code>, the template argument shall satisfy
+the <code><i>Cpp17ForwardIterator</i></code> requirements
+(24.3.5.5 <a href="https://wg21.link/forward.iterators">[forward.iterators]</a>), and is required to have the property that
 no exceptions are thrown from increment, assignment, comparison, or indirection
 through valid iterators.
 </p><p>
@@ -184,8 +201,8 @@ through valid iterators.
 </blockquote>
 </li>
 <li><p>Modify the declarations of the specialized algorithms in the remainder of
-25.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> to agree with the proposed changes to
-20.10.2 <a href="https://wg21.link/memory.syn">[memory.syn]</a> above.</p>
+26.11 <a href="https://wg21.link/specialized.algorithms">[specialized.algorithms]</a> to agree with the proposed changes to
+20.2.2 <a href="https://wg21.link/memory.syn">[memory.syn]</a> above.</p>
 </li>
 </ol>
 </blockquote>
@@ -198,7 +215,7 @@ in Prague 2020.
 </p>
 
 
-<p><b>Proposed resolution:</b></p>
+<p id="res-3156"><b>Proposed resolution:</b></p>
 <p>
 Resolved by <a href="https://wg21.link/p1963r0">P1963R0</a>.
 </p>

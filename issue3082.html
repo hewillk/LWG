@@ -1,12 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Issue 3082: from_chars specification regarding floating point rounding is inconsistent</title>
-<style type="text/css">
+<meta property="og:title" content="Issue 3082: from_chars specification regarding floating point rounding is inconsistent">
+<meta property="og:description" content="C++ library issue. Status: Open">
+<meta property="og:url" content="https://cplusplus.github.io/LWG/issue3082.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="http://cplusplus.github.io/LWG/images/cpp_logo.png">
+<meta property="og:image:alt" content="C++ logo">
+<style>
   p {text-align:justify}
   li {text-align:justify}
+  pre code.backtick::before { content: "`" }
+  pre code.backtick::after { content: "`" }
   blockquote.note
   {
     background-color:#E0E0E0;
@@ -17,7 +24,17 @@
   }
   ins {background-color:#A0FFA0}
   del {background-color:#FFA0A0}
-  table {border-collapse: collapse;}
+  table.issues-index { border: 1px solid; border-collapse: collapse; }
+  table.issues-index th { text-align: center; padding: 4px; border: 1px solid; }
+  table.issues-index td { padding: 4px; border: 1px solid; }
+  table.issues-index td:nth-child(1) { text-align: right; }
+  table.issues-index td:nth-child(2) { text-align: left; }
+  table.issues-index td:nth-child(3) { text-align: left; }
+  table.issues-index td:nth-child(4) { text-align: left; }
+  table.issues-index td:nth-child(5) { text-align: center; }
+  table.issues-index td:nth-child(6) { text-align: center; }
+  table.issues-index td:nth-child(7) { text-align: left; }
+  table.issues-index td:nth-child(5) span.no-pr { color: red; }
   @media (prefers-color-scheme: dark) {
      html {
         color: #ddd;
@@ -45,9 +62,9 @@
 <body>
 <hr>
 <p><em>This page is a snapshot from the LWG issues list, see the <a href="lwg-active.html">Library Active Issues List</a> for more information and the meaning of <a href="lwg-active.html#Open">Open</a> status.</em></p>
-<h3><a name="3082" href="lwg-active.html#3082">3082</a>. <tt>from_chars</tt> specification regarding floating point rounding is inconsistent</h3>
-<p><b>Section:</b> 20.19.3 <a href="https://wg21.link/charconv.from.chars">[charconv.from.chars]</a> <b>Status:</b> <a href="lwg-active.html#Open">Open</a>
- <b>Submitter:</b> Greg Falcon <b>Opened:</b> 2018-03-12 <b>Last modified:</b> 2020-09-06</p>
+<h3 id="3082"><a href="lwg-active.html#3082">3082</a>. <code>from_chars</code> specification regarding floating point rounding is inconsistent</h3>
+<p><b>Section:</b> 28.2.3 <a href="https://wg21.link/charconv.from.chars">[charconv.from.chars]</a> <b>Status:</b> <a href="lwg-active.html#Open">Open</a>
+ <b>Submitter:</b> Greg Falcon <b>Opened:</b> 2018-03-12 <b>Last modified:</b> 2024-12-04</p>
 <p><b>Priority: </b>2
 </p>
 <p><b>View other</b> <a href="lwg-index-open.html#charconv.from.chars">active issues</a> in [charconv.from.chars].</p>
@@ -55,12 +72,12 @@
 <p><b>View all issues with</b> <a href="lwg-status.html#Open">Open</a> status.</p>
 <p><b>Discussion:</b></p>
 <p>
-<a href="https://wg21.link/p0682r1">P0682R1</a> added the requirement that <tt>from_chars</tt> use 
-<tt>round_to_nearest</tt> when converting from string, but later text in the section suggests that 
+<a href="https://wg21.link/p0682r1">P0682R1</a> added the requirement that <code>from_chars</code> use 
+<code>round_to_nearest</code> when converting from string, but later text in the section suggests that 
 the implementation has latitude in its choice of rounding logic.
 <p/>
-If the intent is merely that the floating point environment should not affect <tt>from_chars</tt> behavior, 
-the rounding-mode text should be weakened. If the intent is to always require <tt>round_to_nearest</tt>, 
+If the intent is merely that the floating point environment should not affect <code>from_chars</code> behavior, 
+the rounding-mode text should be weakened. If the intent is to always require <code>round_to_nearest</code>, 
 the text suggesting a latitude in rounding logic should be removed.
 </p>
 
@@ -75,15 +92,72 @@ the text suggesting a latitude in rounding logic should be removed.
 
 <p>Marshall to talk to Jens about this</p>
 
+<p><i>[2024-12-04; add comments from Richard Smith]</i></p>
 
-<p><b>Proposed resolution:</b></p>
+<p>
+In editorial issue
+<a href="https://github.com/cplusplus/draft/issues/6730">#6730</a>
+Richard said:
+</p>
+<blockquote>
+28.2.3 <a href="https://wg21.link/charconv.from.chars">[charconv.from.chars]</a>/6.4 says:
+
+<blockquote>
+In any case, the resulting value is one of at most two floating-point
+values closest to the value of the string matching the pattern.
+</blockquote>
+
+This is ambiguous. It could mean either:
+<ol>
+<li>
+The resulting value is the implementation's choice of one of a set of values,
+and that set contains the two values closest to the value of the string.
+</li>
+<li>
+The resulting value is the implementation's choice of one of a set of values,
+and that set contains all values that are closest to the value of the string
+(of which it turns out there can be up to two).
+</li>
+</ol>
+<p>
+I think the normal English interpretation would be (1),
+but the intended interpretation is actually (2).
+</p>
+<p>
+(Under (1), the string <code class='backtick'>"1.0"</code> can produce the value one ULP less than 1.0
+or it can produce 1.0, and the string <code>"1.00&lt;lots of 0s&gt;1"</code>
+can produce those same two values, because the value one ULP less than 1.0
+is closer to that string than the value one ULP greater than 1.0.)
+</p>
+<p>
+Perhaps the wording from 7.3.10 <a href="https://wg21.link/conv.double">[conv.double]</a>/2 and
+7.6.1.9 <a href="https://wg21.link/expr.static.cast">[expr.static.cast]</a>/11 can be used instead:
+</p>
+<blockquote>
+If the source value can be exactly represented in the destination type,
+the result of the conversion is that exact representation.
+If the source value is between two adjacent destination values,
+the result of the conversion is an implementation-defined choice
+of either of those values.
+</blockquote>
+</blockquote>
+<p>
+Editorial pull request
+<a href="https://github.com/cplusplus/draft/pull/6833">#6833</a>
+proposed a change along those lines, but conflicts with the proposed resolution
+to this issue.
+We should address Richard's comment as part of this issue.
+</p>
+
+
+<p id="res-3082"><b>Proposed resolution:</b></p>
 <p>
 This wording is relative to <a href="https://wg21.link/n4727">N4727</a>.
 </p>
 
 <ol>
 <li>
-<p>Edit 20.19.3 <a href="https://wg21.link/charconv.from.chars">[charconv.from.chars]</a> as indicated:</p>
+<p>Edit 28.2.3 <a href="https://wg21.link/charconv.from.chars">[charconv.from.chars]</a> as indicated:</p>
 <blockquote>
 <pre>
 from_chars_result from_chars(const char* first, const char* last, float&amp; value,
@@ -95,10 +169,10 @@ from_chars_result from_chars(const char* first, const char* last, long double&am
 </pre>
 <blockquote>
 <p>
--6- <i>Requires:</i> <tt>fmt</tt> has the value of one of the enumerators of <tt>chars_format</tt>.
+-6- <i>Requires:</i> <code>fmt</code> has the value of one of the enumerators of <code>chars_format</code>.
 <p/>
--7- <i>Effects:</i> The pattern is the expected form of the subject sequence in the <tt>"C"</tt> 
-locale, as described for <tt>strtod</tt>, except that
+-7- <i>Effects:</i> The pattern is the expected form of the subject sequence in the <code>"C"</code> 
+locale, as described for <code>strtod</code>, except that
 </p>
 <ol style="list-style-type: none">
 <li><p>(7.1) [&hellip;]</p></li>
@@ -109,7 +183,7 @@ locale, as described for <tt>strtod</tt>, except that
 <p>
 In any case, the resulting value is <del>one of at most two</del><ins>the</ins> floating-point 
 value<del>s</del> closest to the value of the string matching the pattern<ins>, with ties broken 
-according to <tt>round_to_nearest</tt></ins>.
+according to <code>round_to_nearest</code></ins>.
 <p/>
 [&hellip;]
 </p>

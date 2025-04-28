@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Issue 3956: chrono::parse uses from_stream as a customization point</title>
+<meta property="og:title" content="Issue 3956: chrono::parse uses from_stream as a customization point">
+<meta property="og:description" content="C++ library issue. Status: WP">
+<meta property="og:url" content="https://cplusplus.github.io/LWG/issue3956.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="http://cplusplus.github.io/LWG/images/cpp_logo.png">
+<meta property="og:image:alt" content="C++ logo">
+<style>
+  p {text-align:justify}
+  li {text-align:justify}
+  pre code.backtick::before { content: "`" }
+  pre code.backtick::after { content: "`" }
+  blockquote.note
+  {
+    background-color:#E0E0E0;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+  }
+  ins {background-color:#A0FFA0}
+  del {background-color:#FFA0A0}
+  table.issues-index { border: 1px solid; border-collapse: collapse; }
+  table.issues-index th { text-align: center; padding: 4px; border: 1px solid; }
+  table.issues-index td { padding: 4px; border: 1px solid; }
+  table.issues-index td:nth-child(1) { text-align: right; }
+  table.issues-index td:nth-child(2) { text-align: left; }
+  table.issues-index td:nth-child(3) { text-align: left; }
+  table.issues-index td:nth-child(4) { text-align: left; }
+  table.issues-index td:nth-child(5) { text-align: center; }
+  table.issues-index td:nth-child(6) { text-align: center; }
+  table.issues-index td:nth-child(7) { text-align: left; }
+  table.issues-index td:nth-child(5) span.no-pr { color: red; }
+  @media (prefers-color-scheme: dark) {
+     html {
+        color: #ddd;
+        background-color: black;
+     }
+     ins {
+        background-color: #225522
+     }
+     del {
+        background-color: #662222
+     }
+     a {
+        color: #6af
+     }
+     a:visited {
+        color: #6af
+     }
+     blockquote.note
+     {
+        background-color: rgba(255, 255, 255, .10)
+     }
+  }
+</style>
+</head>
+<body>
+<hr>
+<p><em>This page is a snapshot from the LWG issues list, see the <a href="lwg-active.html">Library Active Issues List</a> for more information and the meaning of <a href="lwg-active.html#WP">WP</a> status.</em></p>
+<h3 id="3956"><a href="lwg-defects.html#3956">3956</a>. <code>chrono::parse</code> uses <code>from_stream</code> as a customization point</h3>
+<p><b>Section:</b> 30.13 <a href="https://wg21.link/time.parse">[time.parse]</a> <b>Status:</b> <a href="lwg-active.html#WP">WP</a>
+ <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2023-07-15 <b>Last modified:</b> 2025-02-16</p>
+<p><b>Priority: </b>3
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#time.parse">active issues</a> in [time.parse].</p>
+<p><b>View all other</b> <a href="lwg-index.html#time.parse">issues</a> in [time.parse].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#WP">WP</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+30.13 <a href="https://wg21.link/time.parse">[time.parse]</a> says: "Each <code>parse</code> overload specified
+in this subclause calls <code>from_stream</code> unqualified,
+so as to enable argument dependent lookup (6.5.4 <a href="https://wg21.link/basic.lookup.argdep">[basic.lookup.argdep]</a>)."
+That name should be added to 16.4.2.2 <a href="https://wg21.link/contents">[contents]</a> along with
+<code>swap</code>,
+<code>make_error_code</code>, and
+<code>make_error_condition</code>.
+</p>
+
+<p>
+We should decide whether calls to <code>from_stream</code> should use normal
+lookup (i.e. unqualified lookup plus ADL) or just ADL, as was done for
+<code>make_error_code</code> and <code>make_error_condition</code>
+(see LWG <a href="lwg-defects.html#3629" title="make_error_code and make_error_condition are customization points (Status: C++23)">3629</a><sup><a href="https://cplusplus.github.io/LWG/issue3629" title="Latest snapshot">(i)</a></sup>).
+</p>
+
+<p><i>[2023-10-30; Reflector poll]</i></p>
+
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
+<p><i>[2024-12-02; Jonathan provides wording]</i></p>
+
+<p>
+I suggest that <code class='backtick'>from_stream</code> should only be found via ADL,
+not unqualified lookup. This is consistent with what we did for
+<code class='backtick'>make_error_code</code> and <code class='backtick'>make_error_condition</code>, and more recently for
+<code class='backtick'>submdspan_mapping</code>.  I see no reason to treat <code class='backtick'>from_stream</code> differently.
+This implies that implementations might need a poison poll in <code class='backtick'>std::chrono</code>
+so that unqualified lookup stops as soon as those are found.
+</p>
+
+
+<p><i>[2024-12-09; Reflector poll]</i></p>
+
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+
+<p><i>[Hagenberg 2025-02-16; Status changed: Voting &rarr; WP.]</i></p>
+
+
+
+<p id="res-3956"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N4993" title=" Working Draft, Programming Languages — C++">N4993</a>.
+</p>
+
+<ol>
+<li><p>Modify 16.4.2.2 <a href="https://wg21.link/contents">[contents]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-3-
+Whenever an unqualified name other than
+<code class='backtick'>swap</code>, <code class='backtick'>make_error_code</code>, <code class='backtick'>make_error_condition</code>,
+<ins><code class='backtick'>from_stream</code>,</ins>
+or <code class='backtick'>submdspan_mapping</code>
+is used in the specification of a declaration <code class='backtick'>D</code>
+in Clause 17 through Clause 33 or Annex D,
+its meaning is established as-if by performing unqualified name lookup
+(6.5.3 <a href="https://wg21.link/basic.lookup.unqual">[basic.lookup.unqual]</a>)
+in the context of <code class='backtick'>D</code>.
+</p>
+<p>
+[<i>Note 1</i>:
+Argument-dependent lookup is not performed. &mdash; <i>end note</i>]
+</p>
+<p>
+Similarly, the meaning of a <i>qualified-id</i> is established as-if
+by performing qualified name lookup (6.5.5 <a href="https://wg21.link/basic.lookup.qual">[basic.lookup.qual]</a>)
+in the context of <code class='backtick'>D</code>.
+</p>
+<p>
+[<i>Example 1</i>:
+The reference to <code class='backtick'>is_array_v</code> in the specification of <code class='backtick'>std::to_array</code>
+(23.3.3.6 <a href="https://wg21.link/array.creation">[array.creation]</a>) refers to <code class='backtick'>::std::is_array_v</code>.
+&mdash; <i>end example</i>]
+</p>
+<p>
+[<i>Note 2</i>: Operators in expressions (12.2.2.3 <a href="https://wg21.link/over.match.oper">[over.match.oper]</a>)
+are not so constrained; see 16.4.6.4 <a href="https://wg21.link/global.functions">[global.functions]</a>.
+&mdash; <i>end note</i>]
+</p>
+<p>
+The meaning of the unqualified name <code class='backtick'>swap</code> is established
+in an overload resolution context for swappable values
+(16.4.4.3 <a href="https://wg21.link/swappable.requirements">[swappable.requirements]</a>).
+The meanings of the unqualified names
+<code class='backtick'>make_error_code</code>, <code class='backtick'>make_error_condition</code>,
+<ins><code class='backtick'>from_stream</code>,</ins>
+and <code class='backtick'>submdspan_mapping</code>
+are established as-if by performing argument-dependent lookup
+(6.5.4 <a href="https://wg21.link/basic.lookup.argdep">[basic.lookup.argdep]</a>).
+</p>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+</body>
+</html>

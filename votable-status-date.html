@@ -1,12 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>LWG Index by Status and Date</title>
-<style type="text/css">
+<meta property="og:title" content="LWG Index by Status and Date">
+<meta property="og:description" content="C++ standard library issues list">
+<meta property="og:url" content="https://cplusplus.github.io/LWG/votable-status-date.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="http://cplusplus.github.io/LWG/images/cpp_logo.png">
+<meta property="og:image:alt" content="C++ logo">
+<style>
   p {text-align:justify}
   li {text-align:justify}
+  pre code.backtick::before { content: "`" }
+  pre code.backtick::after { content: "`" }
   blockquote.note
   {
     background-color:#E0E0E0;
@@ -17,7 +24,17 @@
   }
   ins {background-color:#A0FFA0}
   del {background-color:#FFA0A0}
-  table {border-collapse: collapse;}
+  table.issues-index { border: 1px solid; border-collapse: collapse; }
+  table.issues-index th { text-align: center; padding: 4px; border: 1px solid; }
+  table.issues-index td { padding: 4px; border: 1px solid; }
+  table.issues-index td:nth-child(1) { text-align: right; }
+  table.issues-index td:nth-child(2) { text-align: left; }
+  table.issues-index td:nth-child(3) { text-align: left; }
+  table.issues-index td:nth-child(4) { text-align: left; }
+  table.issues-index td:nth-child(5) { text-align: center; }
+  table.issues-index td:nth-child(6) { text-align: center; }
+  table.issues-index td:nth-child(7) { text-align: left; }
+  table.issues-index td:nth-child(5) span.no-pr { color: red; }
   @media (prefers-color-scheme: dark) {
      html {
         color: #ddd;
@@ -43,78 +60,126 @@
 </style>
 </head>
 <body>
-<h1>C++ Standard Library Issues List (Revision D122)</h1>
+<h1>C++ Standard Library Issues List (Revision D125)</h1>
 <h1>Index by Status and Date</h1>
-<p>Reference ISO/IEC IS 14882:2011(E)</p>
+<p>Reference ISO/IEC IS 14882:2024(E)</p>
 <p>
 This document is the Index by Status and Date for the <a href="lwg-active.html">Library Active Issues List</a>,
 <a href="lwg-defects.html">Library Defect Reports and Accepted Issues</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.
 </p>
-<p><p>Revised 2022-01-15 at 13:38:56 UTC</p>
-</p><h2><a name="Tentatively Ready"</a>Tentatively Ready (6 issues)</h2>
-<table border="1" cellpadding="4">
+<p>Revised 2025-04-28 at 03:23:30 UTC
+</p><h2 id="Ready">Ready (7 issues)</h2>
+<table class="issues-index">
 <tr>
-  <td align="center"><a href="lwg-toc.html"><b>Issue</b></a></td>
-  <td align="center"><a href="lwg-status.html"><b>Status</b></a></td>
-  <td align="center"><a href="lwg-index.html"><b>Section</b></a></td>
-  <td align="center"><b>Title</b></td>
-  <td align="center"><b>Proposed Resolution</b></td>
-  <td align="center"><a href="unresolved-prioritized.html"><b>Priority</b></a></td>
-  <td align="center"><b>Duplicates</b></td>
+  <th><a href="lwg-toc.html">Issue</a></th>
+  <th><a href="lwg-status.html">Status</a></th>
+  <th><a href="lwg-index.html">Section</a></th>
+  <th>Title</th>
+  <th>Proposed Resolution</th>
+  <th><a href="unresolved-prioritized.html">Priority</a></th>
+  <th>Duplicates</th>
 </tr>
 <tr>
-<td align="right"><a href="lwg-active.html#3607">3607</a><sup><a href="https://cplusplus.github.io/LWG/issue3607">(i)</a></sup></td>
-<td align="left"><a href="lwg-active.html#Ready">Tentatively Ready</a><a name="3607"></a></td>
-<td align="left">23.3.4.14 [iterator.concept.contiguous]<a name="iterator.concept.contiguous"></a></td>
-<td align="left"><tt>contiguous_iterator</tt> should not be allowed to have custom <tt>iter_move</tt> and <tt>iter_swap</tt> behavior</td>
-<td align="center">Yes</td>
-<td align="center"></td>
-<td align="left"></td>
+<td id="4198"><a href="lwg-active.html#4198" title="schedule_from isn't starting the schedule sender if decay-copying results throws (Status: Ready)">4198</a><sup><a href="https://cplusplus.github.io/LWG/issue4198">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Ready</a></td>
+<td>33.9.12.5 [exec.schedule.from]</td>
+<td><code class='backtick'>schedule_from</code> isn't starting the schedule sender if decay-copying results throws</td>
+<td>Yes</td>
+<td>1</td>
+<td></td>
 </tr>
 <tr>
-<td align="right"><a href="lwg-active.html#3598">3598</a><sup><a href="https://cplusplus.github.io/LWG/issue3598">(i)</a></sup></td>
-<td align="left"><a href="lwg-active.html#Ready">Tentatively Ready</a><a name="3598"></a></td>
-<td align="left">19.5.3.5 [syserr.errcat.objects]<a name="syserr.errcat.objects"></a></td>
-<td align="left"><tt>system_category().default_error_condition(0)</tt> is underspecified</td>
-<td align="center">Yes</td>
-<td align="center"></td>
-<td align="left"></td>
+<td id="4202"><a href="lwg-active.html#4202" title="enable-sender should be a variable template (Status: Ready)">4202</a><sup><a href="https://cplusplus.github.io/LWG/issue4202">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Ready</a></td>
+<td>33.9.3 [exec.snd.concepts]</td>
+<td><i><code>enable-sender</code></i> should be a variable template</td>
+<td>Yes</td>
+<td>1</td>
+<td></td>
 </tr>
 <tr>
-<td align="right"><a href="lwg-active.html#3612">3612</a><sup><a href="https://cplusplus.github.io/LWG/issue3612">(i)</a></sup></td>
-<td align="left"><a href="lwg-active.html#Ready">Tentatively Ready</a><a name="3612"></a></td>
-<td align="left">20.20.2.2 [format.string.std]<a name="format.string.std"></a></td>
-<td align="left">Inconsistent pointer alignment in <tt>std::format</tt></td>
-<td align="center">Yes</td>
-<td align="center"></td>
-<td align="left"></td>
+<td id="4209"><a href="lwg-active.html#4209" title="default_domain::transform_env should be returning FWD-ENV(env) (Status: Ready)">4209</a><sup><a href="https://cplusplus.github.io/LWG/issue4209">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Ready</a></td>
+<td>33.9.5 [exec.domain.default]</td>
+<td><code>default_domain::transform_env</code> should be returning <code><i>FWD-ENV</i>(env)</code></td>
+<td>Yes</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td align="right"><a href="lwg-active.html#3601">3601</a><sup><a href="https://cplusplus.github.io/LWG/issue3601">(i)</a></sup></td>
-<td align="left"><a href="lwg-active.html#Ready">Tentatively Ready</a><a name="3601"></a></td>
-<td align="left">23.5.4.5 [common.iter.nav]<a name="common.iter.nav"></a></td>
-<td align="left"><tt>common_iterator</tt>'s <tt><i>postfix-proxy</i></tt> needs <tt>indirectly_readable</tt></td>
-<td align="center">Yes</td>
-<td align="center"></td>
-<td align="left"></td>
+<td id="4208"><a href="lwg-active.html#4208" title="Wording needs to ensure that in connect(sndr, rcvr) that rcvr expression is only evaluated once (Status: Ready)">4208</a><sup><a href="https://cplusplus.github.io/LWG/issue4208">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Ready</a></td>
+<td>33.9.10 [exec.connect]</td>
+<td>Wording needs to ensure that in <code class='backtick'>connect(sndr, rcvr)</code> that <code class='backtick'>rcvr</code> expression is only evaluated once</td>
+<td>Yes</td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td align="right"><a href="lwg-active.html#3610">3610</a><sup><a href="https://cplusplus.github.io/LWG/issue3610">(i)</a></sup></td>
-<td align="left"><a href="lwg-active.html#Ready">Tentatively Ready</a><a name="3610"></a></td>
-<td align="left">24.6.4.2 [range.iota.view]<a name="range.iota.view"></a></td>
-<td align="left"><tt>iota_view::size</tt> sometimes rejects integer-class types</td>
-<td align="center">Yes</td>
-<td align="center"></td>
-<td align="left"></td>
+<td id="4203"><a href="lwg-active.html#4203" title="Constraints on get-state functions are incorrect (Status: Ready)">4203</a><sup><a href="https://cplusplus.github.io/LWG/issue4203">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Ready</a></td>
+<td>33.9.12.5 [exec.schedule.from]</td>
+<td>Constraints on <i><code class='backtick'>get-state</code></i> functions are incorrect</td>
+<td>Yes</td>
+<td>1</td>
+<td></td>
 </tr>
 <tr>
-<td align="right"><a href="lwg-active.html#3616">3616</a><sup><a href="https://cplusplus.github.io/LWG/issue3616">(i)</a></sup></td>
-<td align="left"><a href="lwg-active.html#Ready">Tentatively Ready</a><a name="3616"></a></td>
-<td align="left">29.11.2.6 [syncstream.syncbuf.special]<a name="syncstream.syncbuf.special"></a></td>
-<td align="left">LWG 3498 seems to miss the non-member <tt>swap</tt> for <tt>basic_syncbuf</tt></td>
-<td align="center">Yes</td>
-<td align="center"></td>
-<td align="left"></td>
+<td id="4204"><a href="lwg-active.html#4204" title="specification of as-sndr2(Sig) in [exec.let] is incomplete (Status: Ready)">4204</a><sup><a href="https://cplusplus.github.io/LWG/issue4204">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Ready</a></td>
+<td>33.9.12.8 [exec.let]</td>
+<td>specification of <code><i>as-sndr2</i>(Sig)</code> in [exec.let] is incomplete</td>
+<td>Yes</td>
+<td>1</td>
+<td></td>
+</tr>
+<tr>
+<td id="4205"><a href="lwg-active.html#4205" title="let_[*].transform_env is specified in terms of the let_* sender itself instead of its child (Status: Ready)">4205</a><sup><a href="https://cplusplus.github.io/LWG/issue4205">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Ready</a></td>
+<td>33.9.12.8 [exec.let]</td>
+<td><code class='backtick'>let_[*].transform_env</code> is specified in terms of the <code class='backtick'>let_*</code> sender itself instead of its child</td>
+<td>Yes</td>
+<td>1</td>
+<td></td>
+</tr>
+</table>
+<h2 id="Tentatively_Ready">Tentatively Ready (3 issues)</h2>
+<table class="issues-index">
+<tr>
+  <th><a href="lwg-toc.html">Issue</a></th>
+  <th><a href="lwg-status.html">Status</a></th>
+  <th><a href="lwg-index.html">Section</a></th>
+  <th>Title</th>
+  <th>Proposed Resolution</th>
+  <th><a href="unresolved-prioritized.html">Priority</a></th>
+  <th>Duplicates</th>
+</tr>
+<tr>
+<td id="4188"><a href="lwg-active.html#4188" title="ostream::sentry destructor should handle exceptions (Status: Tentatively Ready)">4188</a><sup><a href="https://cplusplus.github.io/LWG/issue4188">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Tentatively Ready</a></td>
+<td>31.7.6.2.4 [ostream.sentry]</td>
+<td><code>ostream::sentry</code> destructor should handle exceptions</td>
+<td>Yes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td id="4200"><a href="lwg-active.html#4200" title="The operation_state concept can be simplified (Status: Tentatively Ready)">4200</a><sup><a href="https://cplusplus.github.io/LWG/issue4200">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Tentatively Ready</a></td>
+<td>33.8.1 [exec.opstate.general]</td>
+<td>The <code class='backtick'>operation_state</code> concept can be simplified</td>
+<td>Yes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td id="4201"><a href="lwg-active.html#4201" title="with-await-transform::await_transform should not use a deduced return type (Status: Tentatively Ready)">4201</a><sup><a href="https://cplusplus.github.io/LWG/issue4201">(i)</a></sup></td>
+<td><a href="lwg-active.html#Ready">Tentatively Ready</a></td>
+<td>33.9.4 [exec.awaitable]</td>
+<td><code class='backtick'>with-await-transform::await_transform</code> should not use a deduced return type</td>
+<td>Yes</td>
+<td></td>
+<td></td>
 </tr>
 </table>
 </body>

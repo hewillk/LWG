@@ -1,12 +1,19 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Issue 3202: P0318R1 was supposed to be revised</title>
-<style type="text/css">
+<meta property="og:title" content="Issue 3202: P0318R1 was supposed to be revised">
+<meta property="og:description" content="C++ library issue. Status: C++20">
+<meta property="og:url" content="https://cplusplus.github.io/LWG/issue3202.html">
+<meta property="og:type" content="website">
+<meta property="og:image" content="http://cplusplus.github.io/LWG/images/cpp_logo.png">
+<meta property="og:image:alt" content="C++ logo">
+<style>
   p {text-align:justify}
   li {text-align:justify}
+  pre code.backtick::before { content: "`" }
+  pre code.backtick::after { content: "`" }
   blockquote.note
   {
     background-color:#E0E0E0;
@@ -17,7 +24,17 @@
   }
   ins {background-color:#A0FFA0}
   del {background-color:#FFA0A0}
-  table {border-collapse: collapse;}
+  table.issues-index { border: 1px solid; border-collapse: collapse; }
+  table.issues-index th { text-align: center; padding: 4px; border: 1px solid; }
+  table.issues-index td { padding: 4px; border: 1px solid; }
+  table.issues-index td:nth-child(1) { text-align: right; }
+  table.issues-index td:nth-child(2) { text-align: left; }
+  table.issues-index td:nth-child(3) { text-align: left; }
+  table.issues-index td:nth-child(4) { text-align: left; }
+  table.issues-index td:nth-child(5) { text-align: center; }
+  table.issues-index td:nth-child(6) { text-align: center; }
+  table.issues-index td:nth-child(7) { text-align: left; }
+  table.issues-index td:nth-child(5) span.no-pr { color: red; }
   @media (prefers-color-scheme: dark) {
      html {
         color: #ddd;
@@ -45,8 +62,8 @@
 <body>
 <hr>
 <p><em>This page is a snapshot from the LWG issues list, see the <a href="lwg-active.html">Library Active Issues List</a> for more information and the meaning of <a href="lwg-active.html#C++20">C++20</a> status.</em></p>
-<h3><a name="3202" href="lwg-defects.html#3202">3202</a>. P0318R1 was supposed to be revised</h3>
-<p><b>Section:</b> 20.14.2 <a href="https://wg21.link/functional.syn">[functional.syn]</a> <b>Status:</b> <a href="lwg-active.html#C++20">C++20</a>
+<h3 id="3202"><a href="lwg-defects.html#3202">3202</a>. P0318R1 was supposed to be revised</h3>
+<p><b>Section:</b> 22.10.2 <a href="https://wg21.link/functional.syn">[functional.syn]</a> <b>Status:</b> <a href="lwg-active.html#C++20">C++20</a>
  <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2019-04-23 <b>Last modified:</b> 2021-02-25</p>
 <p><b>Priority: </b>0
 </p>
@@ -62,11 +79,11 @@ D0318R2 suggested on the reflector, which are incorporated below.
 
 
 
-<p><b>Proposed resolution:</b></p>
+<p id="res-3202"><b>Proposed resolution:</b></p>
 <p>This wording is relative to <a href="https://wg21.link/n4810">N4810</a>.</p>
 
 <ol>
-<li><p>Modify 20.14.2 <a href="https://wg21.link/functional.syn">[functional.syn]</a>, header <tt>&lt;functional&gt;</tt> synopsis, as indicated:</p>
+<li><p>Modify 22.10.2 <a href="https://wg21.link/functional.syn">[functional.syn]</a>, header <code>&lt;functional&gt;</code> synopsis, as indicated:</p>
 
 <blockquote>
 <pre>
@@ -87,7 +104,7 @@ template&lt;class T&gt;
 </pre>
 <blockquote>
 <p>
--1- If <tt>T</tt> is a specialization [&hellip;]
+-1- If <code>T</code> is a specialization [&hellip;]
 </p>
 </blockquote>
 <pre>
@@ -96,8 +113,8 @@ template&lt;class T&gt;
 </pre>
 <blockquote>
 <p>
-<ins>-?- The member typedef <tt>type</tt> of <tt>unwrap_ref_decay&lt;T&gt;</tt> denotes the type 
-<tt>unwrap_reference_t&lt;decay_t&lt;T&gt;&gt;</tt>.</ins>
+<ins>-?- The member typedef <code>type</code> of <code>unwrap_ref_decay&lt;T&gt;</code> denotes the type 
+<code>unwrap_reference_t&lt;decay_t&lt;T&gt;&gt;</code>.</ins>
 </p>
 </blockquote>
 </blockquote>
