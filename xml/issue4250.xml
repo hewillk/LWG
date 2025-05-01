@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4250" status="New">
+<title>`swap` overloads for `indirect` and `polymorphic` only found by ADL</title>
+<section><sref ref="[indirect.swap]"/></section>
+<section><sref ref="[polymorphic.swap]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>01 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The non-member `swap` overloads for `std::indirect` and `std::polymorphic`
+are defined as hidden friends, so are only available via ADL.
+This means that calling `std::swap(i1, i2)` will always use the generic
+`std::swap` instead of the custom overload for `std::indirect`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[memory.syn]"/> as indicated:</p>
+
+<blockquote>
+<pre><code>
+// 20.4.1, class template indirect
+template&lt;class T, class Allocator = allocator&lt;T&gt;&gt;
+  class indirect;
+<ins>
+template&lt;class T, class Allocator&gt;
+constexpr void swap(indirect&lt;T, Allocator&gt;&amp; lhs, indirect&lt;T, Allocator&gt;&amp; rhs) noexcept(<i>see below</i>);
+</ins>
+// 20.4.1.10, hash support
+template&lt;class T, class Alloc&gt; struct hash&lt;indirect&lt;T, Alloc&gt;&gt;;
+
+// 20.4.2, class template polymorphic
+template&lt;class T, class Allocator = allocator&lt;T&gt;&gt;
+  class polymorphic;
+<ins>
+template&lt;class T, class Allocator&gt;
+constexpr void swap(polymorphic&lt;T, Allocator&gt;&amp; lhs, polymorphic&lt;T, Allocator&gt;&amp; rhs) noexcept(<i>see below</i>);
+</ins>
+</code></pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[indirect.syn]"/> as indicated:</p>
+<blockquote>
+<pre><code>
+// 20.4.1.7, swap
+constexpr void swap(indirect&amp; other) noexcept(<i>see below</i>);
+<del>friend constexpr void swap(indirect&amp; lhs, indirect&amp; rhs) noexcept(<i>see below</i>);</del>
+</code></pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[indirect.swap]"/> as indicated:</p>
+<blockquote>
+<pre><code>
+<ins>template&lt;class T, class Allocator&gt;</ins>
+constexpr void swap(indirect<ins>&lt;T, Allocator&gt;</ins>&amp; lhs, indirect<ins>&lt;T, Allocator&gt;</ins>&amp; rhs) noexcept(noexcept(lhs.swap(rhs)));
+</code></pre>
+<blockquote>-3- <i>Effects</i>: Equivalent to `lhs.swap(rhs)`.</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[polymorphic.syn]"/> as indicated:</p>
+<blockquote>
+<pre><code>
+// 20.4.2.7, swap
+constexpr void swap(polymorphic&amp; other) noexcept(<i>see below</i>);
+<del>friend constexpr void swap(polymorphic&amp; lhs, polymorphic&amp; rhs) noexcept(<i>see below</i>);</del>
+</code></pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[polymorphic.swap]"/> as indicated:</p>
+<blockquote>
+<pre><code>
+<ins>template&lt;class T, class Allocator&gt;</ins>
+constexpr void swap(polymorphic<ins>&lt;T, Allocator&gt;</ins>&amp; lhs, polymorphic<ins>&lt;T, Allocator&gt;</ins>&amp; rhs) noexcept(noexcept(lhs.swap(rhs)));
+</code></pre>
+<blockquote>-3- <i>Effects</i>: Equivalent to `lhs.swap(rhs)`.</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
