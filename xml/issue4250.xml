@@ -3,8 +3,10 @@
 
 <issue num="4250" status="New">
 <title>`swap` overloads for `indirect` and `polymorphic` only found by ADL</title>
-<section><sref ref="[indirect.swap]"/></section>
-<section><sref ref="[polymorphic.swap]"/></section>
+<section>
+<sref ref="[indirect.swap]"/>
+<sref ref="[polymorphic.swap]"/>
+</section>
 <submitter>Jonathan Wakely</submitter>
 <date>01 May 2025</date>
 <priority>99</priority>
