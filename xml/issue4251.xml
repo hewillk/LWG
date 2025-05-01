@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4251" status="New">
+<title>Move assignment for `indirect` unnecessarily requires copy construction</title>
+<section><sref ref="[indirect.asgn]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>01 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The move assignment operator for `indirect` says:
+<blockquote>
+<i>Mandates</i>: <code>is_copy_constructible_t&lt;T&gt;</code> is `true`.
+</blockquote>
+
+However, the only way it ever construct an object is:
+<blockquote>
+constructs a new owned object with the owned object of `other` as the argument
+as an rvalue
+</blockquote>
+and that only ever happens when <code><i>alloc</i> == other.<i>alloc</i></code>
+is false.
+</p>
+<p>
+It seems like we should require `is_move_constructible_v` instead,
+and only if the allocator traits mean we need to construct an object.
+</p>
+<p>
+Additionally, the noexcept-specifier for the move assignment doesn't match
+the effects. The noexcept-specifier says it can't throw if POCMA is true,
+but nothing in the effects says that ownership can be transferred in that case.
+We only do a non-throwing transfer when the allocators are equal.
+I think we should also transfer ownership when
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[indirect.asgn]"/> as indicated:</p>
+<blockquote>
+<pre><code>
+constexpr indirect&amp; operator=(indirect&amp;&amp; other)
+  noexcept(allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value ||
+           allocator_traits&lt;Allocator&gt;::is_always_equal::value);
+</code></pre>
+<blockquote>
+<p>
+-5- <i>Mandates</i>:
+<ins>
+If
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is `false`
+and
+<code>allocator_traits&lt;Allocator&gt;::is_always_equal::value</code>
+is `false`,
+</ins>
+<code>is_<del>copy</del><ins>move</ins>_constructible_t&lt;T&gt;</code> is `true`.
+</p>
+<p>
+-6- <i>Effects</i>:
+If `addressof(other) == this` is `true`, there are no effects.
+Otherwise:
+<ol style="list-style-type:none">
+<li>(6.1) &mdash;
+The allocator needs updating if
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is `true`.
+</li>
+<li>(6.2) &mdash;
+If `other` is valueless, `*this` becomes valueless<del> and the owned object
+in `*this`, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated</del>.
+</li>
+<li>(6.3) &mdash;
+Otherwise,
+<ins>if the allocator needs updating or</ins>
+if <code><i>alloc</i> == other.<i>alloc</i></code> is `true`,
+<del>
+swaps the owned objects in `*this` and `other`;
+the owned object in `other`, if any, is then destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated
+</del>
+<ins>`*this` takes ownership of the owned object of `other`</ins>.
+</li>
+<li>(6.4) &mdash;
+Otherwise, constructs a new owned object with the owned object of `other`
+as the argument as an rvalue, using either the allocator in `*this`
+or the allocator in `other` if the allocator needs updating.
+</li>
+<li>(6.5) &mdash;
+The previously owned object in `*this`, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated.
+</li>
+<li>(6.6) &mdash;
+If the allocator needs updating,
+the allocator in `*this` is replaced with a copy of the allocator in `other`.
+</li>
+</ol>
+</p>
+<p>-7- <i>Postcondition</i>: `other` is valueless.</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
