@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4253" status="New">
+<title>`basic_const_iterator` should provide `iterator_type`</title>
+<section><sref ref="[const.iterators.iterator]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>29 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, iterator adaptors in <code>&lt;iterator&gt;</code> that wrap a single iterator
+such as `reverse_iterator`, `move_iterator`, and `counted_iterator` all provide a
+public `iterator_type` member for users to access the underlying iterator type, except for
+`basic_const_iterator` (<a href="https://godbolt.org/z/4hY4qhnPG">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;iterator&gt;
+
+using I  = int*;
+using RI = std::reverse_iterator&lt;I&gt;;
+using MI = std::move_iterator&lt;I&gt;;
+using CI = std::counted_iterator&lt;I&gt;;
+using BI = std::basic_const_iterator&lt;I&gt;;
+
+static_assert(std::same_as&lt;RI::iterator_type, I&gt;);
+static_assert(std::same_as&lt;MI::iterator_type, I&gt;);
+static_assert(std::same_as&lt;CI::iterator_type, I&gt;);
+static_assert(std::same_as&lt;BI::iterator_type, I&gt;); // <span  style="color:#C80000;font-weight:bold">fire</span>
+</pre></blockquote>
+<p>
+It seems reasonable to add one for `basic_const_iterator` for consistency.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[const.iterators.iterator]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  [&hellip;]
+  template&lt;input_iterator Iterator&gt;
+  class basic_const_iterator {
+    Iterator <i>current_</i> = Iterator();                             // <i>exposition only</i>
+    using <i>reference</i> = iter_const_reference_t&lt;Iterator&gt;;         // <i>exposition only</i>
+    using <i>rvalue-reference</i> =                                    // <i>exposition only</i>
+      <i>iter-const-rvalue-reference-t</i>&lt;Iterator&gt;;
+          
+    public:
+      <ins>using iterator_type = I;</ins>
+      using iterator_concept = <i>see below</i>;
+      using iterator_category = <i>see below</i>;  // <i>not always present</i>
+      using value_type = iter_value_t&lt;Iterator&gt;;
+      using difference_type = iter_difference_t&lt;Iterator&gt;;
+      [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
