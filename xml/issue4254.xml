@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4254" status="New">
+<title><code>stride_view::<i>iterator</i></code> should provide <code>operator-&gt;</code></title>
+<section><sref ref="[range.stride.iterator]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>01 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, only <code>filter_view::<i>iterator</i></code> and <code>join_view::<i>InnerIter</i></code> in
+<code>&lt;ranges&gt;</code> provide <code>operator-&gt;</code>, which makes sense since their `operator*`
+simply dereferences the underlying iterator.
+<p/>
+It turns out this is also true for <code>stride_view::<i>iterator</i></code>, suggesting that providing
+<code>operator-&gt;</code> does is the intuitive thing to do, e.g. when wrapping pointers, keeping 
+<code>operator-&gt;</code> valid so that users can continue to use <code>it-&gt;foo()</code>.
+<p/>
+There is no reason to give up this convenience because <code>stride_view::<i>iterator</i></code> is intended 
+to preserve the nature of the underlying iterator.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[range.stride.iterator]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::ranges {
+  template&lt;input_range V&gt;
+    requires view&lt;V&gt;
+  template&lt;bool Const&gt;
+  class stride_view&lt;V&gt;::<i>iterator</i> {
+    using <i>Parent</i> = <i>maybe-const</i>&lt;Const, stride_view&gt;;                      // <i>exposition only</i>
+    using <i>Base</i> = <i>maybe-const</i>&lt;Const, V&gt;;                                  // <i>exposition only</i>
+
+    iterator_t&lt;<i>Base</i>&gt; <i>current_</i> = iterator_t&lt;<i>Base</i>&gt;();                      // <i>exposition only</i>
+    sentinel_t&lt;<i>Base</i>&gt; <i>end_</i> = sentinel_t&lt;<i>Base</i>&gt;();                          // <i>exposition only</i>
+    range_difference_t&lt;<i>Base</i>&gt; <i>stride_</i> = 0;                                // <i>exposition only</i>
+    range_difference_t&lt;<i>Base</i>&gt; <i>missing_</i> = 0;                               // <i>exposition only</i>
+
+    constexpr iterator(<i>Parent</i>* parent, iterator_t&lt;<i>Base</i>&gt; current,        // <i>exposition only</i>
+                       range_difference_t&lt;<i>Base</i>&gt; missing = 0);
+  public:
+    [&hellip;]
+  
+    constexpr decltype(auto) operator*() const { return *<i>current_</i>; }
+    <ins>constexpr auto operator-&gt;() const
+      requires <i>has-arrow</i>&lt;iterator_t&lt;<i>Base</i>&gt;&gt; &amp;&amp; copyable&lt;iterator_t&lt;<i>Base</i>&gt;&gt;
+    { return <i>current_</i>; }</ins>
+  
+    [&hellip;]
+  };
+}</pre>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
