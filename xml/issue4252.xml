@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4252" status="New">
+<title>Are exposition-only classes considered specified for the purpose of `final`?</title>
+<section><sref ref="[derivation]"/></section>
+<submitter>Jiang An</submitter>
+<date>28 Apr 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, iterator and sentinel types of several views are exposition-only in the standard wording, 
+and none of them is specified to be `final`. These types are arguably required to be non-final due to 
+<sref ref="[derivation]"/> p4 because it's possible to say they are specified except for names.
+<p/>
+However, libc++ marks `join_view`'s iterator `final` for some reasons 
+(<a href="https://reviews.llvm.org/D142811#inline-1383022">https://reviews.llvm.org/D142811#inline-1383022</a>). 
+Perhaps we should clarify that the `final`-ity of exposition-only class is unspecified.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[derivation]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-4- All types specified in the C++ standard library shall be non-`final` types unless otherwise specified.
+<ins>Exposition-only classes (<sref ref="[expos.only.entity]"/>) are not considered specified for the purpose 
+of `final`.</ins>
+</p>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
