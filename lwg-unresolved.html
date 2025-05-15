@@ -54,7 +54,7 @@
 </style>
 </head>
 <body>
-<p>Revised 2025-04-28 at 03:26:38 UTC
+<p>Revised 2025-05-15 at 02:14:59 UTC
 </p><h2>Unresolved Issues</h2>
 <hr>
 <h3 id="423"><a href="#423">423</a><sup><a href="https://cplusplus.github.io/LWG/issue423">(i)</a></sup>. Effects of negative <code>streamsize</code> in iostreams</h3>
@@ -68532,6 +68532,8 @@ return <i>to-unsigned-like</i>(ranges::min(<i>parent_</i>-&gt;remainder_,
  <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-03-27 <b>Last modified:</b> 2025-03-29</p>
 <p><b>Priority: </b>Not Prioritized
 </p>
+<p><b>View other</b> <a href="lwg-index-open.html#const.iterators.iterator">active issues</a> in [const.iterators.iterator].</p>
+<p><b>View all other</b> <a href="lwg-index.html#const.iterators.iterator">issues</a> in [const.iterators.iterator].</p>
 <p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
 <p><b>Discussion:</b></p>
 <p>
@@ -69871,6 +69873,556 @@ else</ins>
 </li>
 
 </ol>
+
+
+
+
+
+<hr>
+<h3 id="4250"><a href="#4250">4250</a><sup><a href="https://cplusplus.github.io/LWG/issue4250">(i)</a></sup>. <code class='backtick'>swap</code> overloads for <code class='backtick'>indirect</code> and <code class='backtick'>polymorphic</code> only found by ADL</h3>
+<p><b>Section:</b> 20.4.1.7 <a href="https://wg21.link/indirect.swap">[indirect.swap]</a>, 20.4.2.7 <a href="https://wg21.link/polymorphic.swap">[polymorphic.swap]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2025-05-01 <b>Last modified:</b> 2025-05-01</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The non-member <code class='backtick'>swap</code> overloads for <code class='backtick'>std::indirect</code> and <code class='backtick'>std::polymorphic</code>
+are defined as hidden friends, so are only available via ADL.
+This means that calling <code class='backtick'>std::swap(i1, i2)</code> will always use the generic
+<code class='backtick'>std::swap</code> instead of the custom overload for <code class='backtick'>std::indirect</code>.
+</p>
+
+
+<p id="res-4250"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 20.2.2 <a href="https://wg21.link/memory.syn">[memory.syn]</a> as indicated:</p>
+
+<blockquote>
+<pre><code>
+// 20.4.1, class template indirect
+template&lt;class T, class Allocator = allocator&lt;T&gt;&gt;
+  class indirect;
+<ins>
+template&lt;class T, class Allocator&gt;
+constexpr void swap(indirect&lt;T, Allocator&gt;&amp; lhs, indirect&lt;T, Allocator&gt;&amp; rhs) noexcept(<i>see below</i>);
+</ins>
+// 20.4.1.10, hash support
+template&lt;class T, class Alloc&gt; struct hash&lt;indirect&lt;T, Alloc&gt;&gt;;
+
+// 20.4.2, class template polymorphic
+template&lt;class T, class Allocator = allocator&lt;T&gt;&gt;
+  class polymorphic;
+<ins>
+template&lt;class T, class Allocator&gt;
+constexpr void swap(polymorphic&lt;T, Allocator&gt;&amp; lhs, polymorphic&lt;T, Allocator&gt;&amp; rhs) noexcept(<i>see below</i>);
+</ins>
+</code></pre>
+</blockquote>
+</li>
+
+<li><p>Modify 20.4.1.2 <a href="https://wg21.link/indirect.syn">[indirect.syn]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+// 20.4.1.7, swap
+constexpr void swap(indirect&amp; other) noexcept(<i>see below</i>);
+<del>friend constexpr void swap(indirect&amp; lhs, indirect&amp; rhs) noexcept(<i>see below</i>);</del>
+</code></pre>
+</blockquote>
+</li>
+
+<li><p>Modify 20.4.1.7 <a href="https://wg21.link/indirect.swap">[indirect.swap]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+<ins>template&lt;class T, class Allocator&gt;</ins>
+constexpr void swap(indirect<ins>&lt;T, Allocator&gt;</ins>&amp; lhs, indirect<ins>&lt;T, Allocator&gt;</ins>&amp; rhs) noexcept(noexcept(lhs.swap(rhs)));
+</code></pre>
+<blockquote>-3- <i>Effects</i>: Equivalent to <code class='backtick'>lhs.swap(rhs)</code>.</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 20.4.2.2 <a href="https://wg21.link/polymorphic.syn">[polymorphic.syn]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+// 20.4.2.7, swap
+constexpr void swap(polymorphic&amp; other) noexcept(<i>see below</i>);
+<del>friend constexpr void swap(polymorphic&amp; lhs, polymorphic&amp; rhs) noexcept(<i>see below</i>);</del>
+</code></pre>
+</blockquote>
+</li>
+
+<li><p>Modify 20.4.2.7 <a href="https://wg21.link/polymorphic.swap">[polymorphic.swap]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+<ins>template&lt;class T, class Allocator&gt;</ins>
+constexpr void swap(polymorphic<ins>&lt;T, Allocator&gt;</ins>&amp; lhs, polymorphic<ins>&lt;T, Allocator&gt;</ins>&amp; rhs) noexcept(noexcept(lhs.swap(rhs)));
+</code></pre>
+<blockquote>-3- <i>Effects</i>: Equivalent to <code class='backtick'>lhs.swap(rhs)</code>.</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4251"><a href="#4251">4251</a><sup><a href="https://cplusplus.github.io/LWG/issue4251">(i)</a></sup>. Move assignment for <code class='backtick'>indirect</code> unnecessarily requires copy construction</h3>
+<p><b>Section:</b> 20.4.1.5 <a href="https://wg21.link/indirect.asgn">[indirect.asgn]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2025-05-01 <b>Last modified:</b> 2025-05-01</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The move assignment operator for <code class='backtick'>indirect</code> says:
+<blockquote>
+<i>Mandates</i>: <code>is_copy_constructible_t&lt;T&gt;</code> is <code class='backtick'>true</code>.
+</blockquote>
+
+However, the only way it ever construct an object is:
+<blockquote>
+constructs a new owned object with the owned object of <code class='backtick'>other</code> as the argument
+as an rvalue
+</blockquote>
+and that only ever happens when <code><i>alloc</i> == other.<i>alloc</i></code>
+is false.
+</p>
+<p>
+It seems like we should require <code class='backtick'>is_move_constructible_v</code> instead,
+and only if the allocator traits mean we need to construct an object.
+(Technically move-constructible might not be correct, because the allocator's
+<code class='backtick'>construct</code> member might use a different constructor).
+</p>
+<p>
+Additionally, the noexcept-specifier for the move assignment doesn't match
+the effects. The noexcept-specifier says it can't throw if POCMA is true,
+but nothing in the effects says that ownership can be transferred in that case;
+we only do a non-throwing transfer when the allocators are equal.
+I think we <i>should</i> transfer ownership when POCMA is true,
+which would make the noexcept-specifier correct.
+</p>
+
+
+<p id="res-4251"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 20.4.1.5 <a href="https://wg21.link/indirect.asgn">[indirect.asgn]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+constexpr indirect&amp; operator=(indirect&amp;&amp; other)
+  noexcept(allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value ||
+           allocator_traits&lt;Allocator&gt;::is_always_equal::value);
+</code></pre>
+<blockquote>
+<p>
+-5- <i>Mandates</i>:
+<ins>
+If
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>false</code>
+and
+<code>allocator_traits&lt;Allocator&gt;::is_always_equal::value</code>
+is <code class='backtick'>false</code>,
+</ins>
+<code>is_<del>copy</del><ins>move</ins>_constructible_t&lt;T&gt;</code> is <code class='backtick'>true</code>.
+</p>
+<p>
+-6- <i>Effects</i>:
+If <code class='backtick'>addressof(other) == this</code> is <code class='backtick'>true</code>, there are no effects.
+Otherwise:
+<ol style="list-style-type:none">
+<li>(6.1) &mdash;
+The allocator needs updating if
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>true</code>.
+</li>
+<li>(6.2) &mdash;
+If <code class='backtick'>other</code> is valueless, <code class='backtick'>*this</code> becomes valueless<del> and the owned object
+in <code class='backtick'>*this</code>, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated</del>.
+</li>
+<li>(6.3) &mdash;
+Otherwise,
+<ins>if the allocator needs updating or</ins>
+if <code><i>alloc</i> == other.<i>alloc</i></code> is <code class='backtick'>true</code>,
+<del>
+swaps the owned objects in <code class='backtick'>*this</code> and <code class='backtick'>other</code>;
+the owned object in <code class='backtick'>other</code>, if any, is then destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated
+</del>
+<ins><code class='backtick'>*this</code> takes ownership of the owned object of <code class='backtick'>other</code></ins>.
+</li>
+<li>(6.4) &mdash;
+Otherwise, constructs a new owned object with the owned object of <code class='backtick'>other</code>
+as the argument as an rvalue, using either the allocator in <code class='backtick'>*this</code>
+or the allocator in <code class='backtick'>other</code> if the allocator needs updating.
+</li>
+<li>(6.5) &mdash;
+The previously owned object in <code class='backtick'>*this</code>, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated.
+</li>
+<li>(6.6) &mdash;
+If the allocator needs updating,
+the allocator in <code class='backtick'>*this</code> is replaced with a copy of the allocator in <code class='backtick'>other</code>.
+</li>
+</ol>
+</p>
+<p>-7- <i>Postcondition</i>: <code class='backtick'>other</code> is valueless.</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4252"><a href="#4252">4252</a><sup><a href="https://cplusplus.github.io/LWG/issue4252">(i)</a></sup>. Are exposition-only classes considered specified for the purpose of <code class='backtick'>final</code>?</h3>
+<p><b>Section:</b> 16.4.6.13 <a href="https://wg21.link/derivation">[derivation]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Jiang An <b>Opened:</b> 2025-04-28 <b>Last modified:</b> 2025-05-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all other</b> <a href="lwg-index.html#derivation">issues</a> in [derivation].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Currently, iterator and sentinel types of several views are exposition-only in the standard wording, 
+and none of them is specified to be <code class='backtick'>final</code>. These types are arguably required to be non-final due to 
+16.4.6.13 <a href="https://wg21.link/derivation">[derivation]</a> p4 because it's possible to say they are specified except for names.
+<p/>
+However, libc++ marks <code class='backtick'>join_view</code>'s iterator <code class='backtick'>final</code> for some reasons 
+(<a href="https://reviews.llvm.org/D142811#inline-1383022">https://reviews.llvm.org/D142811#inline-1383022</a>). 
+Perhaps we should clarify that the <code class='backtick'>final</code>-ity of exposition-only class is unspecified.
+</p>
+
+
+<p id="res-4252"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 16.4.6.13 <a href="https://wg21.link/derivation">[derivation]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-4- All types specified in the C++ standard library shall be non-<code class='backtick'>final</code> types unless otherwise specified.
+<ins>Exposition-only classes (16.3.3.2 <a href="https://wg21.link/expos.only.entity">[expos.only.entity]</a>) are not considered specified for the purpose 
+of <code class='backtick'>final</code>.</ins>
+</p>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4253"><a href="#4253">4253</a><sup><a href="https://cplusplus.github.io/LWG/issue4253">(i)</a></sup>. <code class='backtick'>basic_const_iterator</code> should provide <code class='backtick'>iterator_type</code></h3>
+<p><b>Section:</b> 24.5.3.3 <a href="https://wg21.link/const.iterators.iterator">[const.iterators.iterator]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-04-29 <b>Last modified:</b> 2025-05-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#const.iterators.iterator">active issues</a> in [const.iterators.iterator].</p>
+<p><b>View all other</b> <a href="lwg-index.html#const.iterators.iterator">issues</a> in [const.iterators.iterator].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Currently, iterator adaptors in <code>&lt;iterator&gt;</code> that wrap a single iterator
+such as <code class='backtick'>reverse_iterator</code>, <code class='backtick'>move_iterator</code>, and <code class='backtick'>counted_iterator</code> all provide a
+public <code class='backtick'>iterator_type</code> member for users to access the underlying iterator type, except for
+<code class='backtick'>basic_const_iterator</code> (<a href="https://godbolt.org/z/4hY4qhnPG">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;iterator&gt;
+
+using I  = int*;
+using RI = std::reverse_iterator&lt;I&gt;;
+using MI = std::move_iterator&lt;I&gt;;
+using CI = std::counted_iterator&lt;I&gt;;
+using BI = std::basic_const_iterator&lt;I&gt;;
+
+static_assert(std::same_as&lt;RI::iterator_type, I&gt;);
+static_assert(std::same_as&lt;MI::iterator_type, I&gt;);
+static_assert(std::same_as&lt;CI::iterator_type, I&gt;);
+static_assert(std::same_as&lt;BI::iterator_type, I&gt;); // <span  style="color:#C80000;font-weight:bold">error</span>
+</pre></blockquote>
+<p>
+It seems reasonable to add one for <code class='backtick'>basic_const_iterator</code> for consistency.
+</p>
+
+
+<p id="res-4253"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 24.5.3.3 <a href="https://wg21.link/const.iterators.iterator">[const.iterators.iterator]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  [&hellip;]
+  template&lt;input_iterator Iterator&gt;
+  class basic_const_iterator {
+    Iterator <i>current_</i> = Iterator();                             // <i>exposition only</i>
+    using <i>reference</i> = iter_const_reference_t&lt;Iterator&gt;;         // <i>exposition only</i>
+    using <i>rvalue-reference</i> =                                    // <i>exposition only</i>
+      <i>iter-const-rvalue-reference-t</i>&lt;Iterator&gt;;
+          
+    public:
+      <ins>using iterator_type = I;</ins>
+      using iterator_concept = <i>see below</i>;
+      using iterator_category = <i>see below</i>;  // <i>not always present</i>
+      using value_type = iter_value_t&lt;Iterator&gt;;
+      using difference_type = iter_difference_t&lt;Iterator&gt;;
+      [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4254"><a href="#4254">4254</a><sup><a href="https://cplusplus.github.io/LWG/issue4254">(i)</a></sup>. <code>stride_view::<i>iterator</i></code> should provide <code>operator-&gt;</code></h3>
+<p><b>Section:</b> 25.7.32.3 <a href="https://wg21.link/range.stride.iterator">[range.stride.iterator]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-05-01 <b>Last modified:</b> 2025-05-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Currently, only <code>filter_view::<i>iterator</i></code> and <code>join_view::<i>InnerIter</i></code> in
+<code>&lt;ranges&gt;</code> provide <code>operator-&gt;</code>, which makes sense since their <code class='backtick'>operator*</code>
+simply dereferences the underlying iterator.
+<p/>
+It turns out this is also true for <code>stride_view::<i>iterator</i></code>, suggesting that providing
+<code>operator-&gt;</code> does is the intuitive thing to do, e.g. when wrapping pointers, keeping 
+<code>operator-&gt;</code> valid so that users can continue to use <code>it-&gt;foo()</code>.
+<p/>
+There is no reason to give up this convenience because <code>stride_view::<i>iterator</i></code> is intended 
+to preserve the nature of the underlying iterator.
+</p>
+
+
+<p id="res-4254"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 25.7.32.3 <a href="https://wg21.link/range.stride.iterator">[range.stride.iterator]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::ranges {
+  template&lt;input_range V&gt;
+    requires view&lt;V&gt;
+  template&lt;bool Const&gt;
+  class stride_view&lt;V&gt;::<i>iterator</i> {
+    using <i>Parent</i> = <i>maybe-const</i>&lt;Const, stride_view&gt;;                      // <i>exposition only</i>
+    using <i>Base</i> = <i>maybe-const</i>&lt;Const, V&gt;;                                  // <i>exposition only</i>
+
+    iterator_t&lt;<i>Base</i>&gt; <i>current_</i> = iterator_t&lt;<i>Base</i>&gt;();                      // <i>exposition only</i>
+    sentinel_t&lt;<i>Base</i>&gt; <i>end_</i> = sentinel_t&lt;<i>Base</i>&gt;();                          // <i>exposition only</i>
+    range_difference_t&lt;<i>Base</i>&gt; <i>stride_</i> = 0;                                // <i>exposition only</i>
+    range_difference_t&lt;<i>Base</i>&gt; <i>missing_</i> = 0;                               // <i>exposition only</i>
+
+    constexpr iterator(<i>Parent</i>* parent, iterator_t&lt;<i>Base</i>&gt; current,        // <i>exposition only</i>
+                       range_difference_t&lt;<i>Base</i>&gt; missing = 0);
+  public:
+    [&hellip;]
+  
+    constexpr decltype(auto) operator*() const { return *<i>current_</i>; }
+    <ins>constexpr auto operator-&gt;() const
+      requires <i>has-arrow</i>&lt;iterator_t&lt;<i>Base</i>&gt;&gt; &amp;&amp; copyable&lt;iterator_t&lt;<i>Base</i>&gt;&gt;
+    { return <i>current_</i>; }</ins>
+  
+    [&hellip;]
+  };
+}</pre>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4255"><a href="#4255">4255</a><sup><a href="https://cplusplus.github.io/LWG/issue4255">(i)</a></sup>. move_only_function constructor should recognize empty copyable_functions</h3>
+<p><b>Section:</b> 22.10.17.4.3 <a href="https://wg21.link/func.wrap.move.ctor">[func.wrap.move.ctor]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Tomasz Kami&nacute;ski <b>Opened:</b> 2025-05-12 <b>Last modified:</b> 2025-05-12</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#func.wrap.move.ctor">active issues</a> in [func.wrap.move.ctor].</p>
+<p><b>View all other</b> <a href="lwg-index.html#func.wrap.move.ctor">issues</a> in [func.wrap.move.ctor].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The standard currently requires that constructing <code>move_only_function</code>
+from empty <code>copyable_function</code>, creates an non-empty <code>move_only_function</code>,
+that contains an empty <code>copyable_function</code> as the target. For exampe:
+<code>
+std::copyable_function&lt;int(int)&gt; ce;
+std::move_only_function&lt;int(int)&gt; me(ce);
+</code>
+We require that invoking <code>me(1)</code> is undefined behavior (as it leads to call to the
+<code>ce(1)</code>), however it cannot be detected in the user code, as <code>me != nullptr</code>
+is true.
+</p>
+
+<p>
+We should require that the <code>move_only_function(F&amp;&amp; f)</code> constructor to create an
+empty object, if <code>f</code> is instantiation of of <code>copyable_function</code> and
+<code>f == nullptr</code> is true, i.e. f does not contain target object.
+</p>
+
+<p>
+This simplifies implementing avoidance of double wrapping per 22.10.17.1 <a href="https://wg21.link/func.wrap.general">[func.wrap.general]</a> p2,
+as transfering the target produces empty functor.
+</p>
+
+<p>
+The <code>copyable_function</code> cannot be constructed from <code>move_only_function</code>,
+as it requires functor to be copyable. Invkoing an empty <code>std::function</code> has well
+defined behavior (throws <code>bad_function_call</code>), and wrapping such object into
+other functors should reproduce that behavior
+</p>
+
+
+
+<p id="res-4255"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 22.10.17.1 <a href="https://wg21.link/func.wrap.general">[func.wrap.general]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class F&gt; move_only_function(F&amp;&amp; f);
+</pre>
+<blockquote>
+[&hellip;]
+<p>-8- <i>Postconditions:</i>: <code>*this</code> has no target object if any of the following hold:</p>
+<ul>
+  <li><p>(8.1) <code>f</code> is a null function pointer value, <del>or</del></p></li>
+  <li><p>(8.2) <code>f</code> is a null member pointer value, or</p></li>
+  <li><p>(8.2) <code>remove_cvref_t&lt;F&gt;</code> is a specialization of the <code>move_only_function</code>
+       <ins>or <code>copyable_function</code></ins> class template, and <code>f</code> has no target object.</p></li>
+</ul>
+</blockquote>
+</blockquote>
+
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4256"><a href="#4256">4256</a><sup><a href="https://cplusplus.github.io/LWG/issue4256">(i)</a></sup>. Incorrect constrains for <code>function_ref</code> constructors from <code>nontype_t</code></h3>
+<p><b>Section:</b> 22.10.17.6.3 <a href="https://wg21.link/func.wrap.ref.ctor">[func.wrap.ref.ctor]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Tomasz Kami&nacute;ski <b>Opened:</b> 2025-05-14 <b>Last modified:</b> 2025-05-14</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+For the following class:
+</p>
+<pre>
+struct M
+{
+   void operator();
+};
+</pre>
+<p>
+The constructor of <code>function_ref&lt;void()&gt;</code> from <code>nontype_t</code>
+is considered to be valid candidate
+(is_constructible_v&lt;function_ref&lt;void()&gt;, nontype_t&lt;M{}&gt;&gt; is <code>true</code>),
+despite the fact that the corresponding invocation of template argument object, that is const lvalue,
+is ill-formed. As consequence we produce hard error from inside of this constructor.
+</p>
+
+<p>
+This is caused by the fact that for constructors with non-type <code>auto f</code> parameter,
+we are checking if <code><i>is-invocable-using</i>&lt;F&gt;</code> is <code>true</code>,
+where <code>F</code> is <code>decltype(f)</code> i.e. <code>M</code> for the example.
+We should use <code>const F&amp;</code> or <code>decltype((f))</code>.
+</p>
+
+
+
+<p id="res-4256"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 22.10.17.6.3 <a href="https://wg21.link/func.wrap.ref.ctor">[func.wrap.ref.ctor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;auto f&gt; constexpr function_ref(nontype_t&lt;f&gt;) noexcept;
+</pre>
+<blockquote>
+<p>-8- Let <code>F</code> be <code>decltype(f)</code>.</p>
+<p>-9- <i>Constraints</i>: <code><i>is-invocable-using</i>&lt;<ins>const </ins>F<ins>&amp;</ins>&gt;</code> is <code>true</code>.</p>
+[&hellip;]
+</blockquote>
+
+<pre>
+template&lt;auto f, class U&gt; constexpr function_ref(nontype_t&lt;f&gt;, U&amp;&amp; obj) noexcept;
+</pre>
+<blockquote>
+<p>-12- Let <code>T</code> be <code>remove_reference_t&lt;U&gt;</code> and <code>F</code> be <code>decltype(f)</code>.</p>
+<p>-13- <i>Constraints:</i>:</p>
+<ul>
+  <li><p>(13.1) <code>is_rvalue_reference_v&lt;U&amp;&amp;&gt;</code> is false, and</p></li>
+  <li><p>(13.2) <code><i>is-invocable-using</i>&lt;<ins>const </ins>F<ins>&amp;</ins>, T <i>cv</i>&amp;&gt;</code> is <code>true</code>.</p></li>
+</ul>
+[&hellip;]
+</blockquote>
+
+<pre>
+template&lt;auto f, class T&gt; constexpr function_ref(nontype_t&lt;f&gt;, T <i>cv</i>* obj) noexcept;
+</pre>
+<blockquote>
+<p>-17- Let <code>F</code> be <code>decltype(f)</code>.</p>
+<p>-16- <i>Constraints</i>: <code><i>is-invocable-using</i>&lt;<ins>const </ins>F<ins>&amp;</ins>, T <i>cv</i>*&gt;</code> is <code>true</code>.</p>
+[&hellip;]
+</blockquote>
+</blockquote>
+
+</li>
+</ol>
+
 
 
 

@@ -66,7 +66,7 @@
 <p>This document is the Index by Section for the <a href="lwg-active.html">Library Active Issues List</a>, <a href="lwg-defects.html">Library Defect Reports and Accepted Issues</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.</p>
 <h2>Index by Section</h2>
 <p><a href="lwg-index-open.html">(view only non-Ready open issues)</a></p>
-<p>Revised 2025-04-28 at 03:26:38 UTC
+<p>Revised 2025-05-15 at 02:14:59 UTC
 </p><h2 id="Section_3">Section 3 (2 issues)</h2>
 <p><a href="lwg-index-open.html#Section_3">(view only non-Ready open issues)</a></p>
 <table class="issues-index">
@@ -142,7 +142,7 @@
 <td></td>
 </tr>
 </table>
-<h2 id="Section_16">Section 16 (43 issues)</h2>
+<h2 id="Section_16">Section 16 (44 issues)</h2>
 <p><a href="lwg-index-open.html#Section_16">(view only non-Ready open issues)</a></p>
 <table class="issues-index">
 <tr>
@@ -521,6 +521,15 @@ is unclear</td>
 <td><a href="lwg-active.html#New">New</a></td>
 <td>16.4.6.10 [res.on.data.races]</td>
 <td>Possibly incorrect wording for data race avoidance</td>
+<td>Yes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td id="4252"><a href="lwg-active.html#4252" title="Are exposition-only classes considered specified for the purpose of final? (Status: New)">4252</a><sup><a href="https://cplusplus.github.io/LWG/issue4252">(i)</a></sup></td>
+<td><a href="lwg-active.html#New">New</a></td>
+<td>16.4.6.13 [derivation]<a id="derivation"></a></td>
+<td>Are exposition-only classes considered specified for the purpose of <code class='backtick'>final</code>?</td>
 <td>Yes</td>
 <td></td>
 <td></td>
@@ -992,7 +1001,7 @@ and user requirements</td>
 <td></td>
 </tr>
 </table>
-<h2 id="Section_20">Section 20 (22 issues)</h2>
+<h2 id="Section_20">Section 20 (24 issues)</h2>
 <p><a href="lwg-index-open.html#Section_20">(view only non-Ready open issues)</a></p>
 <table class="issues-index">
 <tr>
@@ -1168,6 +1177,24 @@ passed to allocator construct and destroy (Status: New)">3210</a><sup><a href="h
 passed to allocator <code>construct</code> and <code>destroy</code></td>
 <td>Yes</td>
 <td>3</td>
+<td></td>
+</tr>
+<tr>
+<td id="4251"><a href="lwg-active.html#4251" title="Move assignment for indirect unnecessarily requires copy construction (Status: New)">4251</a><sup><a href="https://cplusplus.github.io/LWG/issue4251">(i)</a></sup></td>
+<td><a href="lwg-active.html#New">New</a></td>
+<td>20.4.1.5 [indirect.asgn]<a id="indirect.asgn"></a></td>
+<td>Move assignment for <code class='backtick'>indirect</code> unnecessarily requires copy construction</td>
+<td>Yes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td id="4250"><a href="lwg-active.html#4250" title="swap overloads for indirect and polymorphic only found by ADL (Status: New)">4250</a><sup><a href="https://cplusplus.github.io/LWG/issue4250">(i)</a></sup></td>
+<td><a href="lwg-active.html#New">New</a></td>
+<td>20.4.1.7 [indirect.swap]<a id="indirect.swap"></a></td>
+<td><code class='backtick'>swap</code> overloads for <code class='backtick'>indirect</code> and <code class='backtick'>polymorphic</code> only found by ADL</td>
+<td>Yes</td>
+<td></td>
 <td></td>
 </tr>
 <tr>
@@ -1404,7 +1431,7 @@ the evaluation of type traits</td>
 <td></td>
 </tr>
 </table>
-<h2 id="Section_22">Section 22 (52 issues)</h2>
+<h2 id="Section_22">Section 22 (54 issues)</h2>
 <p><a href="lwg-index-open.html#Section_22">(view only non-Ready open issues)</a></p>
 <table class="issues-index">
 <tr>
@@ -1831,9 +1858,18 @@ the evaluation of type traits</td>
 <td></td>
 </tr>
 <tr>
-<td id="3680"><a href="lwg-active.html#3680" title="Constructor of move_only_function with empty ref-qualifier is over-constrained (Status: New)">3680</a><sup><a href="https://cplusplus.github.io/LWG/issue3680">(i)</a></sup></td>
+<td id="4255"><a href="lwg-active.html#4255" title="move_only_function constructor should recognize empty copyable_functions (Status: New)">4255</a><sup><a href="https://cplusplus.github.io/LWG/issue4255">(i)</a></sup></td>
 <td><a href="lwg-active.html#New">New</a></td>
 <td>22.10.17.4.3 [func.wrap.move.ctor]<a id="func.wrap.move.ctor"></a></td>
+<td>move_only_function constructor should recognize empty copyable_functions</td>
+<td>Yes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td id="3680"><a href="lwg-active.html#3680" title="Constructor of move_only_function with empty ref-qualifier is over-constrained (Status: New)">3680</a><sup><a href="https://cplusplus.github.io/LWG/issue3680">(i)</a></sup></td>
+<td><a href="lwg-active.html#New">New</a></td>
+<td>22.10.17.4.3 [func.wrap.move.ctor]</td>
 <td>Constructor of <code>move_only_function</code> with empty <code><i>ref</i></code>-qualifier is over-constrained</td>
 <td>Yes</td>
 <td>2</td>
@@ -1846,6 +1882,15 @@ the evaluation of type traits</td>
 <td><code>move_only_function</code> assignment operators seem to be defined suboptimal</td>
 <td>Yes</td>
 <td>3</td>
+<td></td>
+</tr>
+<tr>
+<td id="4256"><a href="lwg-active.html#4256" title="Incorrect constrains for function_ref constructors from nontype_t (Status: New)">4256</a><sup><a href="https://cplusplus.github.io/LWG/issue4256">(i)</a></sup></td>
+<td><a href="lwg-active.html#New">New</a></td>
+<td>22.10.17.6.3 [func.wrap.ref.ctor]<a id="func.wrap.ref.ctor"></a></td>
+<td>Incorrect constrains for <code>function_ref</code> constructors from <code>nontype_t</code></td>
+<td>Yes</td>
+<td></td>
 <td></td>
 </tr>
 <tr>
@@ -2491,7 +2536,7 @@ should conditionally require <i>Cpp17CopyInsertable</i> in their preconditions</
 <td></td>
 </tr>
 </table>
-<h2 id="Section_24">Section 24 (45 issues)</h2>
+<h2 id="Section_24">Section 24 (46 issues)</h2>
 <p><a href="lwg-index-open.html#Section_24">(view only non-Ready open issues)</a></p>
 <table class="issues-index">
 <tr>
@@ -2756,9 +2801,18 @@ should conditionally require <i>Cpp17CopyInsertable</i> in their preconditions</
 <td></td>
 </tr>
 <tr>
-<td id="4237"><a href="lwg-active.html#4237" title="The standard library iterator adaptor does not handle iterator_category correctly (Status: New)">4237</a><sup><a href="https://cplusplus.github.io/LWG/issue4237">(i)</a></sup></td>
+<td id="4253"><a href="lwg-active.html#4253" title="basic_const_iterator should provide iterator_type (Status: New)">4253</a><sup><a href="https://cplusplus.github.io/LWG/issue4253">(i)</a></sup></td>
 <td><a href="lwg-active.html#New">New</a></td>
 <td>24.5.3.3 [const.iterators.iterator]<a id="const.iterators.iterator"></a></td>
+<td><code class='backtick'>basic_const_iterator</code> should provide <code class='backtick'>iterator_type</code></td>
+<td>Yes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td id="4237"><a href="lwg-active.html#4237" title="The standard library iterator adaptor does not handle iterator_category correctly (Status: New)">4237</a><sup><a href="https://cplusplus.github.io/LWG/issue4237">(i)</a></sup></td>
+<td><a href="lwg-active.html#New">New</a></td>
+<td>24.5.3.3 [const.iterators.iterator]</td>
 <td>The standard library iterator adaptor does not handle <code>iterator_category</code> correctly</td>
 <td><span class="no-pr">No</span></td>
 <td></td>
@@ -2913,7 +2967,7 @@ initializer_list (Status: New)">3537</a><sup><a href="https://cplusplus.github.i
 <td></td>
 </tr>
 </table>
-<h2 id="Section_25">Section 25 (64 issues)</h2>
+<h2 id="Section_25">Section 25 (65 issues)</h2>
 <p><a href="lwg-index-open.html#Section_25">(view only non-Ready open issues)</a></p>
 <table class="issues-index">
 <tr>
@@ -3453,6 +3507,15 @@ inner-iterator with std::default_sentinel results in null pointer dereference (S
 <td><a href="lwg-active.html#New">New</a></td>
 <td>25.7.29.4 [range.chunk.outer.value]<a id="range.chunk.outer.value"></a></td>
 <td><code>chunk_view::<i>outer-iterator</i>::value_type</code> should provide <code>reserve_hint</code></td>
+<td>Yes</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td id="4254"><a href="lwg-active.html#4254" title="stride_view::iterator should provide operator-&gt; (Status: New)">4254</a><sup><a href="https://cplusplus.github.io/LWG/issue4254">(i)</a></sup></td>
+<td><a href="lwg-active.html#New">New</a></td>
+<td>25.7.32.3 [range.stride.iterator]<a id="range.stride.iterator"></a></td>
+<td><code>stride_view::<i>iterator</i></code> should provide <code>operator-&gt;</code></td>
 <td>Yes</td>
 <td></td>
 <td></td>
