@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4257" status="New">
+<title>Stream insertion for `chrono::local_time` should be constrained</title>
+<section><sref ref="[time.clock.local]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>16 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Stream insertion for `chrono::local_time` is defined in terms of conversion to
+`chrono::sys_time`, but not all `chrono::sys_time` specializations
+can be inserted into an ostream, because one of the overloads is
+constrained and the other requires convertibility to `chrono::sys_days`
+(see <sref ref="[time.clock.system.nonmembers]"/>).
+</p>
+<p>
+This means the following code fails to compile:
+<pre><code>
+#include &lt;iostream&gt;
+#include &lt;chrono&gt;
+
+template&lt;typename T&gt;
+concept ostream_insertable = requires (std::ostream&amp; o, const T&amp; t) { o &lt;&lt; t; };
+
+using D = std::chrono::duration&lt;double&gt;;
+
+int main() {
+  if constexpr (ostream_insertable&lt;std::chrono::sys_time&lt;D&gt;&gt;)
+    std::cout &lt;&lt; std::chrono::sys_time&lt;D&gt;{};
+  if constexpr (ostream_insertable&lt;std::chrono::local_time&lt;D&gt;&gt;)
+    std::cout &lt;&lt; std::chrono::local_time&lt;D&gt;{}; // <b>FAIL</b>
+}
+</code></pre>
+The first condition is false, because there's no overload that's suitable.
+The second is true, because the <code>operator&lt;&lt;</code> overload for
+`chrono::local_time` isn't constrained and so insertion appears to be valid.
+But actually trying to use it is ill-formed, because it tries to convert the
+<code>local_time&lt;D&gt;</code> to a <code>sys_time&lt;D&gt;</code>
+and then insert that, which isn't valid.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[time.clock.local]"/> as indicated:</p>
+
+<blockquote>
+<pre><code>
+template&lt;class charT, class traits, class Duration&gt;
+  basic_ostream&lt;charT, traits&gt;&amp;
+    operator&lt;&lt;(basic_ostream&lt;charT, traits&gt;&amp; os, const local_time&lt;Duration&gt;&amp; lt);
+</code></pre>
+<p><ins>-?- <i>Constraints</i>:
+<code>os &lt;&lt; sys_time&lt;Duration&gt;{lt.time_since_epoch()}</code>
+is a valid expression.</ins>
+</p>
+<p>-2- <i>Effects</i>:
+<pre><code> os &lt;&lt; sys_time&lt;Duration&gt;{lt.time_since_epoch()};
+</code></pre>
+</p>
+<p>-3- <i>Returns</i>: `os`.</p>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
