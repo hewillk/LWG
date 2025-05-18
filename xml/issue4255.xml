@@ -2,7 +2,7 @@
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
 <issue num="4255" status="New">
-<title>move_only_function constructor should recognize empty copyable_functions</title>
+<title>move_only_function constructor should recognize empty `copyable_function`s</title>
 <section><sref ref="[func.wrap.move.ctor]"/></section>
 <submitter>Tomasz Kami&nacute;ski</submitter>
 <date>12 May 2025</date>
