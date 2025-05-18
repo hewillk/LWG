@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4258" status="New">
+<title>Size type mismatch in constraints involving <i>Cpp17Allocator</i></title>
+<section><sref ref="[allocator.requirements.general]"/></section>
+<submitter>Jiang An</submitter>
+<date>5 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+It seems assumed that a `size_t` value can be passed to an allocator's `allocate` member 
+function per the <tt><i>simple-allocator</i></tt> exposition-only concept in 
+<sref ref="[allocator.requirements.general]"/> and the minimal constraints for 
+allocator types in <sref ref="[container.reqmts]"/>.
+<p/>
+However, it is not exactly required that a type meeting the <i>Cpp17Allocator</i> requirements 
+can be used with `size_t` values, because only <tt>allocator_traits&lt;A&gt;::size_type</tt>, 
+which is possibly not `size_t`, is required to be usable with the allocator.
+<p/>
+Do we want to change these constraints, or change the <i>Cpp17Allocator</i> requirements to 
+require accepting `size_t` values?
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
