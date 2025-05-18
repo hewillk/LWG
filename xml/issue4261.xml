@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4261" status="New">
+<title>P1206R7 broke uses of container adaptors with old custom sequence containers</title>
+<section><sref ref="[string.find]"/></section>
+<submitter>Jiang An</submitter>
+<date>7 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<paper num="P1206R7"/> added some requirements for sequence containers, including program-defined ones.
+<p/>
+These requirements mean that if a custom C++20 sequence container type has no newly required member 
+functions added in C++23 mode, it is no longer a sequence container, and uses of it with 
+`std::stack`, `std::queue`, or `std::priority_queue` possibly have undefined behavior or 
+make the program ill-formed. Additionally, some users want to use C++23 flat container adaptors 
+with old sequence containers (<a href="https://github.com/llvm/llvm-project/issues/136656">llvm/llvm-project#136656</a>), 
+it is unclear whether such uses are intentionally rejected.
+<p/>
+Perhaps the requirements on `from_range_t` constructor, `insert_range` and `assign_range` should be made optional, 
+although these operations should have specified semantics whenever being well-formed in immediate contexts.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
