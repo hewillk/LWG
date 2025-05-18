@@ -1,5 +1,6 @@
 // I, Howard Hinnant, hereby place this code in the public domain.
 // Since tweaked by Alisdair Meredith, also in the public domain.
+// Since tweaked by Daniel Kruegler, also in the public domain.
 
 #ifndef DATE_H
 #define DATE_H
@@ -9,7 +10,6 @@
 #include <istream>
 #include <locale>
 #include <ostream>
-#include <ciso646>
 
 namespace gregorian
 {
