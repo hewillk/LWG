@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4259" status="New">
+<title>P1148R0 changed the return values of searching functions of `std::basic_string` on some platforms</title>
+<section><sref ref="[string.find]"/></section>
+<submitter>Jiang An</submitter>
+<date>5 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<paper num="P1148R0"/> respecified the searching functions of `std::basic_string` to return 
+corresponding string view type's `npos` member constant (equal to `std::size_t(-1)`), converted 
+to the string type `S`'s member `S::size_type`, when the search fails. Before the change, 
+`S::npos` (equal to `S::size_type(-1)`) was returned on failure.
+<p/>
+On platforms where `std::size_t` isn't the widest unsigned integer type (e.g. on usual 32-bit 
+platforms), the return value can change. Because there can be an allocator with a wider size_type, 
+and when the basic_string type `S` uses such an allocator, `S::size_type` is specified to be that 
+type, which in turn makes `S::size_type(std::size_t(-1))` not equal to `S::size_type(-1)`.
+<p/>
+Do we want to restore the old return values?
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[string.find]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T&gt;
+  constexpr size_type find(const T&amp; t, size_type pos = 0) const noexcept(<i>see below</i>);
+[&hellip;]
+template&lt;class T&gt;
+  constexpr size_type find_last_not_of(const T&amp; t, size_type pos = npos) const noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-2- <i>Constraints</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: Let <tt><i>G</i></tt> be the name of the function. Equivalent to:
+</p>
+<blockquote><pre>
+basic_string_view&lt;charT, traits&gt; s = *this, sv = t;
+<del>return s.<i>G</i>(sv, pos);</del>
+<ins>if (auto result = s.<i>G</i>(sv, pos); result == size_t(-1))
+  return npos;
+else
+  return result;</ins>
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
