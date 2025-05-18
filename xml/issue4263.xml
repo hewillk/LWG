@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4263" status="New">
+<title>What should `std::format_to` etc. behave when the output is overlong?</title>
+<section><sref ref="[format]"/></section>
+<submitter>Jiang An</submitter>
+<date>14 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+It seems permitted to write overly long contents via an (C++20) output iterator with 
+`std::format_to(_n)`, where the length isn't representable in `size_t` or `ptrdiff_t`, 
+especially when the implementation provides integer-class types. However, currently 
+some implementation can't properly handle content whose length is greater than 
+`PTRDIFF_MAX`. Presumably we don't want UB in such cases. Should we explicitly allow 
+throwing exception and/or silent truncation?
+<p/>
+Additionally, given that the return type of `std::formatted_size` is `std::size_t`, 
+even if the implementation supports formatted contents whose lengths are greater than 
+`SIZE_MAX`, the length can't be correctly returned. Perhaps we need to either precisely 
+specify the return value as modulo arithmetic seems undesired, or specify that an 
+exception is thrown.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
