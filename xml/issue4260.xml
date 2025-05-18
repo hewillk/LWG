@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4260" status="New">
+<title>Query objects must be default constructible</title>
+<section><sref ref="[exec.queryable.general]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>7 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/333">cplusplus/sender-receiver #333</a>. 
+<p/>
+We require the types of query objects such as `get_scheduler` to be customization point objects. 
+<sref ref="[customization.point.object]"/> requires them to be `semiregular` but that concept 
+does not require default constructability. Much of `std::execution` assumes query object types 
+to be default constructible.
+<p/>
+I propose adding a (nothrow) default-constructibility requirement.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[exec.queryable.general]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- A <i>queryable object</i> is a read-only collection of key/value pair where each key is a 
+customization point object known as a <i>query object</i>. 
+<ins>The type of a query object satisfies `default_initializable`, and its default constructor 
+is not potentially throwing.</ins>
+A <i>query</i> is an invocation of a query object with a queryable object as its first
+argument and a (possibly empty) set of additional arguments. 
+A query imposes syntactic and semantic requirements on its invocations.
+</p>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
