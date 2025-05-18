@@ -20,12 +20,12 @@ struct M
 </pre>
 <p>
 The constructor of <code>function_ref&lt;void()&gt;</code> from <code>nontype_t</code>
-is considered to be valid candidate
-(is_constructible_v&lt;function_ref&lt;void()&gt;, nontype_t&lt;M{}&gt;&gt; is <code>true</code>),
-despite the fact that the corresponding invocation of template argument object, that is const lvalue,
-is ill-formed. As consequence we produce hard error from inside of this constructor.
+is considered to be valid candidate 
+(<code>is_constructible_v&lt;function_ref&lt;void()&gt;, nontype_t&lt;M{}&gt;&gt;</code> 
+is <code>true</code>), despite the fact that the corresponding invocation of template 
+argument object, that is const lvalue, is ill-formed. As consequence we produce a hard 
+error from inside of this constructor.
 </p>
-
 <p>
 This is caused by the fact that for constructors with non-type <code>auto f</code> parameter,
 we are checking if <code><i>is-invocable-using</i>&lt;F&gt;</code> is <code>true</code>,
@@ -59,10 +59,10 @@ template&lt;auto f, class U&gt; constexpr function_ref(nontype_t&lt;f&gt;, U&amp
 <blockquote>
 <p>-12- Let <tt>T</tt> be <tt>remove_reference_t&lt;U&gt;</tt> and <tt>F</tt> be <tt>decltype(f)</tt>.</p>
 <p>-13- <i>Constraints:</i>:</p>
-<ul>
-  <li><p>(13.1) <tt>is_rvalue_reference_v&lt;U&amp;&amp;&gt;</tt> is false, and</p></li>
-  <li><p>(13.2) <tt><i>is-invocable-using</i>&lt;<ins>const </ins>F<ins>&amp;</ins>, T <i>cv</i>&amp;&gt;</tt> is <tt>true</tt>.</p></li>
-</ul>
+<ol style="list-style-type: none">
+<li><p>(13.1) &mdash; <tt>is_rvalue_reference_v&lt;U&amp;&amp;&gt;</tt> is false, and</p></li>
+<li><p>(13.2) &mdash; <tt><i>is-invocable-using</i>&lt;<ins>const </ins>F<ins>&amp;</ins>, T <i>cv</i>&amp;&gt;</tt> is <tt>true</tt>.</p></li>
+</ol>
 [&hellip;]
 </blockquote>
 
