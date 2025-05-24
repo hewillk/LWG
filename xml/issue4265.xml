@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4265" status="New">
+<title>`std::midpoint` should not accept `const bool`</title>
+<section><sref ref="[numeric.ops.midpoint]"/></section>
+<submitter>Jan Schultke</submitter>
+<date>21 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The constraints of the first overload of `std::midpoint` are as follows:
+</p>
+<blockquote>
+<pre>
+template&lt;class T&gt;
+  constexpr T midpoint(T a, T b) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Constraints</i>: `T` is an arithmetic type other than `bool`.
+</p>
+</blockquote>
+</blockquote>
+<p>
+It does not appear intentional that `const bool` is supported considering that 
+<sref ref="[numeric.ops.gcd]"/> excludes <i>cv</i> `bool`.
+<p/>
+More generally, it is questionable that <i>cv</i>-qualified arithmetic types aren't 
+excluded in general, considering that <sref ref="[numeric.sat]"/> excludes them with 
+the "signed or unsigned integer type" constraint. However, tightening the constraints 
+for these other functions seems evolutionary, not like fixing an obvious oversight, 
+and so it likely requires a separate issue.
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[numeric.ops.midpoint]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T&gt;
+  constexpr T midpoint(T a, T b) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Constraints</i>: `T` is an arithmetic type other than <ins><i>cv</i></ins> `bool`.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
