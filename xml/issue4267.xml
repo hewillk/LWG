@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4267" status="New">
+<title>Uses-allocator construction is meaningless for tuple of references</title>
+<section><sref ref="[tuple.cnstr]"/></section>
+<submitter>Jiang An</submitter>
+<date>24 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Per <sref ref="[allocator.uses.construction]"/>/1, uses-allocator construction is only defined for objects. 
+And presumably, an attempt to construct `std::tuple` of reference from an `allocator_arg_t` constructor 
+causes a hard error.
+<p/>
+Since C++23/<paper num="P2255R2"/>, it seems that these `allocator_arg_t` constructors are conditionally 
+deleted according to <sref ref="[tuple.cnstr]"/>/33. However, it's confusing that these constructors are 
+sometimes non-deleted when the tuple contains a reference, while there are hard errors in an instantiation 
+instead.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[tuple.cnstr]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class Alloc&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a);
+[&hellip;]
+template&lt;class Alloc, tuple-like UTuple&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a, UTuple&amp;&amp;);
+</pre>
+<blockquote>
+<p>
+-32- <i>Preconditions</i>: `Alloc` meets the <i>Cpp17Allocator</i> requirements (<sref ref="[allocator.requirements.general]"/>).
+<p/>
+-33- <i>Effects</i>: Equivalent to the preceding constructors except that each element is constructed with uses-allocator
+construction (<sref ref="[allocator.uses.construction]"/>).
+<p/>
+<ins>-?- <i>Remarks</i>: These constructors are defined as deleted if <tt>is_reference_v&lt;T<sub><i>i</i></sub>&gt;</tt> 
+is `true` for at least one <tt>T<sub><i>i</i></sub></tt>.</ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
