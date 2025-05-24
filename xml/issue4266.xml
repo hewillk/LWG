@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4266" status="New">
+<title>`layout_stride::mapping` should treat empty mappings as exhaustive</title>
+<section><sref ref="[mdspan.layout.stride]"/></section>
+<submitter>Tomasz Kamiński</submitter>
+<date>22 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Mapping over an empty multidimensional index space is always exhaustive according to the 
+corresponding definitions from <sref ref="[mdspan.layout.reqmts]"/> p16.
+<p/>
+However, the current specification of `layout_stride::mapping` does not consider whether 
+some of the empty multidimensional index spaces are unique or exhaustive. For illustration, 
+the mapping with the following configuration is not considered exhaustive according to the 
+current specification of <sref ref="[mdspan.layout.stride.obs]"/> bullet 5.2:
+</p>
+<blockquote><pre>
+extents: 2, 2, 0
+strides: 2, 6, 20
+</pre></blockquote>
+<p>
+This prevents the implementation from implementing `sm.is_exhaustive()` as 
+<tt>sm.<i>fwd-prod-of-extents</i>(sm::extents_type::rank()) == sm.required_span_size()</tt>. 
+For all mappings with size greater than zero, such an expression provides an answer consistent 
+with the standard. However, it always returns `true` for an empty mapping, such as shown 
+in the example.
+<p/>
+We should make such implementation conforming, and require `is_exhaustive()` to return 
+`true` for empty mappings.
+<p/>
+For consistency, we could update `is_always_exhaustive()` to recognize mapping with 
+`rank() == 0`, and one for which at least one of the static extents is equal to zero 
+(i.e., they always represent a multidimensional index space).
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[mdspan.layout.stride.overview]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class Extents&gt;
+  class layout_stride::mapping {
+    [&hellip;]
+    static constexpr bool is_always_unique() noexcept { return true; }
+    static constexpr bool is_always_exhaustive() noexcept<ins>;</ins><del>{ return false; }</del><ins>;</ins>
+    static constexpr bool is_always_strided() noexcept { return true; }
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[mdspan.layout.stride.obs]"/> as indicated:</p>
+
+<blockquote>
+<p>
+[&hellip;]
+</p>
+<pre>
+<ins>static constexpr bool is_always_exhaustive() noexcept;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Returns</i>: `true` if <tt><i>rank_</i></tt> is `0` or if there is a rank index 
+`r` of `extents()` such that `extents_type::static_extent(r)` is `0`, otherwise `false`.</ins>
+</p>
+</blockquote>
+<pre>
+constexpr bool is_exhaustive() const noexcept;
+</pre>
+<blockquote>
+<p>
+-5- <i>Returns</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>(5.1) &mdash; `true` if <tt><i>rank_</i></tt> <ins>or the size of the multidimensional 
+index space `m.extents()`</ins> is `0`.</p></li>
+<li><p>(5.2) &mdash; [&hellip;]</p></li>
+<li><p>(5.3) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
