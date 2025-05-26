@@ -195,7 +195,8 @@ template&lt;class F&gt; constexpr function_ref(F&amp;&amp;) noexcept;
 </pre>
 <blockquote>
 [&hellip;]
-<p>-7- <i>Effects</i>: 
+<p>
+-7- <i>Effects</i>: 
 Initializes <tt><i>bound-entity</i></tt> with <tt>addressof(f)</tt>
 and <tt><i>thunk-ptr</i></tt> with the address of a function <tt><i>thunk</i></tt> such that 
 <tt><i>thunk</i>(<i>bound-entity</i>, <i>call-args</i>...)</tt> is expression-equivalent
@@ -204,7 +205,7 @@ and <tt><i>thunk-ptr</i></tt> with the address of a function <tt><i>thunk</i></t
 </p>
 <p>
 <ins>-?- <i>Remarks</i>:
-If <tt>remove_cveref_t&lt;F&gt;</tt> is specialization of <tt>function_ref</tt> implementation
+If <tt>remove_cveref_t&lt;F&gt;</tt> is a specialization of <tt>function_ref</tt> an implementation
 may initialize <tt><i>bound-entity</i></tt> with <tt><i>bound-entity</i></tt> of <tt>f</tt>.
 [<i>Example:</i>:</ins>
 </p>
