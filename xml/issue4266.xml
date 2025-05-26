@@ -53,7 +53,7 @@ namespace std {
   class layout_stride::mapping {
     [&hellip;]
     static constexpr bool is_always_unique() noexcept { return true; }
-    static constexpr bool is_always_exhaustive() noexcept<ins>;</ins><del>{ return false; }</del><ins>;</ins>
+    static constexpr bool is_always_exhaustive() noexcept<ins>;</ins> <del>{ return false; }</del>
     static constexpr bool is_always_strided() noexcept { return true; }
     [&hellip;]
   };
