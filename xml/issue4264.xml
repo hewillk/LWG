@@ -202,21 +202,24 @@ and <tt><i>thunk-ptr</i></tt> with the address of a function <tt><i>thunk</i></t
 (<sref ref="[defns.expression.equivalent]"/>) to 
 <tt>invoke_r&lt;R&gt;(static_cast&lt;cv T&amp;&gt;(f), <i>call-args</i>...)</tt>.
 </p>
-<ins><p>-X- <i>Remarks</i>:
+<p>
+<ins>-?- <i>Remarks</i>:
 If <tt>remove_cveref_t&lt;F&gt;</tt> is specialization of <tt>function_ref</tt> implementation
 may initialize <tt><i>bound-entity</i></tt> with <tt><i>bound-entity</i></tt> of <tt>f</tt>.
-[<i>Example:</i>:</p>
+[<i>Example:</i>:</ins>
+</p>
 <pre>
-void f1() noexcept;
+<ins>void f1() noexcept;
 void f2() noexcept;
 
 function_ref&lt;void() noexcept&gt; r1(&amp;r1);
 function_ref&lt;void()&gt; r2(r1);
 r1 = &amp;f2;
-f2(); // it is unspecified if `f1` or `f2` is invoked
+f2(); // it is unspecified if `f1` or `f2` is invoked</ins>
 </pre>
-<p> &mdash; <i>end example</i>]</p>
-</ins>
+<p> 
+<ins>&mdash; <i>end example</i>]</ins>
+</p>
 </blockquote>
 </blockquote>
 
