@@ -153,29 +153,32 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
    issue is;
 
    // Get issue number
-   auto k = tx.find("<issue num=\"");
+   std::string_view match = "<issue num=\"";
+   auto k = tx.find(match);
    if (k == std::string::npos) {
       throw bad_issue_file{filename, "Unable to find issue number"};
    }
-   k += sizeof("<issue num=\"") - 1;
+   k += match.size();
    auto l = tx.find('\"', k);
    is.num = std::stoi(tx.substr(k, l-k));
 
    // Get issue status
-   k = tx.find("status=\"", l);
+   match = "status=\"";
+   k = tx.find(match, l);
    if (k == std::string::npos) {
       throw bad_issue_file{filename, "Unable to find issue status"};
    }
-   k += sizeof("status=\"") - 1;
+   k += match.size();
    l = tx.find('\"', k);
    is.stat = tx.substr(k, l-k);
 
    // Get issue title
-   k = tx.find("<title>", l);
+   match = "<title>";
+   k = tx.find(match, l);
    if (k == std::string::npos) {
       throw bad_issue_file{filename, "Unable to find issue title"};
    }
-   k +=  sizeof("<title>") - 1;
+   k += match.size();
    l = tx.find("</title>", k);
    is.title = tx.substr(k, l-k);
 
@@ -190,11 +193,12 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
    }
 
    // Get issue sections
-   k = tx.find("<section>", l);
+   match = "<section>";
+   k = tx.find(match, l);
    if (k == std::string::npos) {
       throw bad_issue_file{filename, "Unable to find issue section"};
    }
-   k += sizeof("<section>") - 1;
+   k += match.size();
    l = tx.find("</section>", k);
    while (k < l) {
       k = tx.find('\"', k);
@@ -227,20 +231,22 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
    }
 
    // Get submitter
-   k = tx.find("<submitter>", l);
+   match = "<submitter>";
+   k = tx.find(match, l);
    if (k == std::string::npos) {
       throw bad_issue_file{filename, "Unable to find issue submitter"};
    }
-   k += sizeof("<submitter>") - 1;
+   k += match.size();
    l = tx.find("</submitter>", k);
    is.submitter = tx.substr(k, l-k);
 
    // Get date
-   k = tx.find("<date>", l);
+   match = "<date>";
+   k = tx.find(match, l);
    if (k == std::string::npos) {
       throw bad_issue_file{filename, "Unable to find issue date"};
    }
-   k += sizeof("<date>") - 1;
+   k += match.size();
    l = tx.find("</date>", k);
 
    try {
@@ -255,9 +261,10 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
    }
 
    // Get priority - this element is optional
-   k = tx.find("<priority>", l);
+   match = "<priority>";
+   k = tx.find(match, l);
    if (k != std::string::npos) {
-      k += sizeof("<priority>") - 1;
+      k += match.size();
       l = tx.find("</priority>", k);
       if (l == std::string::npos) {
          throw bad_issue_file{filename, "Corrupt 'priority' element: no closing tag"};
@@ -274,12 +281,13 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
 
    // Find out if issue has a proposed resolution
    if (is_active(is.stat)  or  "Pending WP" == is.stat) {
-      auto k2 = tx.find("<resolution>", 0);
+     match = "<resolution>";
+      auto k2 = tx.find(match, 0);
       if (k2 == std::string::npos) {
          is.has_resolution = false;
       }
       else {
-         k2 += sizeof("<resolution>") - 1;
+         k2 += match.size();
          auto l2 = tx.find("</resolution>", k2);
          is.resolution = tx.substr(k2, l2 - k2);
          if (is.resolution.length() < 15) {
