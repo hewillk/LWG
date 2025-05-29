@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4268" status="New">
+<title><code>function&lt;void()&gt;</code> suppresses `nodiscard` warnings</title>
+<section><sref ref="[func.require]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>29 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<pre><code>struct [[nodiscard]] A { };
+A f();
+std::function&lt;void()&gt; func = f;
+</code></pre>
+<p>
+Invoking `func()` will discard the return value of `f()`, but there will be
+no warning. This is because <code><i>INVOKE</i>&lt;void&gt;(...)</code>
+is defined in terms of <code>static_cast&lt;void&gt;(...)</code> and the
+explicit cast to void suppresses `nodiscard` warnings.
+This is in contast to <code><i>INVOKE</i>&lt;R&gt;(...)</code> where the
+conversion to non-void `R` is implicit.
+</p>
+
+<p>
+It seems right that <code>std::invoke_r&lt;void&gt;(f)</code> should not give
+`nodiscard` warnings, because that's quite explicit about converting to void,
+and similarly for <code>std::bind&lt;void&gt;(f)()</code>.
+However, I think it's debatable whether all uses of <code><i>INVOKE</i>&lt;void&gt;</code> (and <code>std::function&lt;void()&gt;</code> in particular)
+intend an explicit cast to void that ignores `nodiscard` types.
+It's very easy to set `f` as the target of `func` and then lose its warning,
+and there's no explicit use of `void` when you write `func = f; func();`.
+</p>
+<p>
+We could consider defining <code><i>INVOKE</i>&lt;void&gt;(...)</code> to be
+an expression of type void, without explicitly saying there's a cast to void.
+For example, `(INVOKE(...), void())` would invoke the invocable and have type
+`void`, but would not require any `nodiscard` warnings to be suppressed.
+If we did that, some uses of <code><i>INVOKE</i>&lt;R&gt;</code> such as
+<code>std::invoke_r</code> and <code>std::bind&lt;R&gt;</code> might need to
+be adjusted to preserve the explicit conversion to void.
+That would allow us to be selective about which uses of
+<code><i>INVOKE</i>&lt;void&gt;</code> we consider to be explicit about
+discarding results, and which we don't.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
