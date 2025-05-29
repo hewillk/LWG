@@ -160,7 +160,10 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
    }
    k += match.size();
    auto l = tx.find('\"', k);
-   is.num = std::stoi(tx.substr(k, l-k));
+   auto num = tx.substr(k, l-k);
+   if (filename.find(num + ".xml") == filename.npos)
+     std::cerr << "warning: issue number " << num << " in " << filename << " does not match issue number\n";
+   is.num = std::stoi(num);
 
    // Get issue status
    match = "status=\"";
