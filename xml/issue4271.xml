@@ -1,0 +1,289 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4271" status="New">
+<title>Caching range views claim amortized amortized &#x1d4aa;(1) runtime
+complexity for algorithms that are in fact &#x1d4aa;(n)</title>
+<section>
+<sref ref="[iterator.requirements.general]"/>
+<sref ref="[range.approximately.sized]"/><sref ref="[range.req.general]"/>
+<sref ref="[range.range]"/><sref ref="[range.sized]"/>
+<sref ref="[range.filter.view]"/><sref ref="[range.drop.view]"/>
+<sref ref="[range.drop.while.view]"/><sref ref="[range.split.view]"/>
+<sref ref="[range.reverse.view]"/><sref ref="[range.slide.view]"/>
+<sref ref="[range.chunk.by.view]"/>
+</section>
+<submitter>Andreas Weis</submitter>
+<date>02 Jun 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently range views that cache the result of their operation claim an
+amortized &#x1d4aa;(1) worst-case runtime complexity. This is inconsistent 
+with the established practice in algorithm analysis, where the given
+complexity bound must hold for all possible sequences of operations.
+Caching is not sufficient to lower the complexity bound here, as the
+sequence that contains only a single call to the operation will cause a
+runtime cost linear in the size of the underlying range. Thus all of the
+caching range operations are in fact &#x1d4aa;(n).
+<p/>
+Apart from the caching view operations, this also has secondary impacts
+in other places that rely on the complexity of iterator functions, such
+as the iterator requirements and functions for computing the size of a
+range.
+<p/>
+It is unclear how desirable it is under these circumstances to continue
+disallowing other kinds of &#x1d4aa;(n) behavior for iterator functions. 
+While caching offers clear benefits in the context of lazy evaluation, it
+cannot prevent losing the &#x1d4aa;(1) complexity guarantee. The proposed
+changes below therefore do not address the issue that other types of
+views (such as hypothetical non-caching variants of the affected views)
+that were previously considered invalid will become valid with these
+changes.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[iterator.requirements.general]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-14- All the categories of iterators require only those functions that are realizable 
+for a given category in <del>constant time (amortized)</del><ins>linear time</ins>. 
+Therefore, requirement tables and concept definitions for the iterators do not specify
+complexity.
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.approximately.sized]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- The `approximately_sized_range` concept refines range with the requirement that 
+an approximation of the number of elements in the range can be determined in 
+<del>amortized constant</del><ins>linear</ins> time using `ranges::reserve_hint`.
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.req.general]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The `range` concept requires that `ranges::begin` and `ranges::end` return an 
+iterator and a sentinel, respectively. The `sized_range` concept refines range 
+with the requirement that `ranges::size` be amortized &#x1d4aa;(<del>1</del><ins>n</ins>).
+The `view` concept specifies requirements on a `range` type to provide operations 
+with predictable complexity.
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.range]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- Given an expression `t` such that `decltype((t))` is <tt>T&amp;</tt>, `T` models `range` 
+only if
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; [&hellip;]</p></li>
+<li><p>(2.2) &mdash; both `ranges::begin(t)` and `ranges::end(t)` are <del>amortized
+constant</del><ins>linear</ins> time and non-modifying,
+and</p></li>
+<li><p>(2.3) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.sized]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- The `sized_range` concept refines `approximately_sized_range` with the 
+requirement that the number of elements in the range can be determined in 
+<del>amortized constant</del><ins>linear</ins> time using `ranges::size`.
+</p>
+<pre>
+template&lt;class T&gt;
+  concept sized_range =
+    approximately_sized_range&lt;T&gt; &amp;&amp; requires(T&amp; t) { ranges::size(t); };
+</pre>
+<blockquote>
+<p>
+-2- Given an lvalue `t` of type <tt>remove_reference_t&lt;T&gt;</tt>, `T` models 
+`sized_range` only if
+</p>
+</blockquote>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; `ranges::size(t)` is amortized &#x1d4aa;(<del>1</del><ins>n</ins>), 
+does not modify `t`, and is equal to `ranges::distance(ranges::begin(t), ranges::end(t))`, 
+and</p></li>
+<li><p>(2.2) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.filter.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <i>iterator</i> begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Preconditions</i>: [&hellip;]
+<p/>
+-4- <i>Returns</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: <del>In order to provide the amortized constant time complexity required 
+by the `range` concept when `filter_view` models `forward_range`, this</del><ins>This</ins> 
+function caches the result within the `filter_view` for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.drop.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr auto begin()
+  requires (!(<i>simple-view</i>&lt;V&gt; &amp;&amp;
+              random_access_range&lt;const V&gt; &amp;&amp; sized_range&lt;const V&gt;));
+constexpr auto begin() const
+  requires random_access_range&lt;const V&gt; &amp;&amp; sized_range&lt;const V&gt;;
+</pre>
+<blockquote>
+<p>
+-3- <i>Returns</i>: [&hellip;]
+<p/>
+-4- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the `range` concept when `drop_view` models `forward_range`, the</del><ins>The</ins> 
+first overload caches the result within the `drop_view` for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.drop.while.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr auto begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Preconditions</i>: [&hellip;]
+<p/>
+-4- <i>Returns</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the `range` concept when `drop_while_view` models `forward_range`, the</del><ins>The</ins> 
+first call caches the result within the `drop_while_view` for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.split.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <i>iterator</i> begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Returns</i>: [&hellip;]
+<p/>
+-4- <i>Remarks</i>: <del>In order to provide the amortized constant time complexity 
+required by the `range` concept, this</del><ins>This</ins> function caches the result 
+within the `split_view` for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.reverse.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr reverse_iterator&lt;iterator_t&lt;V&gt;&gt; begin();
+</pre>
+<blockquote>
+<p>
+-2- <i>Returns</i>: [&hellip;]
+<p/>
+-3- <i>Remarks</i>: <del>In order to provide the amortized constant time complexity 
+required by the `range` concept, this</del><ins>This</ins> function caches the 
+result within the `reverse_view` for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.slide.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr auto begin()
+  requires (!(<i>simple-view</i>&lt;V&gt; &amp;&amp; <i>slide-caches-nothing</i>&lt;const V&gt;));
+</pre>
+<blockquote>
+<p>
+-3- <i>Returns</i>: [&hellip;]
+<p/>
+-4- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the `range` concept, this</del><ins>This</ins> function caches the result 
+within the `slide_view` for use on subsequent calls when `V` models
+<tt><i>slide-caches-first</i></tt>.
+</p>
+</blockquote>
+[&hellip;]
+<pre>
+constexpr auto end()
+  requires (!(<i>simple-view</i>&lt;V&gt; &amp;&amp; <i>slide-caches-nothing</i>&lt;const V&gt;));
+</pre>
+<blockquote>
+<p>
+-6- <i>Returns</i>: [&hellip;]
+<p/>
+-7- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the `range` concept, this</del><ins>This</ins> function caches the result 
+within the `slide_view` for use on subsequent calls when `V` models
+<tt><i>slide-caches-first</i></tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.chunk.by.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <i>iterator</i> begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Preconditions</i>: [&hellip;]
+<p/>
+-4- <i>Returns</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the `range` concept, this</del><ins>This</ins> function caches the result 
+within the `chunk_by_view` for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
