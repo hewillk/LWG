@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4270" status="New">
+<title>Diagnose misuse of `std::projected::operator*`</title>
+<section><sref ref="[projected]"/></section>
+<submitter>Jiang An</submitter>
+<date>30 May 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`std::projected::operator*` is only intentionally used for type calculation like `std::declval`. 
+Currently, if one attempts to call it in a potentially evaluated expression, the program is ill-formed, 
+no diagnostic required because the `operator*` is not defined.
+<p/>
+It seems better to diagnose such misuse, as we are already diagnosing misuse of `std::declval` 
+(<sref ref="[declval]"/>/2). Implementation used to perform such misuse via `std::ranges::iter_move`, 
+but libc++ and libstdc++ have already switched not to do this (see 
+<a href="https://github.com/microsoft/STL/issues/5555">microsoft/STL#5555</a>).
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[projected]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class I, class Proj&gt;
+  struct <i>projected-impl</i> { <i>// exposition only</i>
+    struct type { <i>// exposition only</i>
+      [&hellip;]
+      <i>// models weakly_incrementable</i>
+      indirect_result_t&lt;Proj&amp;, I&gt; operator*() const; <del><i>// not defined</i></del>
+    };
+  };
+  [&hellip;]
+}
+</pre>
+<pre>
+<ins>indirect_result_t&lt;Proj&amp;, I&gt; operator*() const;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Mandates</i>: This function is not odr-used (<sref ref="[basic.def.odr]"/>).</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
