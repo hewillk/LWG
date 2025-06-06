@@ -4,7 +4,7 @@
 <issue num="4273" status="New">
 <title>Standard execution policy types should be conventional tag class types</title>
 <section>
-<sref ref="[execpol.objects]"/>
+<sref ref="[execpol]"/>
 </section>
 <submitter>Jiang An</submitter>
 <date>03 Jun 2025</date>
