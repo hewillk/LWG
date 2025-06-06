@@ -34,7 +34,7 @@ This wording is relative to <paper num="N5008"/>.
 namespace std {
   template&lt;class I, class Proj&gt;
   struct <i>projected-impl</i> { <i>// exposition only</i>
-    struct type { <i>// exposition only</i>
+    struct <i>type</i> { <i>// exposition only</i>
       [&hellip;]
       <i>// models weakly_incrementable</i>
       indirect_result_t&lt;Proj&amp;, I&gt; operator*() const; <del><i>// not defined</i></del>
