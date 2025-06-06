@@ -79,7 +79,7 @@ an approximation of the number of elements in the range can be determined in
 <p>
 -2- The `range` concept requires that `ranges::begin` and `ranges::end` return an 
 iterator and a sentinel, respectively. The `sized_range` concept refines range 
-with the requirement that `ranges::size` be amortized &#x1d4aa;(<del>1</del><ins>n</ins>).
+with the requirement that `ranges::size` be <del>amortized</del> &#x1d4aa;(<del>1</del><ins>n</ins>).
 The `view` concept specifies requirements on a `range` type to provide operations 
 with predictable complexity.
 </p>
@@ -123,7 +123,7 @@ template&lt;class T&gt;
 </p>
 </blockquote>
 <ol style="list-style-type: none">
-<li><p>(2.1) &mdash; `ranges::size(t)` is amortized &#x1d4aa;(<del>1</del><ins>n</ins>), 
+<li><p>(2.1) &mdash; `ranges::size(t)` is <del>amortized</del> &#x1d4aa;(<del>1</del><ins>n</ins>), 
 does not modify `t`, and is equal to `ranges::distance(ranges::begin(t), ranges::end(t))`, 
 and</p></li>
 <li><p>(2.2) &mdash; [&hellip;]</p></li>
