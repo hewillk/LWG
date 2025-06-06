@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4273" status="New">
+<title>Standard execution policy types should be conventional tag class types</title>
+<section>
+<sref ref="[execpol.objects]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>03 Jun 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Existing standard execution policy types don't hold any state, and mostly act as disambiguating tags 
+in parallel algorithms. Perhaps it will be better to ensure them to be similar to construction tag types, 
+which possibly enables more desired usages.
+<p/>
+Currently, libc++ makes these types non-movable, which is arguable undesired per the decision made in 
+<paper num="P3136R1"/>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[execpol.seq]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+class execution::sequenced_policy { <del><i>unspecified</i></del>
+    <ins>explicit sequenced_policy() = default;</ins> 
+};
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[execpol.par]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+class execution::parallel_policy { <del><i>unspecified</i></del>
+    <ins>explicit parallel_policy() = default;</ins> 
+};
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[execpol.parunseq]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+class execution::parallel_unsequenced_policy { <del><i>unspecified</i></del>
+    <ins>explicit parallel_unsequenced_policy() = default;</ins> 
+};
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[execpol.unseq]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+class execution::unsequenced_policy { <del><i>unspecified</i></del>
+    <ins>explicit unsequenced_policy() = default;</ins> 
+};
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[execpol.objects]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+inline constexpr execution::sequenced_policy execution::seq{ <del><i>unspecified</i></del> };
+inline constexpr execution::parallel_policy execution::par{ <del><i>unspecified</i></del> };
+inline constexpr execution::parallel_unsequenced_policy execution::par_unseq{ <del><i>unspecified</i></del> };
+inline constexpr execution::unsequenced_policy execution::unseq{ <del><i>unspecified</i></del> };
+</pre>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
