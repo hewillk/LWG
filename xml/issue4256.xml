@@ -15,7 +15,7 @@ For the following class:
 <pre>
 struct M
 {
-   void operator();
+   void operator()();
 };
 </pre>
 <p>
