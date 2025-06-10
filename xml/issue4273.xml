@@ -32,7 +32,8 @@ This wording is relative to <paper num="N5008"/>.
 <blockquote>
 <pre>
 class execution::sequenced_policy { <del><i>unspecified</i></del>
-  <ins>explicit sequenced_policy() = default;</ins> 
+<ins>public:
+  explicit sequenced_policy() = default;</ins> 
 };
 </pre>
 </blockquote>
@@ -43,7 +44,8 @@ class execution::sequenced_policy { <del><i>unspecified</i></del>
 <blockquote>
 <pre>
 class execution::parallel_policy { <del><i>unspecified</i></del>
-  <ins>explicit parallel_policy() = default;</ins> 
+<ins>public:
+  explicit parallel_policy() = default;</ins> 
 };
 </pre>
 </blockquote>
@@ -54,7 +56,8 @@ class execution::parallel_policy { <del><i>unspecified</i></del>
 <blockquote>
 <pre>
 class execution::parallel_unsequenced_policy { <del><i>unspecified</i></del>
-  <ins>explicit parallel_unsequenced_policy() = default;</ins> 
+<ins>public:
+  explicit parallel_unsequenced_policy() = default;</ins> 
 };
 </pre>
 </blockquote>
@@ -65,7 +68,8 @@ class execution::parallel_unsequenced_policy { <del><i>unspecified</i></del>
 <blockquote>
 <pre>
 class execution::unsequenced_policy { <del><i>unspecified</i></del>
-  <ins>explicit unsequenced_policy() = default;</ins> 
+<ins>public:
+  explicit unsequenced_policy() = default;</ins> 
 };
 </pre>
 </blockquote>
