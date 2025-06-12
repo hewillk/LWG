@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4200" status="Tentatively Ready">
+<issue num="4200" status="Voting">
 <title>The `operation_state` concept can be simplified</title>
 <section><sref ref="[exec.opstate.general]"/></section>
 <submitter>Eric Niebler</submitter>
