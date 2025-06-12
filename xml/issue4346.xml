@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4346" status="Tentatively Ready">
+<issue num="4346" status="Voting">
 <title><code>task::promise_type::return_void</code>/<code>value</code> lack a specification</title>
 <section><sref ref="[task.promise]"/></section>
 <submitter>Dietmar Kühl</submitter>

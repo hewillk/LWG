@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4266" status="Tentatively Ready">
+<issue num="4266" status="Voting">
 <title>`layout_stride::mapping` should treat empty mappings as exhaustive</title>
 <section><sref ref="[mdspan.layout.stride]"/></section>
 <submitter>Tomasz Kamiński</submitter>
