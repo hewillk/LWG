@@ -54,7 +54,7 @@ namespace std {
       <i>iter-const-rvalue-reference-t</i>&lt;Iterator&gt;;
           
     public:
-      <ins>using iterator_type = I;</ins>
+      <ins>using iterator_type = Iterator;</ins>
       using iterator_concept = <i>see below</i>;
       using iterator_category = <i>see below</i>;  // <i>not always present</i>
       using value_type = iter_value_t&lt;Iterator&gt;;
