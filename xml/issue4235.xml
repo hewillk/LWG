@@ -8,12 +8,18 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>25 Mar 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
 Intuitively, both view classes should also have <code>reserve_hint</code> members.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

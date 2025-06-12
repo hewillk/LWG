@@ -6,7 +6,7 @@
 <section><sref ref="[indirect.asgn]"/></section>
 <submitter>Jonathan Wakely</submitter>
 <date>01 May 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -37,6 +37,15 @@ we only do a non-throwing transfer when the allocators are equal.
 I think we <i>should</i> transfer ownership when POCMA is true,
 which would make the noexcept-specifier correct.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+Similar change needed for `std::polymorphic`.
+</p>
+
 </discussion>
 
 <resolution>

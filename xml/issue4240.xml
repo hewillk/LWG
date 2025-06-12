@@ -8,7 +8,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>06 Apr 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -115,6 +115,16 @@ of guarantee about <code>formattable</code> can bring unnecessary confusion.
 <p>
 I think we should ensure that <code>color</code> is <code>formattable</code>, because it is formattable.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"This change would prevent future evolution of the API."
+"Maybe `formatter` is not useful and `formattable_with` should always be used."
+</p>
+
 </discussion>
 
 <resolution>

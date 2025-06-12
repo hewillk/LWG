@@ -8,7 +8,7 @@
 </section>
 <submitter>Luc Grosheintz</submitter>
 <date>02 Jun 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -38,6 +38,12 @@ Moreover, for rank 0 `layout_stride` can be converted to any
 specialization of `layout_left` or `layout_right`; but not to every
 specialization of `layout_stride`.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

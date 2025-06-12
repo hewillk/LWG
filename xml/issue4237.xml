@@ -8,7 +8,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>27 Mar 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -59,6 +59,12 @@ specialization provides <code>iterator_category</code>.
 This issue is somewhat related to LWG <iref ref="3763"/>, which is a further consideration after LWG 
 <iref ref="3749"/> has been resolved.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

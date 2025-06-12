@@ -8,7 +8,7 @@
 </section>
 <submitter>Eric Niebler</submitter>
 <date>26 Apr 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -57,6 +57,15 @@ what they are for late customization. This is a bug. They should be consistent.
 and this inconsistency was a mistake on my part. The correct thing to do is to change 
 <tt><i>get-domain-late</i></tt> to treat `schedule_from` as special, not `continues_on`.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"Names are a bit misleading but the change looks right."
+</p>
+
 </discussion>
 
 <resolution>

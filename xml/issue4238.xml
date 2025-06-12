@@ -8,7 +8,7 @@
 </section>
 <submitter>Matthias Kretz</submitter>
 <date>27 Mar 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -46,6 +46,12 @@ basic_simd_mask&lt;<i>integer-from</i>&lt;16&gt;, Abi&gt;&gt;&gt;</tt>
 <li><p>delete unary `+`, `-`, and `~` for <tt>basic_simd_mask&lt;16, Abi&gt;</tt> 
 (closest to the status quo)</p></li>
 </ol>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
