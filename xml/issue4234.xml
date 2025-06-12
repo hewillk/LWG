@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4234" status="New">
+<issue num="4234" status="Tentatively Ready">
 <title>Including <tt>&lt;hive&gt;</tt> doesn't provide <tt>std::begin/end</tt></title>
 <section>
 <sref ref="[iterator.range]"/>
@@ -15,6 +15,12 @@
 <sref ref="[iterator.range]"/> should add <tt>&lt;hive&gt;</tt> to the list as the latter provides
 a series of range access member functions such as <tt>begin/end</tt>.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

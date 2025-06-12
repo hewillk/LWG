@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4245" status="New">
+<issue num="4245" status="Tentatively Ready">
 <title>Operators that interact with `counted_iterator` and `default_sentinel_t` should be `noexcept`</title>
 <section>
 <sref ref="[counted.iterator]"/><sref ref="[counted.iter.nav]"/><sref ref="[counted.iter.cmp]"/>
@@ -17,6 +17,12 @@ which only involves simple integer arithmetic and does not have any <i>Precondit
 <p/>
 In this case, it is reasonable to declare them as <code>noexcept</code>.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after seven votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

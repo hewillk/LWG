@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4247" status="New">
+<issue num="4247" status="Tentatively Ready">
 <title>Header <tt>&lt;stdbit.h&gt;</tt> is not yet freestanding</title>
 <section>
 <sref ref="[stdbit.h.syn]"/>
@@ -16,6 +16,12 @@ Per C23/WG14 <a href="https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3220.pdf
 is freestanding in C23, but C++ hasn't required it for a freestanding implementation. 
 LWG <iref ref="4049"/> is related but doesn't cover this, because there's no <tt>&lt;cstdbit&gt;</tt> standard header.
 </p>
+
+<note>2025-06-12; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
