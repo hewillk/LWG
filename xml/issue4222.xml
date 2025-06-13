@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4222" status="New">
+<issue num="4222" status="Tentatively Ready">
 <title>`expected` constructor from a single value missing a constraint</title>
 <section>
 <sref ref="[expected.object.cons]"/>
@@ -62,6 +62,12 @@ like so:
 <blockquote><pre>
 expected&lt;T, E&gt; a(in_place, unexpect);
 </pre></blockquote>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after nine votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
