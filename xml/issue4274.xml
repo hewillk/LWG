@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4274" status="New">
+<issue num="4274" status="Tentatively Ready">
 <title>The `chrono::hh_mm_ss` constructor is ill-formed for unsigned durations</title>
 <section>
 <sref ref="[time.hms.members]"/>
@@ -23,6 +23,12 @@ Moreover, <tt>is_constructible_v&lt;hh_mm_ss&lt;ud&gt;, ud&gt;</tt> is required
 to be true by the standard for any duration, so making it actually work makes 
 a lot of sense.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
