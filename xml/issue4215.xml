@@ -8,7 +8,7 @@
 </section>
 <submitter>Eric Niebler</submitter>
 <date>13 Feb 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -62,6 +62,16 @@ Simply put, `run_loop::finish()` has to be `noexcept`. The implementation must f
 into the <tt><i>finishing</i></tt> state. If it cannot, it should terminate. Throwing an exception and foisting the 
 problem on the caller &mdash; who has no recourse &mdash; is simply wrong.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"If this can call `terminate()`, we should explicitly say so
+(c.f. <sref ref="[thread.condition.condvar]"/> p11)"
+</p>
+
 </discussion>
 
 <resolution>
