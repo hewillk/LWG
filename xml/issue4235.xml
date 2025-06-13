@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4235" status="New">
+<issue num="4235" status="Tentatively Ready">
 <title><code>cache_latest_view</code> and <code>to_input_view</code> miss <code>reserve_hint</code></title>
 <section>
 <sref ref="[range.cache.latest.view]"/><sref ref="[range.to.input.view]"/>
@@ -18,6 +18,12 @@ Intuitively, both view classes should also have <code>reserve_hint</code> member
 <note>2025-06-12; Reflector poll</note>
 <p>
 Set priority to 2 after reflector poll.
+</p>
+
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 
 </discussion>
