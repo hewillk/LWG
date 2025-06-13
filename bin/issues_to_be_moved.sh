@@ -17,6 +17,7 @@ usage()
   echo
   echo "Options:"
   echo "--help    Print this usage and exit."
+  echo "--no-toc  Do not include each issue in table of contents"
   echo "--intros  Read a block of HTML text from standard input"
   echo "          as an introductory paragraph for each status."
   echo "--nad     Include Tentatively NAD issues in the report."
@@ -37,10 +38,12 @@ die()
 intros=no
 nad=no
 ts=no
+toc=yes
 while [[ "$1" == --* ]]
 do
   case "$1" in
     --help) usage ; exit ;;
+    --no-toc) toc=no ;;
     --intros) intros=yes ;;
     --nad) nad=yes ;;
     --ts) ts=yes ;;
@@ -89,7 +92,7 @@ dump_issues()
     count=$(echo "${issues[$st]}" | wc -w)
     echo "Processing $count $st issues ..." >&2
     test $count -ne 0 || continue
-    printf '<h2 id="%s">%s Issues</h2>\n' "${anchors[$st]}" "$st"
+    printf '<h2 id="%s">%s Issues</h2>\n\n' "${anchors[$st]}" "$st"
     if [ "$intros" = "yes" ]
     then
       echo "* Enter HTML text, followed by EOF (Ctrl-D on UNIX):" >&2
@@ -119,6 +122,33 @@ dump_issues()
         -e '/^<\/body>/,$d' \
         $html
     done
+  done
+}
+
+dump_toc()
+{
+  # for each status
+  st="$1"
+
+  count=$(echo "${issues[$st]}" | wc -w)
+  echo "Summarizing $count $st issues ..." >&2
+  test $count -ne 0 || return
+  echo "${issues[$st]}" | while read i
+  do
+    if [[ $ts = no ]]
+    then
+      match=$(grep -o '^<title>\[[^]]\+\.ts\.[^]]\+]' "xml/issue$i.xml")
+      if [[ $match ]]
+      then
+        continue
+      fi
+    fi
+    printf '<li><a href="#%d">%d</a>.\n' $i $i
+    # Extracting just the <title> from the HTML is tricky, due to some
+    # multiline titles like issue2642.html so extract from the XML instead.
+    xpath -q -e '/issue/title/node()' xml/issue$i.xml \
+      | sed -E -e 's;`([^`]+)`;<code>\1</code>;g' # replace backticks
+    printf '\n</li>\n'
   done
 }
 
@@ -171,7 +201,14 @@ EOT
 for st in "${statuses[@]}"
 do
   [ -n "${issues[$st]}" ] || continue
-  printf '<li><a href="#%s">%s Issues</a></li>\n' "${anchors[$st]}" "$st"
+  printf '<li><a href="#%s">%s Issues</a>' "${anchors[$st]}" "$st"
+  if [[ $toc = yes ]]
+  then
+    printf '\n<ul>\n'
+      dump_toc "$st"
+    printf '</ul>\n'
+  fi
+  printf '</li>\n'
 done
 echo '</ul>'
 
