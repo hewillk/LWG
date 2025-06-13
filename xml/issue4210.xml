@@ -6,7 +6,7 @@
 <section><sref ref="[range.cache.latest.iterator]"/></section>
 <submitter>Hewill Kang</submitter>
 <date>09 Feb 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -50,6 +50,12 @@ to preserve the original ref-qualifiers as much as possible (I don't see any dis
 in the original paper), or not provide a specialized <code>iter_move</code>, since it's intuitive to have 
 the default <code>iter_move</code> return an rvalue when it always returns an lvalue.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

@@ -8,7 +8,7 @@
 </section>
 <submitter>Patrick Palka</submitter>
 <date>03 Mar 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -76,6 +76,12 @@ operand that isn't a specialization of `basic_const_iterator` (or derived from o
 LWG <iref ref="3769"/> is an earlier issue about constraint recursion in `basic_const_iterator`'s
 operators, but there the recursion was independent of CWG 2369.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

@@ -6,7 +6,7 @@
 <section><sref ref="[concept.swappable]"/><sref ref="[utility.swap]"/><sref ref="[array.members]"/></section>
 <submitter>Jiang An</submitter>
 <date>13 Oct 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -22,6 +22,20 @@ don't refer to the same object. Should we make self-swapping of arrays well-defi
 perhaps we should change the semantics to plain loops that execute `swap` or `ranges::swap` on 
 elements.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+Instead of a loop I'd prefer something like:
+<blockquote>
+<i>Effects</i>:
+If `addressof(a) == addressof(b)`, no effects.
+Otherwise, equivalent to `swap_ranges(begin(a), end(a), begin(b))`.
+</blockquote>
+</p>
+
 </discussion>
 
 <resolution>

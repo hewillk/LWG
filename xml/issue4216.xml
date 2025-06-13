@@ -8,7 +8,7 @@
 </section>
 <submitter>Nikolas Klauser</submitter>
 <date>26 Feb 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -27,6 +27,24 @@ fix that, the output of `num_put::do_put` no longer matches the libc's
 decades, indicating that nobody seems to have a problem with
 `num_put::do_put` and `printf` having different results in some rare cases.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+We could emphasize that calling `printf` isn't actually intended:
+<blockquote>
+The representations at the end of stage 1 consists of the `char`'s
+that would be printed by a call of `printf(s, val)`
+<ins>in a hypothetical implementation</ins>,
+where `s` is the conversion specifier determined above.
+</blockquote>
+</p>
+<p>
+Why is there an apostrophe in `char`'s?
+</p>
+
 </discussion>
 
 <resolution>

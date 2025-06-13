@@ -7,7 +7,7 @@
 <section><sref ref="[alg.min.max]"/></section>
 <submitter>Casey Carter</submitter>
 <date>20 Oct 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -37,6 +37,12 @@ it returns <tt>b</tt> if
 <tt>invoke(comp, invoke(proj, b), invoke(proj, a))</tt> yields <tt>true</tt>
 and <tt>a</tt> otherwise.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
@@ -114,7 +120,7 @@ For the first form, <tt>T</tt> meets the
 -6- <i>Returns</i>: <del>The smallest value in the input range.
 Returns a copy of the leftmost element
 when several elements are equivalent to the smallest.</del>
-<ins>Returns a copy of the leftmost element <tt>e</tt>
+<ins>A copy of the leftmost element <tt>e</tt>
 in the input range <tt>r</tt> for which
 <tt>bool(invoke(comp, invoke(proj, x), invoke(proj, e)))</tt>
 is <tt>false</tt> for all elements <tt>x</tt> in <tt>r</tt>.</ins>

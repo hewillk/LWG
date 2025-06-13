@@ -8,7 +8,7 @@
 </section>
 <submitter>Thomas Köppe</submitter>
 <date>12 Feb 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -30,6 +30,12 @@ It seems convenient to change the round counter <math><mi>q</mi></math> to be 1-
 is an alias for the initial value, <math><mi>X</mi></math>), so that the final result is 
 <math><msup><mi>X</mi><mrow><mo>(</mo><mi>r</mi><mo>)</mo></mrow></msup></math>.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

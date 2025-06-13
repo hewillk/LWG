@@ -8,7 +8,7 @@
 </section>
 <submitter>Matthias Kretz</submitter>
 <date>18 Mar 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -39,6 +39,12 @@ complex&lt;double&gt; c{1., 1.f};
 simd&lt;complex&lt;double&gt;&gt; sc0(1., 1.);
 simd&lt;complex&lt;double&gt;, 4&gt; sc1(simd&lt;double, 4&gt;(1.), simd&lt;float, 4&gt;(1.f));
 </pre></blockquote>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
