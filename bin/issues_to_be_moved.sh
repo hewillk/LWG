@@ -127,29 +127,40 @@ dump_issues()
 
 dump_toc()
 {
+  echo '<ul>'
   # for each status
-  st="$1"
-
-  count=$(echo "${issues[$st]}" | wc -w)
-  echo "Summarizing $count $st issues ..." >&2
-  test $count -ne 0 || return
-  echo "${issues[$st]}" | while read i
+  for st in "${statuses[@]}"
   do
-    if [[ $ts = no ]]
+    count=$(echo "${issues[$st]}" | wc -w)
+    test $count -ne 0 || continue
+    echo "Summarizing $count $st issues ..." >&2
+    printf '<li><a href="#%s">%s Issues</a>' "${anchors[$st]}" "$st"
+    if [[ $toc = yes ]]
     then
-      match=$(grep -o '^<title>\[[^]]\+\.ts\.[^]]\+]' "xml/issue$i.xml")
-      if [[ $match ]]
-      then
-        continue
-      fi
+      printf '\n<ul>\n'
+
+      echo "${issues[$st]}" | while read i
+      do
+        if [[ $ts = no ]]
+        then
+          match=$(grep -o '^<title>\[[^]]\+\.ts\.[^]]\+]' "xml/issue$i.xml")
+          if [[ $match ]]
+          then
+            continue
+          fi
+        fi
+        printf '<li><a href="#%d">%d</a>.\n' $i $i
+        # Extracting just the <title> from the HTML is tricky, due to some
+        # multiline titles like issue2642.html so extract from the XML instead.
+        xpath -q -e '/issue/title/node()' xml/issue$i.xml \
+          | sed -E -e 's;`([^`]+)`;<code>\1</code>;g' # replace backticks
+        printf '\n</li>\n'
+      done
+      echo '</ul>'
     fi
-    printf '<li><a href="#%d">%d</a>.\n' $i $i
-    # Extracting just the <title> from the HTML is tricky, due to some
-    # multiline titles like issue2642.html so extract from the XML instead.
-    xpath -q -e '/issue/title/node()' xml/issue$i.xml \
-      | sed -E -e 's;`([^`]+)`;<code>\1</code>;g' # replace backticks
-    printf '\n</li>\n'
+    echo '</li>'
   done
+  echo '</ul>'
 }
 
 cat <<EOT
@@ -195,23 +206,9 @@ cat <<EOT
 <td align="left">$author &lt;<a href="mailto:$email">$email</a>&gt;</td>
 </tr>
 </table>
-<ul>
 EOT
 
-for st in "${statuses[@]}"
-do
-  [ -n "${issues[$st]}" ] || continue
-  printf '<li><a href="#%s">%s Issues</a>' "${anchors[$st]}" "$st"
-  if [[ $toc = yes ]]
-  then
-    printf '\n<ul>\n'
-      dump_toc "$st"
-    printf '</ul>\n'
-  fi
-  printf '</li>\n'
-done
-echo '</ul>'
-
+dump_toc
 dump_issues
 
 echo '</body>'
