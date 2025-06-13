@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4239" status="New">
+<issue num="4239" status="Tentatively Ready">
 <title>`flat_map`'s transparent comparator no longer works for string literals</title>
 <section>
 <sref ref="[flat.map.modifiers]"/>
@@ -37,6 +37,18 @@ We should just use `std::upper_bound` instead. libstdc++ already uses `std::uppe
 libc++ uses `ranges::upper_bound` but clang has not yet implemented <paper num="P2865"/> 
 properly.
 </p>
+
+<note>2025-06-13; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+<p>
+We should make `ranges::upper_bound` work for this case, but literals never met
+its `indirect_strict_weak_order` semantic requirements anyway.
+Making that work would be a new design to be seen be LEWG.
+The proposed resolution solves the immediate problem here.
+</p>
+
 </discussion>
 
 <resolution>
