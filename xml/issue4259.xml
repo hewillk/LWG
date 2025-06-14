@@ -22,6 +22,48 @@ type, which in turn makes `S::size_type(std::size_t(-1))` not equal to `S::size_
 <p/>
 Do we want to restore the old return values?
 </p>
+
+<superseded>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[string.find]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T&gt;
+  constexpr size_type find(const T&amp; t, size_type pos = 0) const noexcept(<i>see below</i>);
+[&hellip;]
+template&lt;class T&gt;
+  constexpr size_type find_last_not_of(const T&amp; t, size_type pos = npos) const noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-2- <i>Constraints</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: Let <tt><i>G</i></tt> be the name of the function. Equivalent to:
+</p>
+<blockquote><pre>
+basic_string_view&lt;charT, traits&gt; s = *this, sv = t;
+<del>return s.<i>G</i>(sv, pos);</del>
+<ins>if (auto result = s.<i>G</i>(sv, pos); result == size_t(-1))
+  return npos;
+else
+  return result;</ins>
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</superseded>
+
+<note>2025-06-10, reflector discussion</note>
+<p>
+During reflector discussion of this issue there was a preference to adjust the
+proposed wording to use `s.npos` instead of `size_t(-1)`. 
+</p>
 </discussion>
 
 <resolution>
@@ -49,7 +91,7 @@ template&lt;class T&gt;
 <blockquote><pre>
 basic_string_view&lt;charT, traits&gt; s = *this, sv = t;
 <del>return s.<i>G</i>(sv, pos);</del>
-<ins>if (auto result = s.<i>G</i>(sv, pos); result == size_t(-1))
+<ins>if (auto result = s.<i>G</i>(sv, pos); result == s.npos)
   return npos;
 else
   return result;</ins>
