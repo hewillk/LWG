@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4276" status="New">
+<title>`front()` and `back()` are not hardened for zero-length `std::array`s</title>
+<section>
+<sref ref="[array.zero]"/>
+</section>
+<submitter>Jan Schultke</submitter>
+<date>08 Jun 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The intent of <paper num="P3471"/> "Standard library hardening" is clearly to provide hardened preconditions 
+for members of sequence containers, including `std::array`. However, a zero-length `std::array` dodges this 
+hardening by having undefined behavior for `front()` and `back()` explicitly specified in 
+<sref ref="[array.zero]"/> paragraph 3.
+<p/>
+Without this paragraph, `front()` and `back()` would be hardened as well, as specified in <sref ref="[sequence.reqmts]"/>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[array.zero]"/> as indicated:</p>
+
+<blockquote>
+<p>
+<del>-3- The effect of calling `front()` or `back()` for a zero-sized array is undefined.</del>
+</p>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
