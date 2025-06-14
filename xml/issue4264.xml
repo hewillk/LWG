@@ -216,7 +216,7 @@ void f2() noexcept;
 function_ref&lt;void() noexcept&gt; r1(&amp;r1);
 function_ref&lt;void()&gt; r2(r1);
 r1 = &amp;f2;
-r2(); // it is unspecified if `f1` or `f2` is invoked</ins>
+f2(); // it is unspecified if `f1` or `f2` is invoked</ins>
 </pre>
 <p> 
 <ins>&mdash; <i>end example</i>]</ins>
