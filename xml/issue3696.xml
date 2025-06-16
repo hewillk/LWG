@@ -61,11 +61,11 @@ in an I/O operation, or the size of I/O buffers.<sup>257</sup>
 </p>
 
 <p>
-256) Typically `long long`.
+<sub>256) Typically `long long`.</sub>
 </p>
 <p>
-257) Most places where `streamsize` is used would use `size_t` in C,
-or `ssize_t` in POSIX.
+<sub>257) Most places where `streamsize` is used would use `size_t` in C,
+or `ssize_t` in POSIX.</sub>
 </p>
 </blockquote>
 </li>
