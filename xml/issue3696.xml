@@ -31,9 +31,46 @@ So I think we should just use "signed integer types" instead of "signed basic in
 Set priority to 3 after reflector poll.
 </p>
 
+<note>2025-06-16; Jonathan adds wording</note>
+
 </discussion>
 
 <resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[stream.types]"/> as indicated:</p>
+
+<blockquote>
+<pre>using streamoff = implementation-defined;</pre>
+<p>
+-1- The type `streamoff` is a synonym for one of the
+signed <del>basic</del> integral types
+of sufficient size to represent the maximum possible file size
+for the operating system.<sup>256</sup>
+</p>
+<pre>using streamsize = implementation-defined;</pre>
+<p>
+-2-
+The type `streamsize` is a synonym for one of the
+signed <del>basic</del> integral types.
+It is used to represent the number of characters transferred
+in an I/O operation, or the size of I/O buffers.<sup>257</sup>
+</p>
+
+<p>
+256) Typically `long long`.
+</p>
+<p>
+257) Most places where `streamsize` is used would use `size_t` in C,
+or `ssize_t` in POSIX.
+</p>
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
