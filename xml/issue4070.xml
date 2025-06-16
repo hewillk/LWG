@@ -155,7 +155,7 @@ template&lt;class FormatContext&gt;
 Let `s` be <code>p.generic_string&lt;filesystem::path::value_type&gt;()</code>
 if the `g` option is used, otherwise `p.native()`.
 Writes `s` into `ctx.out()`, adjusted according to the <i>path-format-spec</i>.
-If `charT` is `char`, `path::value_type` is `wchar_t`, and the literal encoding 
+If `charT` is `char`, `path::value_type` is `wchar_t`, and the <ins>ordinary</ins> literal encoding 
 is UTF-8, then the <del>escaped path</del> <ins>(possibly escaped) string</ins>
 is transcoded from the native encoding for wide character strings to UTF-8
 with maximal subparts of ill-formed subsequences substituted with
