@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4243" status="New">
+<issue num="4243" status="Ready">
 <title>`as_bytes`/`as_writable_bytes` is broken with <code>span&lt;volatile T&gt;</code></title>
 <section>
 <sref ref="[span.objectrep]"/>
@@ -107,6 +107,8 @@ support for `volatile`.
 <p>
 Set priority to 4 after reflector poll.
 </p>
+
+<note>Sofia 2025-06-17; Move to Ready</note>
 
 </discussion>
 
