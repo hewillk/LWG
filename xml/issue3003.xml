@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3003" status="LEWG">
+<issue num="3003" status="Resolved">
 <title><tt>&lt;future&gt;</tt> still has type-erased allocators in <tt>promise</tt></title>
 <section><sref ref="[futures.promise]"/></section>
 <submitter>Billy O'Neal III</submitter>
@@ -118,6 +118,9 @@ fix `reset()` as discussed in issue <iref ref="2245"/>.
 </p>
 
 <note>Wrocław 2024-11-18; LEWG would prefer a paper for this</note>
+
+<note>2025-06-21 Status changed: LEWG &rarr; Resolved.</note>
+Resolved by adoption of <paper num="P3503R3"/> in Sofia.
 
 </discussion>
 

@@ -29,6 +29,9 @@ Strike the last sentence of 30.6.9.1p4. In p3, revise "These constructors" to "T
 
 <note>Kona 2017-03-02</note>
 <p>Accepted as Immediate to resolve NB comment.</p>
+
+<note>Sofia 2025-06-21; this was reverted by <paper num="P3503R3"/></note>
+
 </discussion>
 
 <resolution>
