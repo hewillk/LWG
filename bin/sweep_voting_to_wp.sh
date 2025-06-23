@@ -8,13 +8,14 @@ then
   exit 1
 fi
 
-date=$(date +%F)
+today=$(date +%F)
 meeting=$1
+date=$2
 
 # We could use awk -F'"' '/status="voting"/ { print $2}' xml/issue*.xml here,
 # but the wildcard matches thousands of files, so let git grep loop over them.
 git grep 'status="Voting"' xml | awk -F'"' '{print $2}' | while read inum
 do
   bin/set_status $inum WP
-  sed -i "s/^<note>$date /<note>$meeting; /" xml/issue$inum.xml
+  sed -i "s/^<note>$today /<note>$meeting $date; /" xml/issue$inum.xml
 done
