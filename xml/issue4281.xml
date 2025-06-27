@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4281" status="New">
+<title>Inconsistency between `value_or()` and `error_or()` in `std::expected`</title>
+<section>
+<sref ref="[optional.observe]"/>
+<sref ref="[expected.object.obs]"/>
+</section>
+<submitter>Hiroaki Ando</submitter>
+<date>27 Jun 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[expected.object.obs]"/>/19, the return value of `value_or()`
+is specified as follows:
+<blockquote>
+<i>Returns</i>:
+<code>has_value() ? **this : static_cast&lt;T&gt;(std::forward&lt;U&gt;(v))</code>.
+</blockquote>
+
+Meanwhile, the return value of `error_or()` is specified as follows (<sref ref="[expected.object.obs]"/>/23):
+<blockquote>
+<i>Returns</i>:
+<code>std::forward&lt;G&gt;(e)</code> if <code>has_value()</code> is <code>true</code>, <code>error()</code> otherwise.
+</blockquote>
+Since these functions appear to be dual in nature,
+it would be preferable to maintain consistent notation.
+</p>
+<p>
+Jonathan adds:
+The wording in `expected::error_or` is newer, having been added by
+<paper num="P2505R5"/>, and intentionally avoided a conditional expression
+(the problems with conditional expressions explained in <paper num="p3177r0"/>
+don't actually affect these member functions, due to the non-const prvalue
+return type, but determining that there are no pessimized copies in `value_or`
+wouldn't be necessary if we didn't specify it with a conditional expression).
+The `error_or` wording also avoids using an explicit conversion when the
+<i>Mandates</i>: element requires implicit conversion to work anyway.
+We might want to rephrase the `value_or` wording to match `error_or`,
+or possibly make `value_or` and `error_or` even more explicit:
+</p>
+<blockquote>
+<i>Effects</i>: Equivalent to:
+<pre><code>
+if (has_value())
+  return **this;
+else
+  return std::forward&lt;U&gt;(v);
+</code></pre>
+</blockquote>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
