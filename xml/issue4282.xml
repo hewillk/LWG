@@ -59,7 +59,7 @@ template&lt;class T&gt;
 </pre>
 <blockquote>
 <p>
--16 <i>Mandates</i>: [&hellip;]
+-16- <i>Mandates</i>: [&hellip;]
 <p/>
 -17- <i>Preconditions</i>: [&hellip;]
 <p/>
@@ -67,7 +67,7 @@ template&lt;class T&gt;
 <p/>
 -19- <i>Returns</i>: `result + (last - first)`.
 <p/>
--20- <i>Throws:</i>: Nothing.
+-20- <i>Throws</i>: Nothing.
 <p/>
 <ins>-?- <i>Remarks</i>: If `relocate` is called during constant evaluation, and an
 exception is thrown by a constructor or destructor of `T`, the call to `relocate` 
