@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4283" status="New">
+<title>`std::trivially_relocate` needs stronger preconditions on "nested" objects with dynamic lifetime</title>
+<section>
+<sref ref="[obj.lifetime]"/>
+</section>
+<submitter>Giuseppe D'Angelo</submitter>
+<date>23 Jun 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[obj.lifetime]"/> the `std::trivially_relocate` function 
+is missing a precondition, that is, that any object alive in the range being
+relocated is itself trivially relocatable.
+<p/>
+We know the objects in the range are trivially relocatable, because
+there is a <i>Mandates</i>: element for this. The current draft has precise
+rules to determine whether a type is trivially relocatable or not; in
+general, subobjects are considered there (cf. <sref ref="[class.prop]"/>, 
+"eligible for trivial relocation", which discusses base classes and non-static
+data members).
+<p/>
+However these rules do not take into account objects with dynamic
+lifetime whose storage is being provided by (sub)objects in the range.
+<p/>
+For instance, given a `wrapper` type like:
+</p>
+<blockquote><pre>
+// wraps a T
+template&lt;typename T&gt;
+struct wrapper {
+  alignas(T) std::byte data[sizeof(T)];
+};
+</pre></blockquote>
+<p>
+then one can build a non-trivially relocatable object into `wrapper`
+objects:
+</p>
+<blockquote><pre>
+struct NTR { ~NTR() {} };
+static_assert(not std::is_trivially_relocatable_v&lt;NTR&gt;);
+
+using WS = wrapper&lt;NTR&gt;;
+static_assert(std::is_trivially_relocatable_v&lt;WS&gt;); // OK
+</pre></blockquote>
+<p>
+And now one can do this:
+</p>
+<blockquote><pre>
+WS* ws = /* &hellip; */;     // create a wrapper
+new (&amp;ws-&gt;data) NTR();  // create a NTR object into it
+
+std::trivially_relocate(ws, ws+1, dest); // should be UB
+</pre></blockquote>
+<p>
+Attempting to trivially relocate `*ws` should result in undefined
+behavior because `NTR` isn't trivially relocatable. I don't believe that
+this fact is correctly captured by the preconditions of
+`std::trivially_relocate`.
+<p/>
+A similar issue is present for polymorphic types. In <paper num="P2786"/>'s 
+design polymorphic types can be trivially relocatable (assuming all the other
+conditions hold). Given a trivially relocatable polymorphic type `P`,
+then this code:
+</p>
+<blockquote><pre>
+struct P { virtual void f(); };
+static_assert(std::is_trivially_relocatable_v&lt;P&gt;);
+
+using WP = wrapper&lt;P&gt;;
+WP* wp = /* &hellip; */;   // create a wrapper
+new (&amp;wp-&gt;data) P();  // create a P object into it
+
+std::trivially_relocate(wp, wp+1, dest); // implementation defined
+</pre></blockquote>
+<p>
+is well-defined or UB, depending on the implementation. This is because
+on some implementations trivially relocating a polymorphic type requires
+patching its virtual table pointer; cf. the discussion in chapter 15.1
+of <paper num="P2786R13"/>. However the "type erasure" done by 
+<tt>wrapper&lt;P&gt;</tt> in the example (ultimately, it is just an array 
+of bytes) does not allow implementations to do such patching, and the code 
+is going to fail at runtime. Therefore this case also needs to be discussed by
+`std::trivially_relocate`'s specification.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[obj.lifetime]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: For the general part of the issue (all objects in the range must be of
+trivially relocatable type), we append another point at the end of the existing 
+<i>Preconditions:</i> element of `trivially_relocate`.<br/>
+For the specifics of polymorphic types, we amend at the end of the description the existing 
+<i>Remarks</i>: element]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+template&lt;class T&gt;
+  T* trivially_relocate(T* first, T* last, T* result);
+</pre>
+<blockquote>
+<p>
+-9- <i>Mandates</i>: [&hellip;]
+<p/>
+-10- <i>Preconditions</i>: 
+</p>
+<ol style="list-style-type: none">
+<li><p>(10.1) &mdash; `[first, last)` is a valid range.</p></li>
+<li><p>(10.2) &mdash; `[result, result + (last - first))` denotes a region of storage that is a subset of the region
+reachable through `result` (<sref ref="[basic.compound]"/>) and suitably aligned for the type `T`.</p></li>
+<li><p>(10.3) &mdash; No element in the range `[first, last)` is a potentially-overlapping subobject.</p></li>
+<li><p><ins>(10.?) &mdash; All objects whose storage is being provided for (<sref ref="[intro.object]"/>) by
+objects in the `[first, last)` range are of trivially relocatable type.</ins></p></li>
+</ol>
+<p>
+-11- <i>Postconditions</i>: [&hellip;]
+<p/>
+-12- <i>Returns</i>: `result + (last - first)`.
+<p/>
+-13- <i>Throws</i>: Nothing.
+<p/>
+-14- <i>Complexity</i>: Linear in the length of the source range.
+<p/>
+-15- <i>Remarks</i>: The destination region of storage is considered reused (<sref ref="[basic.life]"/>). 
+No constructors or destructors are invoked. <ins>If any polymorphic object (<sref ref="[class.virtual]"/>) 
+exists in storage provided for (<sref ref="[intro.object]"/>) by objects in the `[first, last)` range,
+it is implementation-defined whether the behavior is undefined.</ins>
+<p/>
+[<i>Note 2</i>: Overlapping ranges are supported. &mdash; <i>end note</i>]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
