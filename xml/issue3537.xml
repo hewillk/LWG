@@ -60,6 +60,9 @@ Casey: I don't think we should mark these rbegin/rend overloads noexcept
 without making the pertinent <tt>reverse_iterator</tt> constructors
 conditionally noexcept.
 </p>
+
+<note>2025-07-01; <paper num="P3623R0"/> would resolve this</note>
+
 </discussion>
 
 <resolution>
