@@ -39,11 +39,12 @@ wouldn't be necessary if we didn't specify it with a conditional expression).
 The `error_or` wording also avoids using an explicit conversion when the
 <i>Mandates</i>: element requires implicit conversion to work anyway.
 We might want to rephrase the `value_or` wording to match `error_or`,
-or possibly make `value_or` and `error_or` even more explicit:
+or possibly make `value_or` and `error_or` even more explicit,
+specifying them in terms of `if`-`else`:
+:
 </p>
 <blockquote>
-<i>Effects</i>: Equivalent to:
-<pre><code>
+<i>Effects</i>: Equivalent to: <pre><code>
 if (has_value())
   return **this;
 else
