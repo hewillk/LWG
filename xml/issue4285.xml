@@ -28,7 +28,7 @@ of the standard library implementations are affected by this mistake.</p></li>
 <li><p>`date_order()` might need additional locale facets to find out the date order, but it doesn't have an 
 <tt>ios_base&amp;</tt> argument from which to get the locale.</p></li>
 <li><p>Many locales do not use any of the specified formats. For example, `de_DE` uses `%d.%m.%Y`, `zh_CN` 
-uses `%Y?%m?%d?`. Although <sref ref="[locale.time.get.virtuals]"/>/5 gives an implementation the latitude 
+uses `%Y年%m月%d日`. Although <sref ref="[locale.time.get.virtuals]"/>/5 gives an implementation the latitude 
 to accept additional formats, ambiguity could arise if the locale's format disagrees with `date_order()`.</p></li>
 </ol>
 <p>
