@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4286" status="New">
+<title>Some more feature-test macros for fully freestanding features are not marked freestanding</title>
+<section>
+<sref ref="[version.syn]"/><sref ref="[memory.syn]"/>
+</section>
+<submitter>Yihe Li</submitter>
+<date>17 Jun 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+LWG <iref ref="4189"/> (accepted in Hagenberg) added nearly the entire <tt>&lt;ranges&gt;</tt> header to freestanding. 
+However, the only feature-test macro being added to freestanding is `__cpp_lib_ranges_cache_latest`, which seems weird, 
+since `views::enumerate` is also added to freestanding following the blanket comment strategy, but its feature-test 
+macro remains not in freestanding. In retrospective, since all range algorithms are in freestanding via 
+<paper num="P2976"/>, all `__cpp_lib_ranges_*` FTMs (except `__cpp_lib_ranges_generate_random` since 
+`ranges::generate_random` is not in freestanding) should probably be marked as freestanding.
+<p/>
+Furthermore, LWG <iref ref="4126"/> left out some other FTMs for fully freestanding features. They are also added 
+in the following wording.
+<p/>
+A note about `is_sufficiently_aligned`: <paper num="P2897R7"/> does indicate in 5.7.6.1 that the function should be 
+freestanding, but somehow the wording didn't say so. The following wording includes the function and its FTM anyway 
+since hopefully this is just an omission when wording the paper.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[version.syn]"/>, header <tt>&lt;version&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+#define __cpp_lib_aligned_accessor             202411L <i>// <ins>freestanding,</ins> also in &lt;mdspan&gt;</i>
+[&hellip;]                                     
+#define __cpp_lib_array_constexpr              201811L <i>// <ins>freestanding,</ins> also in &lt;iterator&gt;, &lt;array&gt;</i>
+[&hellip;]                                     
+#define __cpp_lib_clamp                        201603L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
+[&hellip;]                                     
+#define __cpp_lib_constexpr_numeric            201911L <i>// <ins>freestanding,</ins> also in &lt;numeric&gt;</i>
+[&hellip;]                                     
+#define __cpp_lib_function_ref                 202306L <i>// <ins>freestanding,</ins> also in &lt;functional&gt;</i>
+#define __cpp_lib_gcd_lcm                      201606L <i>// <ins>freestanding,</ins> also in &lt;numeric&gt;</i>
+[&hellip;]
+#define __cpp_lib_integer_comparison_functions 202002L <i>// <ins>freestanding,</ins> also in &lt;utility&gt;</i>
+[&hellip;]
+#define __cpp_lib_is_sufficiently_aligned      202411L <i>// <ins>freestanding,</ins> also in &lt;memory&gt;</i>
+[&hellip;]
+#define __cpp_lib_ranges_contains              202207L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
+#define __cpp_lib_ranges_enumerate             202302L <i>// <ins>freestanding,</ins> also in &lt;ranges&gt;</i>
+#define __cpp_lib_ranges_find_last             202207L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
+#define __cpp_lib_ranges_fold                  202207L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
+[&hellip;]
+#define __cpp_lib_ranges_iota                  202202L <i>// <ins>freestanding,</ins> also in &lt;numeric&gt;</i>
+[&hellip;]
+#define __cpp_lib_ranges_reserve_hint          202502L <i>// <ins>freestanding,</ins> also in &lt;ranges&gt;</i>
+[&hellip;]
+#define __cpp_lib_ranges_starts_ends_with      202106L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
+[&hellip;]
+#define __cpp_lib_robust_nonmodifying_seq_ops  201304L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
+#define __cpp_lib_sample                       201603L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
+#define __cpp_lib_saturation_arithmetic        202311L <i>// <ins>freestanding,</ins> also in &lt;numeric&gt;</i>
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[memory.syn]"/>, header <tt>&lt;memory&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+template&lt;size_t Alignment, class T&gt;
+  bool is_sufficiently_aligned(T* ptr);      <ins><i>// freestanding</i></ins>
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
