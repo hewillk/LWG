@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4287" status="New">
+<title>&sect;[locale.codecvt.virtuals] `do_in` and `do_out` could do with better specification</title>
+<section>
+<sref ref="[locale.codecvt.virtuals]"/>
+</section>
+<submitter>S. B. Tam</submitter>
+<date>18 Jun 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Background: <a href="https://github.com/cplusplus/draft/pull/7347">https://github.com/cplusplus/draft/pull/7347</a>
+<p/>
+The specification of `codecvt::do_in` and `codecvt::do_out` is unclear, and possibly incorrect:
+</p>
+<ol>
+<li><p>the meaning of `noconv` is specified twice (once in paragraph 3, once in Table 91 [tab:locale.codecvt.inout]);</p></li>
+<li><p>the effect on `from_next` is not specified;</p></li>
+<li><p>the specification talks about "the input sequence [from, from_next)", but `from_next` is supposed to be an out parameter. 
+I think it should say "[from, from_end)" instead.</p></li>
+</ol>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: This is modified from Jonathan Wakely's suggestion in 
+<a href="https://github.com/cplusplus/draft/pull/7347#issuecomment-2549982495">https://github.com/cplusplus/draft/pull/7347#issuecomment</a>]
+</p>
+</blockquote>
+
+<ol>
+<li><p>In <sref ref="[locale.codecvt.virtuals]"/> remove Table 91 [tab:locale.codecvt.inout] in its entirety:</p>
+
+<blockquote>
+<table border="1">
+<caption><del>Table 91 &mdash; `do_in`/`do_out` result values [tab:locale.codecvt.inout]</del></caption>
+<tr align="center">
+<th><del>Value</del></th>
+<th><del>Meaning</del></th>
+</tr> 
+
+<tr>
+<td>
+<del><tt>ok</tt></del>
+</td>
+<td>
+<del>completed the conversion</del>
+</td>
+</tr>
+
+<tr>
+<td>
+<del><tt>partial</tt></del>
+</td>
+<td>
+<del>not all source characters converted</del>
+</td>
+</tr>
+
+<tr>
+<td>
+<del><tt>error</tt></del>
+</td>
+<td>
+<del>encountered a character in `[from, from_end)` that
+cannot be converted</del>
+</td>
+</tr>
+
+<tr>
+<td>
+<del><tt>noconv</tt></del>
+</td>
+<td>
+<del>`internT` and `externT` are the same type, and input
+sequence is identical to converted sequence</del>
+</td>
+</tr>
+
+</table>
+
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[locale.codecvt.virtuals]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+result do_out(
+  stateT&amp; state,
+  const internT* from, const internT* from_end, const internT*&amp; from_next,
+  externT* to, externT* to_end, externT*&amp; to_next) const;
+
+result do_in(
+  stateT&amp; state,
+  const externT* from, const externT* from_end, const externT*&amp; from_next,
+  internT* to, internT* to_end, internT*&amp; to_next) const;
+</pre>
+<blockquote>
+<p>
+-1- <i>Preconditions</i>: [&hellip;]
+<p/>
+-2- <i>Effects</i>: Translates characters in the source range `[from, from_end)`, 
+placing the results in sequential positions starting at destination to. Converts 
+no more than `(from_end - from)` source elements, and stores no more than 
+`(to_end - to)` destination elements.
+<p/>
+-3- <del>Stops if it encounters a character it cannot convert. It always leaves the 
+`from_next` and `to_next` pointers pointing one beyond the last element successfully 
+converted. If it returns `noconv`, `internT` and `externT` are the same type, and the 
+converted sequence is identical to the input sequence `[from, from_next)`, `to_next` 
+is set equal to `to`, the value of `state` is unchanged, and there are no changes to 
+the values in `[to, to_end)`.</del>
+<ins>If `internT` and `externT` are the same type 
+and the converted sequence would be identical to the input sequence 
+[`from`, `from_next`), then no elements are converted, the value of `state` is unchanged, 
+there are no changes to the values in [`to`, `to_end`), and the result is `noconv`. 
+Otherwise, if a character in [`from`,`from_end`) cannot be converted, conversion stops 
+at that character and the result is `error`. Otherwise, if all input characters are 
+successfully converted and placed in the output range, the result is `ok`. Otherwise, 
+the result is `partial`. In all cases, `from_next` is set to point to the first element 
+of the input that was not converted, `to_next` is set to point to the first unchanged 
+element in the output. [<i>Note</i>: When the result is `noconv`, `from_next` points 
+to `from` and `to_next` points to `to`. &mdash; <i>end note</i>]</ins>
+<p/>
+-4- A `codecvt` facet that is used by `basic_filebuf` [&hellip;]
+<p/>
+-5- <i>Returns</i>: <del>An enumeration value, as summarized in Table 91</del>
+<ins>The result as described above</ins>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
