@@ -12,7 +12,8 @@
 
 <discussion>
 <p>
-LWG <iref ref="4189"/> (accepted in Hagenberg) added nearly the entire <tt>&lt;ranges&gt;</tt> header to freestanding. 
+<paper num="P1642R11"/> (accepted in C++23) plus LWG <iref ref="4189"/> (accepted in Hagenberg) added nearly the entire 
+<tt>&lt;ranges&gt;</tt> header to freestanding. 
 However, the only feature-test macro being added to freestanding is `__cpp_lib_ranges_cache_latest`, which seems weird, 
 since `views::enumerate` is also added to freestanding following the blanket comment strategy, but its feature-test 
 macro remains not in freestanding. In retrospective, since all range algorithms are in freestanding via 
@@ -60,8 +61,6 @@ This wording is relative to <paper num="N5008"/>.
 #define __cpp_lib_ranges_fold                  202207L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
 [&hellip;]
 #define __cpp_lib_ranges_iota                  202202L <i>// <ins>freestanding,</ins> also in &lt;numeric&gt;</i>
-[&hellip;]
-#define __cpp_lib_ranges_reserve_hint          202502L <i>// <ins>freestanding,</ins> also in &lt;ranges&gt;</i>
 [&hellip;]
 #define __cpp_lib_ranges_starts_ends_with      202106L <i>// <ins>freestanding,</ins> also in &lt;algorithm&gt;</i>
 [&hellip;]
