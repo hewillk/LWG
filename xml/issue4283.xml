@@ -86,9 +86,8 @@ of bytes) does not allow implementations to do such patching, and the code
 is going to fail at runtime. Therefore this case also needs to be discussed by
 `std::trivially_relocate`'s specification.
 </p>
-</discussion>
 
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5008"/>.
 </p>
@@ -138,6 +137,68 @@ objects in the `[first, last)` range are of trivially relocatable type.</ins></p
 No constructors or destructors are invoked. <ins>If any polymorphic object (<sref ref="[class.virtual]"/>) 
 exists in storage provided for (<sref ref="[intro.object]"/>) by objects in the `[first, last)` range,
 it is implementation-defined whether the behavior is undefined.</ins>
+<p/>
+[<i>Note 2</i>: Overlapping ranges are supported. &mdash; <i>end note</i>]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</superseded>
+
+<note>2025-07-01; Pablo and Giuseppe improve wording</note>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[obj.lifetime]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: For the general part of the issue (all objects in the range must be of
+trivially relocatable type), we append another point at the end of the existing 
+<i>Preconditions:</i> element of `trivially_relocate`.<br/>
+For the specifics of polymorphic types, we amend at the end of the description the existing 
+<i>Remarks</i>: element]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+template&lt;class T&gt;
+  T* trivially_relocate(T* first, T* last, T* result);
+</pre>
+<blockquote>
+<p>
+-9- <i>Mandates</i>: [&hellip;]
+<p/>
+-10- <i>Preconditions</i>: 
+</p>
+<ol style="list-style-type: none">
+<li><p>(10.1) &mdash; `[first, last)` is a valid range.</p></li>
+<li><p>(10.2) &mdash; `[result, result + (last - first))` denotes a region of storage that is a subset of the region
+reachable through `result` (<sref ref="[basic.compound]"/>) and suitably aligned for the type `T`.</p></li>
+<li><p>(10.3) &mdash; No element in the range `[first, last)` is a potentially-overlapping subobject.</p></li>
+<li><p><ins>(10.?) &mdash; All objects whose storage is being provided for (<sref ref="[intro.object]"/>) by
+objects in the `[first, last)` range are of a type such that a union containing a non-static member of that type 
+would be eligible for trivial relocation.</ins></p></li>
+</ol>
+<p>
+-11- <i>Postconditions</i>: [&hellip;]
+<p/>
+-12- <i>Returns</i>: `result + (last - first)`.
+<p/>
+-13- <i>Throws</i>: Nothing.
+<p/>
+-14- <i>Complexity</i>: Linear in the length of the source range.
+<p/>
+-15- <i>Remarks</i>: The destination region of storage is considered reused (<sref ref="[basic.life]"/>). 
+No constructors or destructors are invoked.
 <p/>
 [<i>Note 2</i>: Overlapping ranges are supported. &mdash; <i>end note</i>]
 </p>
