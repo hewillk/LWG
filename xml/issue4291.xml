@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4291" status="New">
+<title> <code>explicit map(const Allocator&amp;)</code> should be <code>constexpr</code> </title>
+<section><sref ref="[map.overview]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>10 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The intent of <paper num="P3372R3"/> was for all container constructors to be
+constexpr, but during application of the paper to the working draft
+it was observed that one `map` constructor was missed.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[ptr.align]"/> as indicated:</p>
+<blockquote>
+<pre><code>
+<i>// 23.4.3.2, construct/copy/destroy</i>
+constexpr map() : map(Compare()) { }
+constexpr explicit map(const Compare&amp; comp, const Allocator&amp; = Allocator());
+template&lt;class InputIterator&gt;
+  constexpr map(InputIterator first, InputIterator last,
+                const Compare&amp; comp = Compare(), const Allocator&amp; = Allocator());
+template&lt;<i>container-compatible-range</i> &lt;value_type&gt; R&gt;
+  constexpr map(from_range_t, R&amp;&amp; rg, const Compare&amp; comp = Compare(),
+                const Allocator&amp; = Allocator());
+constexpr map(const map&amp; x);
+constexpr map(map&amp;&amp; x);
+<ins>constexpr</ins> explicit map(const Allocator&amp;);
+constexpr map(const map&amp;, const type_identity_t&lt;Allocator&gt;&amp;);
+constexpr map(map&amp;&amp;, const type_identity_t&lt;Allocator&gt;&amp;);
+constexpr map(initializer_list&lt;value_type&gt;, const Compare&amp; = Compare(),
+              const Allocator&amp; = Allocator());
+</code></pre>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
