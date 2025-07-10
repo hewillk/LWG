@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4292" status="New">
+<title>Unordered container local iterators should be constexpr iterators</title>
+<section>
+<sref ref="[unord.map.overview]"/>
+<sref ref="[unord.multimap.overview]"/>
+<sref ref="[unord.set.overview]"/>
+<sref ref="[unord.multiset.overview]"/>
+</section>
+<submitter>Jonathan Wakely</submitter>
+<date>10 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The intent of <paper num="P3372R3"/> was for all container iterators to be
+constexpr iterators, but during application of the paper to the working draft
+it was observed that unordered containers don't say it for their
+local iterators.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[unord.map.overview]"/> as indicated:</p>
+<blockquote>
+<p>-4-
+The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
+`local_iterator`, and `local_const_iterator`</ins>
+meet the constexpr iterator requirements
+(<sref ref="[iterator.requirements.general]"/>).
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[unord.multimap.overview]"/> as indicated:</p>
+<blockquote>
+<p>-4-
+The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
+`local_iterator`, and `local_const_iterator`</ins>
+meet the constexpr iterator requirements
+(<sref ref="[iterator.requirements.general]"/>).
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[unord.set.overview]"/> as indicated:</p>
+<blockquote>
+<p>-4-
+The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
+`local_iterator`, and `local_const_iterator`</ins>
+meet the constexpr iterator requirements
+(<sref ref="[iterator.requirements.general]"/>).
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[unord.multiset.overview]"/> as indicated:</p>
+<blockquote>
+<p>-4-
+The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
+`local_iterator`, and `local_const_iterator`</ins>
+meet the constexpr iterator requirements
+(<sref ref="[iterator.requirements.general]"/>).
+</p>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
