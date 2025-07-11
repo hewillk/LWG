@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4293" status="New">
+<title>span::subspan/first/last chooses wrong constructor when T is const-qualified bool</title>
+<section><sref ref="[span.sub]"/></section>
+<submitter>Yuhan Liu</submitter>
+<date>11 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In section <sref ref="[span.sub]"/>, paragraphs p12, p14, and p16 erroneously
+use the initializer list constructor for span instead of the intended
+iterator/count constructor.
+</p>
+<p>
+Specifically, in these paragraphs, the standard states:
+<blockquote>
+<i>Effects</i>: Equivalent to: `return {data(), count};`
+</blockquote>
+or some variant of `return {pointer, size}`.  As reported in
+<a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=120997">GCC bug 120997</a>
+this results in a span that points to invalid stack memory.
+This can be reproduced on GCC 15.1 for subspan, first, and last:
+<a href="https://godbolt.org/z/r9nrdWscq">https://godbolt.org/z/r9nrdWscq</a>.
+</p>
+<p>
+A proposed fix (thanks to Jonathan Wakely) could look like this following:
+<blockquote>
+`return span<element_type>(data(), count);`
+</blockquote>
+for the affected paragraphs,
+which would explicitly specify the constructor used.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
