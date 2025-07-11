@@ -28,7 +28,7 @@ This can be reproduced on GCC 15.1 for subspan, first, and last:
 <p>
 A proposed fix (thanks to Jonathan Wakely) could look like this following:
 <blockquote>
-`return span<element_type>(data(), count);`
+<code>return span&lt;element_type&gt;(data(), count);</code>
 </blockquote>
 for the affected paragraphs,
 which would explicitly specify the constructor used.
