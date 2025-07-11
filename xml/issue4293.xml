@@ -33,11 +33,131 @@ A proposed fix (thanks to Jonathan Wakely) could look like this following:
 for the affected paragraphs,
 which would explicitly specify the constructor used.
 </p>
+
+<note>2025-07-11; Jonathan adds proposed resolution</note>
+<p>
+The meaning of those <i>Effects</i>: paragraphs was changed for C++26 by
+<paper num="P2447R6"/> which added the `span(initializer_list)` constructor.
+A simpler demo is:
+<blockquote><pre><code>
+bool a[5]{};
+std::span&lt;const bool&gt; s(a);
+std::span&lt;const bool&gt; s2 = s.first(5);
+assert(s2.size() == 5); // OK in C++23, fails in C++26
+assert(s2.data() == a); // OK in C++23, fails in C++26
+</code></pre></blockquote>
+The proposed resolution is to use `R(data(), count)` instead of
+`{data(), count}`. The former always (uniformly) means the same thing,
+but for the latter the meaning of list-initialization depends on the types.
+The list-initialization form will choose the initializer-list constructor
+when `data()` and `count` are both convertible to the element type.
+</p>
 </discussion>
 
 <resolution>
 <p>
+This wording is relative to <paper num="N5008"/>.
 </p>
+
+<ol>
+
+<li><p>Modify <sref ref="[span.sub]"/> as indicated:</p>
+
+<blockquote>
+
+<pre><code>
+template&lt;size_t Count&gt; constexpr span&lt;element_type, Count&gt; first() const;
+</code></pre>
+<blockquote>
+<p>-1- <i>Mandates</i>: <code>Count &lt;= Extent</code> is `true`.</p>
+<p>-2- <i>Hardened preconditions</i>: <code>Count &lt;= size()</code> is `true`.</p>
+<p>-3- <i>Effects</i>: Equivalent to:
+<code>return R<ins>(</ins><del>{</del>data(), Count<del>}</del><ins>)</ins>;</code>
+where `R` is the return type.
+</p>
+</blockquote>
+
+<pre><code>
+template&lt;size_t Count&gt; constexpr span&lt;element_type, Count&gt; last() const;
+</code></pre>
+<blockquote>
+<p>-4- <i>Mandates</i>: <code>Count &lt;= Extent</code> is `true`.</p>
+<p>-5- <i>Hardened preconditions</i>: <code>Count &lt;= size()</code> is `true`.</p>
+<p>-6- <i>Effects</i>: Equivalent to:
+<code>return R<ins>(</ins><del>{</del>data() + (size() - Count), Count<del>}</del><ins>)</ins>;</code>
+where `R` is the return type.
+</p>
+</blockquote>
+
+<pre><code>
+template&lt;size_t Offset, size_t Count = dynamic_extent&gt;
+  constexpr span&lt;element_type, <i>see below</i>&gt; subspan() const;
+</code></pre>
+<blockquote>
+<p>-7- <i>Mandates</i>:
+<pre><code>  Offset &lt;= Extent &amp;&amp; (Count == dynamic_extent || Count &lt;= Extent - Offset)
+</code></pre>
+is `true`.</p>
+<p>-8- <i>Hardened preconditions</i>:
+<pre><code>  Offset &lt;= size() &amp;&amp; (Count == dynamic_extent || Count &lt;= size() - Offset)
+</code></pre>
+is `true`.</p>
+<p>-9- <i>Effects</i>: Equivalent to:
+<pre><code>  return span&lt;ElementType, <i>see below</i>&gt;(
+    data() + Offset, Count != dynamic_extent ? Count : size() - Offset);
+</code></pre>
+</p>
+<p>-10- <i>Remarks</i>:
+The second template argument of the returned `span` type is:
+<pre><code>  Count != dynamic_extent ? Count
+                          : (Extent != dynamic_extent ? Extent - Offset
+                                                      : dynamic_extent)
+</code></pre>
+</p>
+</blockquote>
+
+<pre><code>
+constexpr span&lt;element_type, dynamic_extent&gt; first(size_type count) const;
+</code></pre>
+<blockquote>
+<p>-11- <i>Hardened preconditions</i>: <code>count &lt;= size()</code> is `true`.</p>
+<p>-12- <i>Effects</i>: Equivalent to:
+<code>return <ins>R(</ins><del>{</del>data(), count<del>}</del><ins>)</ins>;</code>
+<ins>where `R` is the return type</ins>.
+</p>
+</blockquote>
+
+<pre><code>
+constexpr span&lt;element_type, dynamic_extent&gt; last(size_type count) const;
+</code></pre>
+<blockquote>
+<p>-13- <i>Hardened preconditions</i>: <code>count &lt;= size()</code> is `true`.</p>
+<p>-14- <i>Effects</i>: Equivalent to:
+<code>return <ins>R(</ins><del>{</del>data() + (size() - count), count<del>}</del><ins>)</ins>;</code>
+<ins>where `R` is the return type</ins>.
+</p>
+</blockquote>
+
+<pre><code>
+constexpr span&lt;element_type, dynamic_extent&gt; subspan(
+  size_type offset, size_type count = dynamic_extent) const;
+</code></pre>
+<blockquote>
+<p>-15- <i>Hardened preconditions</i>:
+<pre><code>  offset &lt;= size() &amp;&amp; (count == dynamic_extent || count &lt;= size() - offset
+</code></pre>
+is `true`.</p>
+<p>-16- <i>Effects</i>: Equivalent to:
+<pre><code>  return <ins>R(</ins><del>{</del>data() + offset, count == dynamic_extent ? size() - offset :  count<del>}</del><ins>)</ins>;
+</code></pre>
+<ins>where `R` is the return type</ins>.
+</p>
+</blockquote>
+
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
