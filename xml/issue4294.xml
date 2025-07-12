@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4294" status="New">
+<title>`bitset(const CharT*)` constructor needs to be constrained</title>
+<section><sref ref="[bitset.cons]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>12 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+This code might be ill-formed, with an error outside the immediate context
+that users cannot prevent:
+<blockquote><pre><code>
+#include &lt;bitset&gt;
+struct NonTrivial { ~NonTrivial() { } };
+static_assert( ! std::is_constructible_v&lt;std::bitset&lt;1&gt;, NonTrivial*&gt; );
+</code></pre></blockquote>
+</p>
+<p>
+The problem is that the `bitset(const CharT*)` constructor tries to instantiate
+<code>basic_string_view&lt;NonTrivial&gt;</code> to find its `size_type`,
+and that instantiation might ill-formed (e.g. if `std::basic_string_view` or
+`std::char_traits` has a static assert enforcing the requirement for their
+character type to be sufficiently char-like (<sref ref="[strings.general]"/>).
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[bitset.cons]"/> as indicated:</p>
+
+<blockquote>
+<pre><code>
+template&lt;class charT&gt;
+  constexpr explicit bitset(
+    const charT* str,
+    typename basic_string_view&lt;charT&gt;::size_type n = basic_string_view&lt;charT&gt;::npos,
+    charT zero = charT(’0’),
+    charT one = charT(’1’));
+</code></pre>
+<blockquote>
+<p>
+<ins>-?- <i>Constraints</i>:
+<code>is_trivially_default_constructible_v&lt;charT&gt;</code> is `true`.
+</ins>
+</p>
+<p>-8- <i>Effects</i>: As if by:
+<blockquote>
+<pre><code>bitset(n == basic_string_view&lt;charT&gt;::npos
+          ? basic_string_view&lt;charT&gt;(str)
+          : basic_string_view&lt;charT&gt;(str, n),
+       0, n, zero, one)
+</code></pre>
+</blockquote>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+</resolution>
+
+</issue>
