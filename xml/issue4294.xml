@@ -21,9 +21,12 @@ static_assert( ! std::is_constructible_v&lt;std::bitset&lt;1&gt;, NonTrivial*&gt
 <p>
 The problem is that the `bitset(const CharT*)` constructor tries to instantiate
 <code>basic_string_view&lt;NonTrivial&gt;</code> to find its `size_type`,
-and that instantiation might ill-formed (e.g. if `std::basic_string_view` or
+and that instantiation might ill-formed, e.g. if `std::basic_string_view` or
 `std::char_traits` has a static assert enforcing the requirement for their
-character type to be sufficiently char-like (<sref ref="[strings.general]"/>).
+character type to be sufficiently char-like. <sref ref="[strings.general]"/>
+defines a char-like type as "any non-array trivially copyable standard-layout
+(<sref ref="[basic.types.general]"/>) type `T`
+where <code>is_trivially_default_constructible_v&lt;T&gt;</code> is `true`."
 </p>
 </discussion>
 
