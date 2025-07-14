@@ -33,7 +33,7 @@ This wording is relative to <paper num="N5008"/>.
 <blockquote>
 <p>-4-
 The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
-`local_iterator`, and `local_const_iterator`</ins>
+`local_iterator`, and `const_local_iterator`</ins>
 meet the constexpr iterator requirements
 (<sref ref="[iterator.requirements.general]"/>).
 </p>
@@ -44,7 +44,7 @@ meet the constexpr iterator requirements
 <blockquote>
 <p>-4-
 The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
-`local_iterator`, and `local_const_iterator`</ins>
+`local_iterator`, and `const_local_iterator`</ins>
 meet the constexpr iterator requirements
 (<sref ref="[iterator.requirements.general]"/>).
 </p>
@@ -55,7 +55,7 @@ meet the constexpr iterator requirements
 <blockquote>
 <p>-4-
 The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
-`local_iterator`, and `local_const_iterator`</ins>
+`local_iterator`, and `const_local_iterator`</ins>
 meet the constexpr iterator requirements
 (<sref ref="[iterator.requirements.general]"/>).
 </p>
@@ -66,7 +66,7 @@ meet the constexpr iterator requirements
 <blockquote>
 <p>-4-
 The types `iterator`<ins>,</ins> <del>and</del> `const_iterator`<ins>,
-`local_iterator`, and `local_const_iterator`</ins>
+`local_iterator`, and `const_local_iterator`</ins>
 meet the constexpr iterator requirements
 (<sref ref="[iterator.requirements.general]"/>).
 </p>
