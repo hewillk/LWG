@@ -53,13 +53,13 @@ template&lt;class charT&gt;
 <ins>-?- <i>Constraints</i>:</ins>
 <ul>
 <li>
-<ins><code>is_array_v&lt;charT&gt;</code> is `false`.</ins>
+<ins><code>is_array_v&lt;charT&gt;</code> is `false`,</ins>
 </li>
 <li>
-<ins><code>is_trivially_copyable_v&lt;charT&gt;</code> is `true`.</ins>
+<ins><code>is_trivially_copyable_v&lt;charT&gt;</code> is `true`,</ins>
 </li>
 <li>
-<ins><code>is_standard_layout_v&lt;charT&gt;</code> is `true`.</ins>
+<ins><code>is_standard_layout_v&lt;charT&gt;</code> is `true`, and</ins>
 </li>
 <li>
 <ins><code>is_trivially_default_constructible_v&lt;charT&gt;</code> is `true`.</ins>
