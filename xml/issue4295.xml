@@ -50,8 +50,8 @@ template &lt;class W1, class W2&gt;
 </code></pre>
 <blockquote>
 <i>Returns</i>:
-    <code><del>less&lt;W3&gt;</del><ins>compare_three_way</ins>()(p1.get(), p2.get())</code>,
-    where `W3` is the composite pointer type (C++20 §7) of `W1*` and `W2*`.
+    <code><del>less&lt;W3&gt;</del><ins>compare_three_way</ins>()(p1.get(), p2.get())</code><del>,
+    where `W3` is the composite pointer type (C++20 §7) of `W1*` and `W2*`</del>.
 </blockquote>
 
 <pre><code><del>bool operator&gt;(...);
