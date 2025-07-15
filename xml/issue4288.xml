@@ -16,6 +16,40 @@ Currently, the <i>Constraints:</i> element in <sref ref="[time.clock.system.memb
 `system_clock::rep` imposes a requirement for the implementation, without establishing any condition for user 
 code. Perhaps it's wrong to use a <i>Constraints:</i> element there.
 </p>
+
+<superseded>
+<p>
+This wording is relative to <paper num="N5008"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[time.clock.system.members]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+using system_clock::rep = <i>unspecified</i>;
+</pre>
+<blockquote>
+<p>
+-1- <del><i>Constraints:</i></del><ins>The implementation shall ensure that</ins> 
+<tt>system_clock::duration::min() &lt; system_clock::duration::zero()</tt> is <tt>true</tt>.
+[<i>Note 1</i>: This implies that `rep` is a signed type. &mdash; <i>end note</i>]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</superseded>
+
+<note>2025-07-15; Reflector discussion</note>
+<p>
+The discussion revealed a preference to not insert the additional 
+"The implementation shall ensure that", because its not really needed, 
+since this is just a normal implementation requirement that falls out of
+the specification. 
+</p>
 </discussion>
 
 <resolution>
@@ -33,8 +67,8 @@ using system_clock::rep = <i>unspecified</i>;
 </pre>
 <blockquote>
 <p>
--1- <del><i>Constraints:</i></del><ins>The implementation shall ensure that</ins> 
-<tt>system_clock::duration::min() &lt; system_clock::duration::zero()</tt> is <tt>true</tt>.
+-1- <del><i>Constraints:</i></del> <tt>system_clock::duration::min() &lt; system_clock::duration::zero()</tt> 
+is <tt>true</tt>.
 [<i>Note 1</i>: This implies that `rep` is a signed type. &mdash; <i>end note</i>]
 </p>
 </blockquote>
