@@ -23,7 +23,7 @@ This wording is relative to <paper num="N5008"/>.
 
 <ol>
 
-<li><p>Modify <sref ref="[ptr.align]"/> as indicated:</p>
+<li><p>Modify <sref ref="[map.overview]"/> as indicated:</p>
 <blockquote>
 <pre><code>
 <i>// 23.4.3.2, construct/copy/destroy</i>
