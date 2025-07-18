@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4296" status="New">
+<title>Clarify that Cpp17Hash does not imply stateless</title>
+<section><sref ref="[hash.requirements]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>18 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+A colleague was mislead into thinking that the <i>Cpp17Hash</i> requirements
+imply hash functions must be stateless, so that every `h` would produce the
+same value for `h(k)`. The normative wording and the note can be interpreted
+as saying that the value of `h` is not relevant, only `k` matters.
+</p>
+<blockquote>
+The value returned shall depend only on the argument `k` for the duration
+of the program.
+<p>
+[<i>Note 1</i>: Thus all evaluations of the expression `h(k)` with the same
+value for `k` yield the same result for a given execution of the program.
+&mdash; <i>end note</i>]
+</p>
+</blockquote>
+<p>
+I initially proposed changing it to "with the same values for `h` and `k`
+but Jens observed that if `h(k)` is allowed to change `h` then a subsequent
+call would not meet the condition "the same value of `h`".
+We should also clarify that the evaluation of `h(k)` should not change `h`,
+so that we have the same value of `h` each time.
+</p>
+<p>
+Arguably, the wording in p2 "`h` is a value of type (possibly const) `H`"
+already covers this. It suggests to me that the effects in the table are for
+a particular value `h`, so for <i>that</i> value, the result of calling `h(k)`
+depends only on the value of `k`
+(and not on the current time, ambient temperature in Denmark,
+or the output of a random number generator). And the fact that `h` can be
+a value of type `const H` implies that calling `h(k)` doesn't change `h`.
+</p>
+<p>
+Maybe we want to clarify it in terms of equality-preserving
+<sref ref="[concepts.equality]"/>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
