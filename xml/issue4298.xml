@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4298" status="New">
+<title>&sect;[meta.reflection.extract] Malformed "`F noexcept`" type</title>
+<section><sref ref="[meta.reflection.extract]"/></section>
+<submitter>Jan Schultke</submitter>
+<date>10 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+This is a follow-up from <a href="https://github.com/cplusplus/draft/pull/8008#discussion_r2190652506">https://github.com/cplusplus/#8008</a>
+<p/>
+In <sref ref="[meta.reflection.extract]"/> paragraph 7, the type "`F noexcept`" is used, presumably 
+with the intent that `noexcept` would be "injected" into the <i>parameters-and-qualifiers</i> of 
+the declarator associated with `F`.
+<p/>
+However, the syntax `F noexcept` is ill-formed, and does not have that intended effect. There ought 
+to be a better way to phrase that.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16433597877/artifacts/3583518547">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[meta.reflection.extract]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: In bullet (7.1) we apply an additional drive-by fix for the broken 
+"`T` is" construction before the `is_convertible_v` condition]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+template&lt;class T&gt;
+  consteval T <i>extract-member-or-function</i>(info r); <i>// exposition only</i>
+</pre>
+<blockquote>
+<p>
+<ins>-?- Given a function type `F`, let the type `F` <i>with</i> `noexcept` be the same type, 
+except that the <i>parameters-and-qualifiers</i> in the <i>noptr-declarator</i> describing the 
+type contain `noexcept(true)`.</ins>
+<p/>
+-6- <i>Returns</i>: [&hellip;]
+<p/>
+-7- <i>Throws</i>: `meta::exception` unless
+</p>
+<ol style="list-style-type: none">
+<li><p>(7.1) &mdash; `r` represents a non-static data member with type <tt><i>X</i></tt>, 
+that is not a bit-field, that is a direct member of class `C`, `T` and `C` are similar types 
+(<sref ref="[conv.qual]"/>), and <del>`T` is</del> <tt>is_convertible_v&lt;<i>X</i> C::*, T&gt;</tt> is `true`;</p></li>
+<li><p>(7.2) &mdash; `r` represents an implicit object member function with type `F` or `F` <ins>with</ins> `noexcept` 
+that is a direct member of a class `C`, and `T` is `F C::*`; or</p></li>
+<li><p>(7.3) &mdash; `r` represents a non-member function, static member function, or explicit object
+member function of function type `F` or `F` <ins>with</ins> `noexcept`, and `T` is `F*`.</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
