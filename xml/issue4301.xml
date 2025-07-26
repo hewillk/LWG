@@ -1,0 +1,324 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4301" status="New">
+<title>`condition_variable{_any}::wait_{for, until}` should take timeout by value</title>
+<section><sref ref="[thread.condition.condvar]"/><sref ref="[thread.condition.condvarany]"/></section>
+<submitter>Hui Xie</submitter>
+<date>19 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+At the moment, both `condition_variable` and `condition_variable_any`'s 
+`wait_for` and `wait_until` take the timeout `time_point`/`duration` by 
+`const` reference. This can cause surprising behaviour. Given the following 
+example (thanks to Tim Song):
+</p>
+<blockquote><pre>
+struct Task {
+  system_clock::time_point deadline;
+  // stuff
+};
+
+std::mutex mtx;
+std::condition_variable cv;
+std::priority_queue&lt;Task, vector&lt;Task&gt;, CompareDeadlines&gt; queue;
+
+// thread 1
+std::unique_lock lck(mtx);
+if (queue.empty()) { cv.wait(lck); }
+else { cv.wait_until(lck, queue.top().deadline); }
+
+// thread 2
+std::lock_guard lck(mtx);
+queue.push(/* some task */);
+cv.notify_one();
+</pre></blockquote>
+<p>
+From the user's point of view, it is sufficiently locked on both threads. However, 
+due to the fact that the `time_point` is taken by reference, and that both libc++ 
+and libstdc++'s implementation will read the value again after waking up, this 
+will read a dangling reference of the `time_point`.
+<p/>
+Another example related to this issue:
+<p/>
+We (libc++) recently received a bug report on `condition_variable{_any}::wait_{for, until}`.
+<p/>
+Basically the user claims that these functions take `time_point`/`duration` by `const` 
+reference, if the user modifies the `time_point`/`duration` on another thread with 
+the same mutex, they can get unexpected return value for `condition_variable`, and 
+data race for `conditional_variable_any`.
+<p/>
+Bug report <a href="https://github.com/llvm/llvm-project/pull/148330#issuecomment-3065062889">here</a>.
+<p/>
+Reproducer (libstdc++ has the same behaviour as ours) <a href="https://godbolt.org/z/GnY35T3hn">on godbolt</a>.
+</p>
+<blockquote><pre>
+std::mutex mutex;
+std::condition_variable cv;
+auto timeout = std::chrono::steady_clock::time_point::max();
+
+// Thread 1:
+std::unique_lock lock(mutex);
+const auto status = cv.wait_until(lock, timeout);
+
+// Thread 2:
+std::unique_lock lock(mutex);
+cv.notify_one();
+timeout = std::chrono::steady_clock::time_point::min();
+</pre></blockquote>
+<p>
+So basically the problem was that when we return whether there is `no_timeout` or `timeout` 
+at the end of the function, we read the `const` reference again, which can be changed since 
+the beginning of the function. For `condition_variable`, it is "unexpected results" according 
+to the user. And in `conditional_variable_any`, we actually unlock the user lock and acquire 
+our internal lock, then read the input again, so this is actually a data race.
+<p/>
+For `wait_for`, the spec has 
+</p>
+<blockquote>
+<p>
+<i>Effects</i>: Equivalent to: <tt>return wait_until(lock, chrono::steady_clock::now() + rel_time);</tt>
+</p>
+</blockquote>
+<p>
+So the user can claim our implementation is not conforming because the spec says there needs 
+to be a temporary `time_point` (`now + duration`) created and since it should operate on this 
+temporary `time_point`. There shouldn't be any unexpected behaviour or data race .
+<p/>
+For `wait_until` it is unclear whether the spec has implications that implementations are allowed 
+to read `abs_time` while the user's lock is unlocked. 
+<p/>
+it is also unclear if an implementation is allowed to return `timeout` if `cv` indeed does 
+not wait longer than the original value of `timeout`. If it is not allowed, implementations 
+will have to make a local copy of the input `rel_time` or `abs_time`, which defeats the purpose 
+of taking arguments by `const` reference.
+<p/>
+For both of the examples, Ville has a great comment in the reflector:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+It seems like a whole bag of problems goes away if these functions just take the timeout by value?
+</p>
+</blockquote>
+<p>
+libc++ implementers have strong preference just changing the API to take these arguments by value, 
+and it is not an ABI break for us as the function signature has changed.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16433597877/artifacts/3583518547">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[thread.condition.condvar]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std {
+  class condition_variable {
+  public:
+    [&hellip;]
+    template&lt;class Predicate&gt;
+      void wait(unique_lock&lt;mutex&gt;&amp; lock, Predicate pred);
+    template&lt;class Clock, class Duration&gt;
+      cv_status wait_until(unique_lock&lt;mutex&gt;&amp; lock,
+                           <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time);
+    template&lt;class Clock, class Duration, class Predicate&gt;
+      bool wait_until(unique_lock&lt;mutex&gt;&amp; lock,
+                      <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time,
+                      Predicate pred);
+    template&lt;class Rep, class Period&gt;
+      cv_status wait_for(unique_lock&lt;mutex&gt;&amp; lock,
+                         <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time);
+    template&lt;class Rep, class Period, class Predicate&gt;
+      bool wait_for(unique_lock&lt;mutex&gt;&amp; lock,
+                    <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time,
+                    Predicate pred);    
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+template&lt;class Clock, class Duration&gt;
+  cv_status wait_until(unique_lock&lt;mutex&gt;&amp; lock,
+                       <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time);
+</pre>
+<blockquote>
+<p>
+-17- <i>Preconditions</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class Rep, class Period&gt;
+  cv_status wait_for(unique_lock&lt;mutex&gt;&amp; lock,
+                     <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time);
+</pre>
+<blockquote>
+<p>
+-23- <i>Preconditions</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class Clock, class Duration, class Predicate&gt;
+  bool wait_until(unique_lock&lt;mutex&gt;&amp; lock,
+                  <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time,
+                  Predicate pred);
+</pre>
+<blockquote>
+<p>
+-29- <i>Preconditions</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class Rep, class Period, class Predicate&gt;
+  bool wait_for(unique_lock&lt;mutex&gt;&amp; lock,
+                <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time,
+                Predicate pred);    
+</pre>
+<blockquote>
+<p>
+-35- <i>Preconditions</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[thread.condition.condvarany.general]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  class condition_variable_any {
+  public:
+    [&hellip;]
+    // <i><sref ref="[thread.condvarany.wait]"/>, noninterruptible waits</i>
+    template&lt;class Lock&gt;
+      void wait(Lock&amp; lock);
+    template&lt;class Lock, class Predicate&gt;
+      void wait(Lock&amp; lock, Predicate pred);
+    
+    template&lt;class Lock, class Clock, class Duration&gt;
+      cv_status wait_until(Lock&amp; lock, <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time);
+    template&lt;class Lock, class Clock, class Duration, class Predicate&gt;
+      bool wait_until(Lock&amp; lock, <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time,
+                      Predicate pred);
+    template&lt;class Lock, class Rep, class Period&gt;
+      cv_status wait_for(Lock&amp; lock, <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time);
+    template&lt;class Lock, class Rep, class Period, class Predicate&gt;
+      bool wait_for(Lock&amp; lock, <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time, Predicate pred);
+   
+    // <i><sref ref="[thread.condvarany.intwait]"/>, interruptible waits</i>
+    template&lt;class Lock, class Predicate&gt;
+      bool wait(Lock&amp; lock, stop_token stoken, Predicate pred);
+    template&lt;class Lock, class Clock, class Duration, class Predicate&gt;
+      bool wait_until(Lock&amp; lock, stop_token stoken,
+                      <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time, Predicate pred);
+    template&lt;class Lock, class Rep, class Period, class Predicate&gt;
+      bool wait_for(Lock&amp; lock, stop_token stoken,
+                    <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time, Predicate pred);
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[thread.condvarany.wait]"/> as indicated:</p>
+
+<blockquote>
+[&hellip;]
+<pre>
+template&lt;class Lock, class Clock, class Duration&gt;
+  cv_status wait_until(Lock&amp; lock, <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time);
+</pre>
+<blockquote>
+<p>
+-6- <i>Effects</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class Lock, class Rep, class Period&gt;
+  cv_status wait_for(Lock&amp; lock, <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time);
+</pre>
+<blockquote>
+<p>
+-11- <i>Effects</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class Lock, class Clock, class Duration, class Predicate&gt;
+  bool wait_until(Lock&amp; lock, <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time,
+                  Predicate pred);
+</pre>
+<blockquote>
+<p>
+-16- <i>Effects</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class Lock, class Rep, class Period, class Predicate&gt;
+  bool wait_for(Lock&amp; lock, <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time, Predicate pred);
+</pre>
+<blockquote>
+<p>
+-19- <i>Effects</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[thread.condvarany.intwait]"/> as indicated:</p>
+
+<blockquote>
+[&hellip;]
+<pre>
+template&lt;class Lock, class Clock, class Duration, class Predicate&gt;
+  bool wait_until(Lock&amp; lock, stop_token stoken,
+                  <del>const</del> chrono::time_point&lt;Clock, Duration&gt;<del>&amp;</del> abs_time, Predicate pred);
+</pre>
+<blockquote>
+<p>
+-7- <i>Effects</i>: [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class Lock, class Rep, class Period, class Predicate&gt;
+  bool wait_for(Lock&amp; lock, stop_token stoken,
+                <del>const</del> chrono::duration&lt;Rep, Period&gt;<del>&amp;</del> rel_time, Predicate pred);
+</pre>
+<blockquote>
+<p>
+-13- <i>Effects</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
