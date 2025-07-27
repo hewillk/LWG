@@ -12,7 +12,7 @@
 <p>
 In <sref ref="[optional.ref.monadic]"/> the specification of <tt>optional&lt;T&amp;&gt;::transform</tt>
 is missing an additional part of the <i>Mandates:</i> element compared to the primary template's
-`transform` (in <sref ref="[optional.monadic]"/> p8; that is, is missing to enforce that
+`transform` (in <sref ref="[optional.monadic]"/> p8); that is, is missing to enforce that
 the `U` type is a valid contained type for `optional`.
 <p/>
 The definition of "valid contained type" comes from <paper num="P2988R12"/>. The paper
