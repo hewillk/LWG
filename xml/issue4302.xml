@@ -75,7 +75,7 @@ This wording is relative to this
 <pre>
 namespace std::linalg {
   [&hellip;]
-  <del>// <i><sref ref="[linalg.algs.blas1.ssq]"/>, scaled sum of squares of a vector’s elements</i>
+  <del>// <i><sref ref="[linalg.algs.blas1.ssq]"/>, scaled sum of squares of a vector's elements</i>
   template&lt;class Scalar&gt;
     struct sum_of_squares_result {
       Scalar scaling_factor;
