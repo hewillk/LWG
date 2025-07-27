@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4304" status="New">
+<title><tt>std::optional&lt;<i>NonReturnable</i>&amp;&gt;</tt> is ill-formed due to `value_or`</title>
+<section><sref ref="[optional.ref.observe]"/></section>
+<submitter>Jiang An</submitter>
+<date>25 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, if `T` is an array type or a function type, instantiation of <tt>std::optional&lt;T&amp;&gt;</tt> 
+is still ill-formed, because the return type of its `value_or` member function is specified as 
+<tt>remove_cv_t&lt;T&gt;</tt>, which is invalid as a return type.
+<p/>
+However, we don't exclude such <tt>T&amp;</tt> from valid contained types. Given only `value_or` is 
+problematic here, perhaps we can avoid providing it if `T` is not returnable.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16433597877/artifacts/3583518547">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[optional.optional.ref.general]"/>, header <tt>&lt;iterator&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T&gt;
+  class optional&lt;T&amp;&gt; {
+    [&hellip;]
+    constexpr T&amp; value() const; // freestanding-deleted
+    template&lt;class U = remove_cv_t&lt;T&gt;&gt;
+      constexpr remove_cv_t&lt;T&gt; value_or(U&amp;&amp; u) const; <ins>// <i>not always present</i></ins>
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[optional.ref.observe]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U = remove_cv_t&lt;T&gt;&gt; constexpr remove_cv_t&lt;T&gt; value_or(U&amp;&amp; u) const;
+</pre>
+<blockquote>
+<p>
+-8- Let `X` be <tt>remove_cv_t&lt;T&gt;</tt>.
+<p/>
+-9- <i>Mandates</i>: <tt>is_constructible_v&lt;X, T&amp;&gt; &amp;&amp; is_convertible_v&lt;U, X&gt;</tt> is `true`.
+<p/>
+-10- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? *<i>val</i> : static_cast&lt;X&gt;(std::forward&lt;U&gt;(u));
+</pre></blockquote>
+<p>
+<ins>-?- <i>Remarks</i>: This function template is present if and only if `T` is a non-array object type.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</resolution>
+
+</issue>
