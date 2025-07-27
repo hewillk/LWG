@@ -1,0 +1,172 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4302" status="New">
+<title>Problematic `vector_sum_of_squares` wording</title>
+<section><sref ref="[linalg.algs.blas1.ssq]"/></section>
+<submitter>Mark Hoemmen</submitter>
+<date>23 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The current wording for `vector_sum_of_squares`
+<sref ref="[linalg.algs.blas1.ssq]"/> has two problems with its specification of the
+value of `result.scaling_factor`.
+</p>
+<ol>
+<li><p>The function permits `InVec::value_type` and `Scalar` to be any
+linear algebra value types. However, computing
+`result.scaling_factor` that satisfies both (3.1) and (3.2) requires
+more operations, such as division. Even if those operations are
+defined, they might not make `result.scaling_factor` satisfy the
+required properties. For example, integers have division, but integer
+division won't help here.</p></li>
+<li><p>LAPACK's xLASSQ (the algorithm to which Note 1 in
+<sref ref="[linalg.algs.blas1.ssq]"/> refers) changed its algorithm recently 
+(see <a href="https://github.com/Reference-LAPACK/lapack/pull/494">Reference-LAPACK/lapack/pull/#494</a>) 
+so that the scaling factor is no longer necessarily the maximum of the input
+scaling factor and the absolute value of all the input elements. It's
+a better algorithm and we would like to be able to use it.</p></li>
+</ol>
+<p>
+Problem (1) means that the current wording is broken. I suggest two
+different ways to fix this.
+</p>
+<ol>
+<li><p>Remove `vector_sum_of_squares` entirely (both overloads from
+<sref ref="[linalg.syn]"/>, and the entire 
+<sref ref="[linalg.algs.blas1.ssq]"/>). That way, we
+won't be baking an old, less good algorithm into the Standard. Remove
+Note 3 from <sref ref="[linalg.algs.blas1.nrm2]"/>, which is the only 
+other reference to `vector_sum_of_squares` in the Standard.</p></li>
+<li><p>Fix <sref ref="[linalg.algs.blas1.ssq]"/> by adding to the 
+<i>Mandates</i> element (para 2) that `InVec::value_type` and `Scalar` 
+are both floating-point types (so that we could fix this later if 
+we want), and remove <sref ref="[linalg.algs.blas1.ssq]"/> 3.1. 
+Optionally add <i>Recommended Practice</i>, though Note 1 already 
+suggests the intent.</p></li>
+</ol>
+<p>
+I prefer just removing `vector_sum_of_squares`. Implementers who care
+about QoI of `vector_two_norm` should already know what to do. If
+somebody cares sufficiently, they can propose it back for C++29 and
+think about how to make it work for generic number types.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16433597877/artifacts/3583518547">CD preview draft</a>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> The wording below implements option 1 of the issue discussion]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[linalg.syn]"/>, header <tt>&lt;linalg&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::linalg {
+  [&hellip;]
+  <del>// <i><sref ref="[linalg.algs.blas1.ssq]"/>, scaled sum of squares of a vector’s elements</i>
+  template&lt;class Scalar&gt;
+    struct sum_of_squares_result {
+      Scalar scaling_factor;
+    };
+  template&lt;<i>in-vector</i> InVec, class Scalar&gt;
+    sum_of_squares_result&lt;Scalar&gt;
+      vector_sum_of_squares(InVec v, sum_of_squares_result&lt;Scalar&gt; init);
+  template&lt;class ExecutionPolicy, <i>in-vector</i> InVec, class Scalar&gt;
+    sum_of_squares_result&lt;Scalar&gt;
+      vector_sum_of_squares(ExecutionPolicy&amp;&amp; exec,
+                            InVec v, sum_of_squares_result&lt;Scalar&gt; init);</del> 
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Delete the entire <sref ref="[linalg.algs.blas1.ssq]"/> as indicated:</p>
+
+<blockquote>
+<p>
+<del><b>29.9.13.8 Scaled sum of squares of a vector's elements [linalg.algs.blas1.ssq]</b></del>
+</p>
+<pre>
+<del>template&lt;<i>in-vector</i> InVec, class Scalar&gt;
+  sum_of_squares_result&lt;Scalar&gt; vector_sum_of_squares(InVec v, sum_of_squares_result&lt;Scalar&gt; init);
+template&lt;class ExecutionPolicy, <i>in-vector</i> InVec, class Scalar&gt;
+  sum_of_squares_result&lt;Scalar&gt; vector_sum_of_squares(ExecutionPolicy&amp;&amp; exec,
+                                                            InVec v, sum_of_squares_result&lt;Scalar&gt; init);</del>
+</pre>
+<blockquote>
+<p>
+<del>-1- [<i>Note 1</i>: These functions correspond to the LAPACK function xLASSQ[20]. &mdash; <i>end note</i>]</del>
+<p/>
+<del>-2- <i>Mandates</i>: <tt>decltype(<i>abs-if-needed</i>(declval&lt;typename InVec::value_type&gt;()))</tt> is convertible
+to `Scalar`.</del>
+<p/>
+<del>-3- <i>Effects</i>: Returns a value `result` such that</del>
+</p>
+<ol style="list-style-type: none">
+<li><p><del>(3.1) &mdash; `result.scaling_factor` is the maximum of `init.scaling_factor` and 
+<tt><i>abs-if-needed</i>(x[i])</tt> for all `i` in the domain of `v`; and</del></p></li>
+<li><p><del>(3.2) &mdash; let `s2init` be</del></p>
+<blockquote><pre>
+<del>init.scaling_factor * init.scaling_factor * init.scaled_sum_of_squares</del>
+</pre></blockquote>
+<p>
+<del>then `result.scaling_factor * result.scaling_factor * result.scaled_sum_of_squares`
+equals the sum of `s2init` and the squares of <tt><i>abs-if-needed</i>(x[i])</tt> for all `i` 
+in the domain of `v`.</del></p></li>
+</ol>
+<p>
+<del>-4- <i>Remarks</i>: If `InVec::value_type`, and `Scalar` are all floating-point types or specializations of 
+`complex`, and if `Scalar` has higher precision than `InVec::value_type`, then intermediate terms in the sum 
+use `Scalar`'s precision or greater.</del>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[linalg.algs.blas1.nrm2]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<i>in-vector</i> InVec, class Scalar&gt;
+  Scalar vector_two_norm(InVec v, Scalar init);
+template&lt;class ExecutionPolicy, <i>in-vector</i> InVec, class Scalar&gt;
+  Scalar vector_two_norm(ExecutionPolicy&amp;&amp; exec, InVec v, Scalar init);
+</pre>
+<blockquote>
+<p>
+-1- [<i>Note 1</i>: [&hellip;] ]
+<p/>
+-2- <i>Mandates</i>: [&hellip;]
+<p/>
+-3- <i>Returns</i>: [&hellip;]
+<p/>
+[<i>Note 2</i>: [&hellip;] ]
+<p/>
+-4- <i>Remarks</i>: [&hellip;]
+<p/>
+<del>[<i>Note 3</i>: An implementation of this function for floating-point types `T` 
+can use the `scaled_sum_of_squares` result from 
+`vector_sum_of_squares(x, {.scaling_factor=1.0, .scaled_sum_of_squares=init})`. 
+&mdash; <i>end note</i>]</del>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</resolution>
+
+</issue>
