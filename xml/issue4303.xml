@@ -2,30 +2,86 @@
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
 <issue num="4303" status="New">
-<title>Interaction between LWG 2259 and <i>Constraints</i> of member functions</title>
-<section><sref ref="[member.functions]"/></section>
+<title>`std::decay_t` in the specification of `ranges::distance` is problematic</title>
+<section><sref ref="[range.iter.op.distance]"/></section>
 <submitter>Jiang An</submitter>
 <date>24 Jul 2025</date>
 <priority>99</priority>
 
 <discussion>
 <p>
-<sref ref="[member.functions]"/>/2 seems to allow that even when the constraints are not met, 
-such a default constructor can be selected, because no restriction is imposed when no overload 
-is originally selected. Per the discussion in LWG <iref ref="2563"/> (closed as NAD), it even 
-seems to allow the implementation to add a default constructor when there's originally none.
+This is discovered when implementing the resolution LWG <iref ref="4242"/>. 
+Per LWG <iref ref="4242"/>, it is intended to allow `ranges::distance` to handle 
+`volatile`-qualified iterator values. 
+However, the uses of `decay_t` (established per LWG <iref ref="3664"/>) are still problematic, 
+because when <tt>sized_sentinel_for&lt;S, decay_t&lt;I&gt;&gt;</tt> is modeled, there's no 
+semantic or syntactic requirement that `S` shall work with volatile-qualified `I`.
 <p/>
-However, we're constraining some member functions, e.g. default constructors of `unique_ptr`, 
-`tuple`, and `variant`. Allowance of more permissive overload sets of constructors effectively 
-renders the <i>Constraints</i> meaningless, because even if the implementation doesn't constrain 
-the default constructors at all, it can still satisfy the restriction in 
-<sref ref="[member.functions]"/>/2 since LWG <iref ref="2259"/>.
+If we implement the constraint as is, there will still be some underconstrained cases. E.g. 
+When the `operator==` or `operator-` intendedly rejects volatile-qualified iterators. And 
+even when they accept volatile-qualified iterators, the additional semantic requirements 
+imposed by <tt>sized_sentinel_for&lt;S, decay_t&lt;I&gt;&gt;</tt> are still undesired.
 <p/>
-Perhaps some wording change is necessary to guarantee the <i>Constraints</i> of member functions to be meaningful.
+I think we should only decay arrays and keep `volatile` for non-array arguments.
 </p>
 </discussion>
 
 <resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16433597877/artifacts/3583518547">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[iterator.synopsis]"/>, header <tt>&lt;iterator&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+namespace std: {
+  [&hellip;]
+  // <i><sref ref="[range.iter.op.distance]"/>, ranges::distance</i>
+ 
+  <ins>template&lt;class T&gt;
+    using <i>distance-iterator-t</i> =               // <i>exposition only</i>
+      conditional_t&lt;is_array_v&lt;remove_reference_t&lt;T&gt;&gt;,
+        decay_t&lt;T&gt;, remove_const_t&lt;remove_reference_t&lt;T&gt;&gt;&gt;;
+</ins>  
+  template&lt;class I, sentinel_for&lt;I&gt; S&gt;
+    requires (!sized_sentinel_for&lt;S, I&gt;)
+    constexpr iter_difference_t&lt;I&gt; distance(I first, S last); // <i>freestanding</i>
+  template&lt;class I, sized_sentinel_for&lt;<del>decay_t</del><ins><i>distance-iterator-t</i></ins>&lt;I&gt;&gt; S&gt;
+    constexpr iter_difference_t&lt;<del>decay_t</del><ins><i>distance-iterator-t</i></ins>&lt;I&gt;&gt; distance(I&amp;&amp; first, S last); // <i>freestanding</i>
+  template&lt;range R&gt;
+    constexpr range_difference_t&lt;R&gt; distance(R&amp;&amp; r); // <i>freestanding</i>
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.iter.op.distance]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class I, sized_sentinel_for&lt;<del>decay_t</del><ins><i>distance-iterator-t</i></ins>&lt;I&gt;&gt; S&gt;
+  constexpr iter_difference_t&lt;<del>decay_t</del><ins><i>distance-iterator-t</i></ins>&lt;I&gt;&gt; distance(I&amp;&amp; first, S last);
+</pre>
+<blockquote>
+<p>
+-3- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if constexpr (!is_array_v&lt;remove_reference_t&lt;I&gt;&gt;)
+  return last - first;
+else
+  return last - static_cast&lt;decay_t&lt;I&gt;&gt;(first);
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
 </resolution>
 
 </issue>
