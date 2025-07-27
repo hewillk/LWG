@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4305" status="New">
+<title>Missing user requirements on `type_order` template</title>
+<section><sref ref="[compare.type]"/></section>
+<submitter>Daniel Krügler</submitter>
+<date>27 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The recently approved paper <paper num="P2830R10"/> proposes to add the new `type_order`
+type traits to <sref ref="[cmp]"/> (and thus outside of <sref ref="[type.traits]"/>), 
+which has the subtle and most likely unintended effect, that it doesn't fall under the 
+general requirement expressed in <sref ref="[meta.rqmts]"/> p4,
+</p>
+<blockquote><p>
+Unless otherwise specified, the behavior of a program that adds specializations for 
+any of the templates specified in <sref ref="[meta.rqmts]"/> is undefined.
+</p></blockquote>
+<p>
+and so in principle the explicit allowance specified in <sref ref="[namespace.std]"/> p2,
+</p>
+<blockquote><p>
+Unless explicitly prohibited, a program may add a template specialization for any standard 
+library class template to namespace `std` [&hellip;]
+</p></blockquote>
+<p>
+holds. So we need to add extra wording to the `type_order` specification in 
+<sref ref="[compare.type]"/> to prohibit such program specializations.
+<p/>
+This was reported shortly before the Sofia meeting 
+<a href="https://lists.isocpp.org/lib/2025/06/31725.php">during reflector discussion</a>  
+but seems to be forgotten before the final paper appeared on plenary. 
+<p/>
+During the reflector discussion two possible ways to solve this issue were pointed out:
+</p>
+<ol>
+<li><p>The most simple one would mimic the wording in <sref ref="[meta.rqmts]"/> p4
+quoted above.</p></li>
+<li><p>Instead of introducing just another undefined opportunity to run into undefined
+behaviour it has been pointed out that we could follow the approach taken by `std::initializer_list`
+and make the program ill-formed in this case, as specified in <sref ref="[initializer.list.syn]"/> p2:
+</p>
+<blockquote><p>
+If an explicit specialization or partial specialization of `initializer_list` is declared, 
+the program is ill-formed.
+</p></blockquote>
+</li>
+</ol>
+Jonathan Wakely responded to the reflector discussion:
+<blockquote><p>
+I think ill-formed would be better. It shouldn't be difficult for implementations to have special cases that are disallowed. 
+</p></blockquote>
+<p>
+Given the already existing experience with `std::initializer_list` the proposed wording below
+therefore follows the ill-formed program approach.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16433597877/artifacts/3583518547">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[compare.type]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class U&gt;
+  struct type_order;
+</pre>
+<blockquote>
+<p>
+-2- The name `type_order` denotes a <i>Cpp17BinaryTypeTrait</i> (<sref ref="[meta.rqmts]"/>) with a base 
+characteristic of <tt>integral_constant&lt;strong_ordering, <i>TYPE-ORDER</i>(T, U)&gt;</tt>.
+<p/>
+<ins>-?- If an explicit specialization or partial specialization of `type_order` is declared, the program is ill-formed.</ins>
+<p/>
+-3- <i>Recommended practice</i>: The order should be lexicographical on parameter-type-lists and template
+argument lists.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
