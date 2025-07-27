@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4303" status="New">
+<title>Interaction between LWG 2259 and <i>Constraints</i> of member functions</title>
+<section><sref ref="[member.functions]"/></section>
+<submitter>Jiang An</submitter>
+<date>24 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[member.functions]"/>/2 seems to allow that even when the constraints are not met, 
+such a default constructor can be selected, because no restriction is imposed when no overload 
+is originally selected. Per the discussion in LWG <iref ref="2563"/> (closed as NAD), it even 
+seems to allow the implementation to add a default constructor when there's originally none.
+<p/>
+However, we're constraining some member functions, e.g. default constructors of `unique_ptr`, 
+`tuple`, and `variant`. Allowance of more permissive overload sets of constructors effectively 
+renders the <i>Constraints</i> meaningless, because even if the implementation doesn't constrain 
+the default constructors at all, it can still satisfy the restriction in 
+<sref ref="[member.functions]"/>/2 since LWG <iref ref="2259"/>.
+<p/>
+Perhaps some wording change is necessary to guarantee the <i>Constraints</i> of member functions to be meaningful.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
