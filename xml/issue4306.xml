@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4306" status="New">
+<title>Interaction between LWG 2259 and <i>Constraints</i> of member functions</title>
+<section><sref ref="[member.functions]"/></section>
+<submitter>Jiang An</submitter>
+<date>24 Jul 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[member.functions]"/>/2 seems to allow that even when the constraints are not met, 
+such a default constructor can be selected, because no restriction is imposed when no overload 
+is originally selected. Per the discussion in LWG <iref ref="2563"/> (closed as NAD), it even 
+seems to allow the implementation to add a default constructor when there's originally none.
+<p/>
+However, we're constraining some member functions, e.g. default constructors of `unique_ptr`, 
+`tuple`, and `variant`. Allowance of more permissive overload sets of constructors effectively 
+renders the <i>Constraints</i> meaningless, because even if the implementation doesn't constrain 
+the default constructors at all, it can still satisfy the restriction in 
+<sref ref="[member.functions]"/>/2 since LWG <iref ref="2259"/>.
+<p/>
+Consider the following example:
+</p>
+<blockquote><pre>
+struct S 
+{
+  S() = delete;
+};
+
+static_assert(std::is_default_constructible_v&lt;std::tuple&lt;S&gt;&gt;);
+std::tuple&lt;S&gt; t;
+</pre></blockquote>
+<p>
+Even though currently the default constructor of `std::tuple` is constrained (<sref ref="[tuple.cnstr]"/>/6), 
+<sref ref="[member.functions]"/>/2 seemingly allows the implementation to add another overload that's also 
+a default constructor, constrained by "<tt>is_default_constructible_v&lt;T<sub><i>i</i></sub>&gt;</tt> is `false` 
+for at least one <tt><i>i</i></tt>", and then render the example well-formed or only error on actual 
+instantiation of the "additional" default constructor. Note that such an additional overload effectively 
+removes the <i>Constraints</i> element requirements.
+<p/>
+As shown by the example, the allowance in <sref ref="[member.functions]"/>/2 can weaken or even invalidate 
+<i>Constraints</i> of member functions.
+<p/>
+So perhaps some wording change is necessary to guarantee the <i>Constraints</i> of member functions to be meaningful.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
