@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4308" status="New">
+<title><tt>std::optional&lt;T&amp;&gt;::iterator</tt> can't be a contiguous iterator for some `T`</title>
+<section>
+<sref ref="[optional.ref.iterators]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>05 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+This is related to LWG <iref ref="4304"/>. When `T` is function type or an incomplete array type, 
+it is impossible to implement all requirements in <sref ref="[optional.ref.iterators]"/>/1.
+<p/>
+When `T` is an incomplete object type, we may want to support <tt>std::optional&lt;T&amp;&gt;</tt> 
+as it's sometimes a replacement of `T*`. Perhaps we can require that the iterator type is always a 
+random access iterator, and additional models `contiguous_iterator` when `T` is complete.
+<p/>
+When `T` is a function type, the possibly intended iterator would be not even an actual iterator. 
+But it seems that range-for loop over such an <tt>std::optional&lt;T&amp;&gt;</tt> can work.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16749320058/artifacts/3690555293">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[optional.ref.iterators]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+using iterator = <i>implementation-defined</i>; 
+</pre>
+<blockquote>
+<p>
+-1- <del>T</del><ins>If `T` is an object type, t</ins>his type models <del>`contiguous_iterator` 
+(<sref ref="[iterator.concept.contiguous]"/>)</del><ins>`random_access_iterator` 
+(<sref ref="[iterator.concept.random.access]"/>)</ins>, meets the 
+<i>Cpp17RandomAccessIterator</i> requirements (<sref ref="[random.access.iterators]"/>), and meets 
+the requirements for constexpr iterators (<sref ref="[iterator.requirements.general]"/>), with value 
+type <tt>remove_cv_t&lt;T&gt;</tt>. The reference type is <tt>T&amp;</tt> for `iterator`.
+<ins>When `T` is a complete object type, iterator additionally models `contiguous_iterator` 
+(<sref ref="[iterator.concept.contiguous]"/>).</ins><br/> 
+<del>-2-</del> All requirements on container iterators (<sref ref="[container.reqmts]"/>) apply to 
+`optional::iterator`.
+<p/>
+<ins>-?-  If `T` is a function type, `iterator` supports all operators required by the 
+`random_access_iterator` concept (<sref ref="[iterator.concept.random.access]"/>) along with the 
+<tt>&lt;=&gt;</tt> operator as specified for container iterators (<sref ref="[container.reqmts]"/>). 
+`iterator` dereferences to a `T` lvalue. These operators behave as if `iterator` were an actual 
+iterator iterating over a range of `T`, and result in constant subexpressions whenever the behavior 
+is well-defined. [<i>Note ?</i>: Such an `optional::iterator` does not need to declare any member 
+type because it is not an actual iterator type. &mdash; <i>end note</i>]</ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
