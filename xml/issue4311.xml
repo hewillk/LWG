@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4311" status="New">
+<title>Can `std::pmr::polymorphic_allocator::construct` just call `std::uninitialized_construct_using_allocator`?</title>
+<section>
+<sref ref="[mem.poly.allocator.mem]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>06 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+This is closely related to LWG <iref ref="3901"/> but only affects arguably pathological cases.
+<p/>
+Uses-allocator construction for <i>cv</i>-qualified types needs to be well-formed, but it's 
+questionable to require `polymorphic_allocator::construct` to support constructing objects via 
+pointer to a <i>cv</i>-qualified type. LWG <iref ref="3870"/> banned such placement construction 
+for `std::construct_at`, which is depended by `uninitialized_construct_using_allocator`.
+<p/>
+As a result, it seems non-conforming to just use `uninitialized_construct_using_allocator` in 
+`polymorphic_allocator::construct` since C++20, because the latter is still required to handle 
+<i>cv</i>-qualified target types. If the status quo is considered unintended and needed to be fixed, 
+perhaps we can just respecify `polymorphic_allocator::construct` to use 
+`uninitialized_construct_using_allocator`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16749320058/artifacts/3690555293">CD preview draft</a>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: The <i>Mandates</i>: element allows implementations not to add constraints even if 
+`uninitialized_construct_using_allocator` is constrained in the future. The <i>Throws</i>: element is made 
+redundant by "<i>Effects</i>: Equivalent to", and it's already wrong because the exception can be thrown 
+by a conversion function.]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[mem.poly.allocator.mem]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class... Args&gt;
+  void construct(T* p, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-14- <i>Mandates</i>: <del>Uses-allocator construction of `T` with allocator `*this` (see 
+<sref ref="[allocator.uses.construction]"/>) and constructor arguments 
+<tt>std::forward&lt;Args&gt;(args)...</tt></del><ins><tt>uninitialized_construct_using_allocator(p, 
+*this, std::forward&lt;Args&gt;(args)...)</tt></ins> is well-formed.
+<p/>
+-15- <i>Effects</i>: <del>Constructs a `T` object in the storage whose address is represented by 
+`p` by uses-allocator construction with allocator `*this` and constructor arguments 
+<tt>std::forward&lt;Args&gt;(args)...</tt>.</del><ins>Equivalent to:</ins>
+</p>
+<blockquote><pre> 
+<ins>uninitialized_construct_using_allocator(p, *this, std::forward&lt;Args&gt;(args)...);</ins>
+</pre></blockquote>
+<p>
+<del>-16- <i>Throws</i>: Nothing unless the constructor for `T` throws.</del>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
