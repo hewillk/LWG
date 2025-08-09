@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4312" status="New">
+<title>Const and value category mismatch for `allocator_arg_t`/`allocator_arg` in the description 
+of uses-allocator construction</title>
+<section>
+<sref ref="[allocator.uses.construction]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>06 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, <sref ref="[allocator.uses.construction]"/> bullet 2.2 states:
+</p>
+<blockquote><p>
+Otherwise, if `T` has a constructor invocable as `T(allocator_arg, alloc, args...)` (leading-allocator convention), 
+[&hellip;]
+</p></blockquote>
+<p>
+However, when forming construction arguments in the utility functions, we're actually using <i>cv</i>-unqualified 
+rvalue of `allocator_arg_t`, which can be inferred from using plain `allocator_arg_t` but not 
+<tt>const allocator_arg_t&amp;</tt> in <sref ref="[allocator.uses.construction]"/> bullet 5.2.
+<p/>
+It seems that such mismatch was present even since C++11 (per <paper num="N3337"/> [allocator.uses.construction]/1.2). 
+If the use of plain `allocator_arg_t` is considered correct, I think we should fix the description.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16749320058/artifacts/3690555293">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[allocator.uses.construction]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The following utility functions support three conventions for passing `alloc` to a constructor:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; [&hellip;]</p></li>
+<li><p>(2.2) &mdash; Otherwise, if `T` has a constructor invocable as 
+<tt>T(<del>allocator_arg</del><ins>allocator_arg_t{}</ins>, alloc, args...)</tt> 
+(leading-allocator convention), then uses-allocator construction chooses this constructor form.</p></li>
+<li><p>(2.3) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
