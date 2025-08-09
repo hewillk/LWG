@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4313" status="New">
+<title>Uses-allocator construction of `pair` in `tuple`'s `allocator_arg_t` constructors</title>
+<section>
+<sref ref="[tuple.cnstr]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>07 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<paper num="P0591R4"/> updated the definition of uses-allocator construction to specially handle `pair`. 
+Per <sref ref="[tuple.cnstr]"/>/33, it seems that the `allocator_arg_t` constructors should also be 
+updated to handle `pair`. However, such a change doesn't seem intended in <paper num="P0591R4"/>, 
+and it would significantly complicate tuple. Currently, implementations consistently don't update 
+these constructors in C++20.
+<p/>
+Perhaps we should explicitly say that the `allocator_arg_t` constructors don't specially handle `pair`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to this 
+<a href="https://github.com/cplusplus/draft/actions/runs/16749320058/artifacts/3690555293">CD preview draft</a>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[tuple.cnstr]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class Alloc&gt;
+  constexpr explicit(see below )
+    tuple(allocator_arg_t, const Alloc&amp; a);
+[&hellip;]
+template&lt;class Alloc, class U1, class U2&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a, pair&lt;U1, U2&gt;&amp;);
+template&lt;class Alloc, class U1, class U2&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a, const pair&lt;U1, U2&gt;&amp;);
+template&lt;class Alloc, class U1, class U2&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a, pair&lt;U1, U2&gt;&amp;&amp;);
+template&lt;class Alloc, class U1, class U2&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a, const pair&lt;U1, U2&gt;&amp;&amp;);
+template&lt;class Alloc, tuple-like UTuple&gt;
+  constexpr explicit(<i>see below</i>)
+  tuple(allocator_arg_t, const Alloc&amp; a, UTuple&amp;&amp;);
+</pre>
+<blockquote>
+<p>
+-32- <i>Preconditions</i>: `Alloc` meets the <i>Cpp17Allocator</i> requirements 
+(<sref ref="[allocator.requirements.general]"/>).
+<p/>
+-33- <i>Effects</i>: Equivalent to the preceding constructors except that each element is constructed 
+with uses-allocator construction (<sref ref="[allocator.uses.construction]"/>)<ins>, except that the 
+construction behaves as if there were only one `uses_allocator_construction_args` overload and the 
+overload behaved the same as the first actual overload without <i>Constraints</i></ins>.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
