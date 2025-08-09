@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4309" status="New">
+<title>How are two `seq_cst` operations ordered in the single total order if these two operations are unsequenced?</title>
+<section>
+<sref ref="[atomics.order]"/>
+</section>
+<submitter>jim x</submitter>
+<date>06 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider this snippet code:
+</p>
+<blockquote><pre>
+std::atomic&lt;int&gt; flag = {0};
+std::atomic&lt;int&gt; turn = {0};
+
+if(flag + turn){}
+</pre></blockquote>
+<p>
+The loads of `flag` and `turn` as the operands of `+` are unsequenced according to [intro.execution] p10.
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+Except where noted, evaluations of operands of individual operators and of subexpressions of individual expressions are unsequenced.
+</p>
+</blockquote>
+<p>
+However, <sref ref="[atomics.order]"/> p4 says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+There is a single total order <i>S</i> on all `memory_order::seq_cst` operations, including fences, 
+that satisfies the following constraints.
+</p></blockquote>
+<p>
+Then, it says that:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+First, if <i>A</i> and <i>B</i> are `memory_order::seq_cst` operations and <i>A</i> strongly happens 
+before <i>B</i>, then <i>A</i> precedes <i>B</i> in <i>S</i>.
+</p></blockquote>
+<p>
+According to the first sentence, the load of `flag` and the load of `turn` do have an order in the single 
+total order <i>S</i> since they are both `memory_order::seq_cst` operations. However, since they are unsequenced, 
+the second sentence does not apply to them. So, what's the order of them in <i>S</i>? Is the order of them in 
+<i>S</i> unspecified?
+<p/>
+<b>Suggestion Resolution:</b>
+<p/>
+We may want to say the order of such operations is indeterminate in the single total order. That is,  
+either <i>A</i> precedes <i>B</i> or <i>B</i> precedes <i>A</i>, but it is unspecified which.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
