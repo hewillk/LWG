@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4310" status="New">
+<title>Is "the completion of the invocation of the constructor" considered as an expression?</title>
+<section>
+<sref ref="[thread.thread.constr]"/>
+<sref ref="[thread.thread.member]"/>
+</section>
+<submitter>jim x</submitter>
+<date>06 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[thread.thread.constr]"/> p6 says
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+The completion of the invocation of the constructor synchronizes with the beginning of the invocation of the copy of `f`.
+</p>
+</blockquote>
+<p>
+The intended meaning is that "The completion of the invocation of the constructor" happens-before 
+"the beginning of the invocation of the copy of `f`.", so we can infer other happen-before relationships 
+based on this point. 
+<p/>
+However, according to the definition of "happens-before" (<sref ref="[intro.races]"/> p7),
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+An evaluation <i>A</i> <i>happens before</i> an evaluation <i>B</i> (or, equivalently, <i>B</i> 
+happens after <i>A</i>) if either
+</p>
+<ol style="list-style-type: none">
+<li><p>(7.1) &mdash; [&hellip;]</p></li>
+<li><p>(7.2) &mdash; <i>A</i> synchronizes with <i>B</i>, or</p></li>
+</ol>
+</blockquote>
+<p>
+That means <i>A</i> and <i>B</i> are first required to be expressions because the evaluation is 
+in terms of expressions. 
+<p/>
+However, "The completion of the invocation of the constructor" and "the beginning of the invocation 
+of the copy of `f`" are not expressions. 
+<p/>
+The similar issue is <sref ref="[thread.thread.member]"/> p4
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+The completion of the thread represented by `*this` synchronizes with (<sref ref="[intro.multithread]"/>) 
+the corresponding successful `join()` return.
+</p></blockquote>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
