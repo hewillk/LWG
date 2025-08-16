@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4316" status="New">
+<title><tt>{can_}substitute</tt> specification is ill-formed</title>
+<section>
+<sref ref="[meta.reflection.substitute]"/>
+</section>
+<submitter>Matthias Wippich</submitter>
+<date>15 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`can_substitute` and `substitute` are currently specified in terms of splices in a template argument list:
+<p/>
+<sref ref="[meta.reflection.substitute]"/> p3:
+</p>
+<blockquote><p>
+<i>Returns</i>: `true` if <tt>Z&lt;[:Args:]...&gt;</tt> is a valid <i>template-id</i> (<sref ref="temp.names]"/>) 
+that does not name a function whose type contains an undeduced placeholder type. Otherwise, `false`.
+</p></blockquote>
+<p>
+<sref ref="[meta.reflection.substitute]"/> p7:
+</p>
+<blockquote><p>
+<i>Returns</i>: <tt>^^Z&lt;[:Args:]...&gt;</tt>.
+</p></blockquote>
+<p>
+This wording was introduced in <paper num="P2996R11"/>. However, merging in changes from 
+<paper num="P3687"/> "Final Adjustments to C++26 Reflection" in <paper num="P2996R13"/> changed 
+the rules for splices in this context. This makes `can_substitute` and `substitute` as specified 
+currently ill-formed. We cannot use the given syntax to splice an arbitrary choice of values, 
+types and templates anymore.
+<p/>
+While the intent seems clear, this should be rephrased to be more technically correct.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
