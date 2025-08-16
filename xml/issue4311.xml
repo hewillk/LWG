@@ -29,8 +29,7 @@ perhaps we can just respecify `polymorphic_allocator::construct` to use
 
 <resolution>
 <p>
-This wording is relative to this 
-<a href="https://github.com/cplusplus/draft/actions/runs/16749320058/artifacts/3690555293">CD preview draft</a>.
+This wording is relative to <paper num="N5014"/>.
 </p>
 
 <blockquote class="note">

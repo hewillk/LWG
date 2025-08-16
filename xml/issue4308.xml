@@ -26,8 +26,7 @@ But it seems that range-for loop over such an <tt>std::optional&lt;T&amp;&gt;</t
 
 <resolution>
 <p>
-This wording is relative to this 
-<a href="https://github.com/cplusplus/draft/actions/runs/16749320058/artifacts/3690555293">CD preview draft</a>.
+This wording is relative to <paper num="N5014"/>.
 </p>
 
 <ol>
