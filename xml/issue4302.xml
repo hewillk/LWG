@@ -11,7 +11,7 @@
 <discussion>
 <p>
 The current wording for `vector_sum_of_squares`
-<sref ref="[linalg.algs.blas1.ssq]"/> has two problems with its specification of the
+<sref ref="[linalg.algs.blas1.ssq]"/> has three problems with its specification of the
 value of `result.scaling_factor`.
 </p>
 <ol>
@@ -28,6 +28,14 @@ division won't help here.</p></li>
 so that the scaling factor is no longer necessarily the maximum of the input
 scaling factor and the absolute value of all the input elements. It's
 a better algorithm and we would like to be able to use it.</p></li>
+<li><p>
+Both members of <tt>sum_of_squares_result&lt;Scalar&gt;</tt> have the same type,
+`Scalar`. If the input `mdspan`'s `value_type` represents a quantity
+with units, this would not be correct. For example, if `value_type`
+has units of distance (say <tt>[m]</tt>), the sum of squares should have units
+of area (<tt>[m<sup>2</sup>]</tt>), while the scaling factor should have units of
+distance (<tt>[m]</tt>).
+</p></li>
 </ol>
 <p>
 Problem (1) means that the current wording is broken. I suggest two
