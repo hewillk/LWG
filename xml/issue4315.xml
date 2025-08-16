@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4315" status="New">
+<title>Insufficient specification of `vector_two_norm` and `matrix_frob_norm`</title>
+<section>
+<sref ref="[linalg.algs.blas1.nrm2]"/>
+<sref ref="[linalg.algs.blas1.matfrobnorm]"/>
+</section>
+<submitter>Mark Hoemmen</submitter>
+<date>14 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The wording for `vector_two_norm` <sref ref="[linalg.algs.blas1.nrm2]"/> and
+`matrix_frob_norm` <sref ref="[linalg.algs.blas1.matfrobnorm]"/> has two issues.
+</p>
+<ol>
+<li><p>Their <i>Returns</i> clauses say that the functions return the "square
+root" of the sum of squares of the initial value and the absolute
+values of the elements of the input `mdspan`. However, nowhere in
+<sref ref="[linalg]"/> explains how to compute a square root.</p>
+<ol style="list-style-type: none">
+<li><p>1.a. The input `mdspan`'s `value_type` and the initial value type
+are not constrained in a way that would ensure that calling
+`std::sqrt` on this expression would be well-formed.</p></li>
+<li><p>1.b. There is no provision to find `sqrt` via argument-dependent
+lookup, even though <sref ref="[linalg]"/> has provisions to find `abs`, `conj`,
+`real`, and `imag` via argument-dependent lookup.  There is no
+"`sqrt-if-needed`" analog to `abs-if-needed`, `conj-if-needed`,
+`real-if-needed`, and `imag-if-needed`.</p></li>
+</ol>
+</li>
+<li><p>The overloads that take an initial value parameter `Scalar init`
+return `Scalar`.</p>
+<ol style="list-style-type: none">
+<li><p>2.a. This may silently lose information if the function uses
+`std::sqrt` to compute square roots. For example, if `Scalar` and the
+input `mdspan`'s `value_type` are both `int`, the square root computed
+via `std::sqrt` would return `double`. However, `vector_two_norm` and
+`matrix_frob_norm` returning `Scalar` would force a rounding
+conversion back to `int`.</p></li>
+</ol>
+</li>
+</ol>
+<p>
+<b>Suggested fix:</b>
+<p/>
+The easiest fix for both issues is just to <i>Constrain</i> both `Scalar` and
+the input `mdspan`'s `value_type` to be floating-point numbers or
+specializations of `std::complex` for these two functions. This
+presumes that relaxing this <i>Constraint</i> and fixing the above two issues
+later would be a non-breaking change. If that is <em>not</em> the case, then
+I would suggest removing the two functions entirely.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
