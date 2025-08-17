@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4318" status="New">
+<title>Have `hive::erase_if` reevaluate `end()` to avoid UB</title>
+<section>
+<sref ref="[hive.erasure]"/>
+</section>
+<submitter>Frank Birbacher</submitter>
+<date>16 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Background:  <a href="https://github.com/cplusplus/draft/pull/8162">https://github.com/cplusplus/draft/pull/8162</a>
+<p/>
+For <sref ref="[hive.erasure]"/> p2, the defining code must not cache the end-iterator. In case the last 
+element of the sequence is removed, the past-the-end iterator will be invalidated. This will trigger UB 
+in the loop condition. Instead, re-evaluate `end()` each time.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> There are other ways to fix this code while keeping the caching behaviour, but I don't 
+see any particular reason to do so for the definition of the effects.]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[hive.erasure]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class Allocator, class Predicate&gt;
+  typename hive&lt;T, Allocator&gt;::size_type
+    erase_if(hive&lt;T, Allocator&gt;&amp; c, Predicate pred);
+</pre>
+<blockquote>
+<p>
+-2- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+auto original_size = c.size();
+for (auto i = c.begin()<del>, last = c.end()</del>; i != <del>last</del><ins>c.end()</ins>; ) {
+  if (pred(*i)) {
+    i = c.erase(i);
+  } else {
+    ++i;
+  }
+}
+return original_size - c.size();
+</pre></blockquote>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
