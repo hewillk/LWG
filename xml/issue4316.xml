@@ -17,7 +17,7 @@
 <sref ref="[meta.reflection.substitute]"/> p3:
 </p>
 <blockquote><p>
-<i>Returns</i>: `true` if <tt>Z&lt;[:Args:]...&gt;</tt> is a valid <i>template-id</i> (<sref ref="temp.names]"/>) 
+<i>Returns</i>: `true` if <tt>Z&lt;[:Args:]...&gt;</tt> is a valid <i>template-id</i> (<sref ref="[temp.names]"/>) 
 that does not name a function whose type contains an undeduced placeholder type. Otherwise, `false`.
 </p></blockquote>
 <p>
