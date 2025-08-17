@@ -12,13 +12,86 @@
 
 <discussion>
 <p>
-<paper num="P0591R4"/> updated the definition of uses-allocator construction to specially handle `pair`. 
-Per <sref ref="[tuple.cnstr]"/>/33, it seems that the `allocator_arg_t` constructors should also be 
-updated to handle `pair`. However, such a change doesn't seem intended in <paper num="P0591R4"/>, 
-and it would significantly complicate tuple. Currently, implementations consistently don't update 
-these constructors in C++20.
+Before <paper num="P0591R4"/>, only `scoped_allocator_adaptor::construct` and 
+`polymorphic_allocator::construct` specially handled `pair` for the purpose of uses-allocator 
+construction. The primary definition of uses-allocator construction (in e.g., 
+<paper num="N4659"/> [allocator.uses.construction]) did not specially handle `pair`. 
+The `allocator_arg_t` constructors of `tuple`, which were specified to construct `tuple` 
+elements with uses-allocator constructor (per e.g., <paper num="N4659"/> [tuple.cnstr] p26), 
+did not specially handle `pair` either.
 <p/>
-Perhaps we should explicitly say that the `allocator_arg_t` constructors don't specially handle `pair`.
+<paper num="P0591R4"/> redefined uses-allocator construction in terms of `make_obj_using_allocator` 
+in [allocator.uses.construction] p1 as:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+When applied to the construction of an object of type `T`, it is equivalent to initializing it 
+with the value of the expression <tt>make_obj_using_allocator&lt;T&gt;(alloc, args...)</tt>, described below.
+</p>
+</blockquote>
+<p>
+And the new definition does handle `pair`. As the specification of `allocator_arg_t` constructors of 
+`tuple` (now in <sref ref="[tuple.cnstr]"/> p33) still refer to uses-allocator construction as-is, 
+these constructors should construct a `pair` element in a way equivalent to `make_obj_using_allocator` now.
+<p/>
+The following example shows the behavioral difference.
+</p>
+<blockquote><pre>
+#include &lt;cstddef&gt;
+#include &lt;utility&gt;
+#include &lt;tuple&gt;
+#include &lt;memory&gt;
+#include &lt;vector&gt;
+#include &lt;cassert&gt;
+
+template&lt;class T&gt;
+class payload_ator {
+  int payload{};
+   
+public:
+  using value_type = T;
+
+  payload_ator() = default;
+
+  constexpr explicit payload_ator(int n) noexcept : payload{n} {}
+
+  template&lt;class U&gt;
+  constexpr explicit payload_ator(payload_ator&lt;U&gt; a) noexcept : payload{a.payload} {}  
+
+  friend bool operator==(payload_ator, payload_ator) = default;
+
+  template&lt;class U&gt;
+  friend constexpr bool operator==(payload_ator x, payload_ator&lt;U&gt; y) noexcept {
+    return x.payload == y.payload;
+  }  
+
+  constexpr T* allocate(std::size_t n) { return std::allocator&lt;T&gt;{}.allocate(n); }
+
+  constexpr void deallocate(T* p, std::size_t n) { return std::allocator&lt;T&gt;{}.deallocate(p, n); }  
+
+  constexpr int get_payload() const noexcept { return payload; }
+};
+
+bool test() {
+  constexpr int in_v = 42;
+  using my_pair_t = std::pair&lt;int, std::vector&lt;int, payload_ator&lt;int&gt;&gt;&gt;;
+  std::tuple&lt;my_pair_t&gt; t(std::allocator_arg, payload_ator&lt;int&gt;{in_v});
+  auto out_v = std::get&lt;0&gt;(t).second.get_allocator().get_payload();
+  return in_v == out_v;
+}
+
+int main() {
+  assert(test()); // <span style="color:#C80000;font-weight:bold">passes only if allocator_arg_t constructors of tuple specially handle pair</span>
+}
+</pre></blockquote>
+<p>
+However, the behavioral changes of these constructors were not discussed in <paper num="P0591R4"/>, 
+and existing implementations that claim full implementation of <paper num="P0591R4"/> (MSVC STL and libstdc++) 
+did not change these constructors (<a href="https://godbolt.org/z/6vnP78nqW">demo</a>).
+<p/>
+Given that implementations did not recognize changes of `allocator_arg_t` constructors as part of the paper, 
+and special handling of `pair` would significantly complicate these constructors, perhaps we should 
+explicitly specify that these constructors behave as if special handling for `pair` were missing.
 </p>
 </discussion>
 
