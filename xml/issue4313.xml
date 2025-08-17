@@ -93,6 +93,17 @@ Given that implementations did not recognize changes of `allocator_arg_t` constr
 and special handling of `pair` would significantly complicate these constructors, perhaps we should 
 explicitly specify that these constructors behave as if special handling for `pair` were missing.
 </p>
+
+<note>2025-08-17; Pablo comments</note>
+<p>
+I don't agree with it or the PR. It seems like the implementations are simply lagging behind. 
+Since `make_obj_using_allocator` is in the standard, `tuple` is easy enough to implement simply 
+by delegating to that function. I regard the failure to handle `pair` in a general way to be a 
+defect in the C++11 specification and that handling it correctly, though technically a change 
+of behavior, is more likely to fix bugs than to create them. It is exactly this scattershot 
+restatement of uses-allocator construction for `pair` that I hoped to fix with P0591, even 
+though I missed `tuple` in my exposition.
+</p>
 </discussion>
 
 <resolution>
