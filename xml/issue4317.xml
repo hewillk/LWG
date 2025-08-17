@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4317" status="New">
+<title>The meaning of "resource" in the <i>Cpp17Destructible</i> requirements is undefined</title>
+<section>
+<sref ref="[utility.arg.requirements]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>15 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The meaning of "resource" in the <i>Cpp17Destructible</i> requirements cannot be inferred 
+from the standard wording and it seems unlikely that the standard will determine its meaning 
+in the future. What are considered as resources generally depends on users' intent, so the 
+standard shouldn't determine the well-definedness of a program execution due to it. Moreover, 
+the wording doesn't seem to consider shared ownership, which can be represented by `shared_ptr`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[utility.arg.requirements]"/>, Table 35 [tab:cpp17.destructible] as indicated:</p>
+
+<blockquote>
+<table border="1">
+<caption>Table 35 &mdash; <tt>Cpp17Destructible</tt> requirements [tab:cpp17.destructible]</caption>
+<tr>
+<th>Expression</th>
+<th>Post-condition</th>
+</tr>
+<tr>
+<td>
+<tt>u.~T()</tt>
+</td>
+<td>
+<del>All resources owned by `u` are reclaimed, n</del><ins>N</ins>o exception is propagated.
+</td>
+</tr>
+<tr>
+<td colspan="2">
+[<i>Note 3:</i> Array types and non-object types are not <i>Cpp17Destructible</i>. &mdash; <i>end note</i>]
+</td>
+</tr>
+</table>
+
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
