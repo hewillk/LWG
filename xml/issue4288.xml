@@ -8,7 +8,7 @@
 </section>
 <submitter>Jiang An</submitter>
 <date>19 Jun 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -50,6 +50,12 @@ The discussion revealed a preference to not insert the additional
 since this is just a normal implementation requirement that falls out of
 the specification. 
 </p>
+
+<note>2025-08-21; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

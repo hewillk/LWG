@@ -6,7 +6,7 @@
 <section><sref ref="[memory.observer.ptr.special]"/></section>
 <submitter>Jonathan Wakely</submitter>
 <date>14 Jul 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -58,6 +58,13 @@ template &lt;class W1, class W2&gt;
 bool operator&lt;=(...);
 bool operator&gt;=(...);</del></code></pre>
 </blockquote>
+
+
+<note>2025-08-21; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+Seven votes for P0 but one vote for NAD, so not made Tentatively Ready.
+</p>
 
 </discussion>
 
