@@ -13,7 +13,7 @@
 
 <discussion>
 <p>
-The Returns clauses `vector_two_norm` <sref ref="[linalg.algs.blas1.nrm2]"/> and
+The Returns clauses of `vector_two_norm` <sref ref="[linalg.algs.blas1.nrm2]"/> and
 `matrix_frob_norm` <sref ref="[linalg.algs.blas1.matfrobnorm]"/> say that the
 functions return the "square root" of the sum of squares of the initial value and 
 the absolute values of the elements of the input `mdspan`. However, nowhere in 
@@ -24,16 +24,16 @@ the absolute values of the elements of the input `mdspan`. However, nowhere in
 not constrained in a way that would ensure that calling `std::sqrt` on
 this expression would be well-formed.</p></li>
 <li><p>There is no provision to find `sqrt` via argument-dependent lookup,
-even though [linalg] has provisions to find `abs`, `conj`, `real`, and
-`imag` via argument-dependent lookup.  There is no "`sqrt-if-needed`"
-analog to `abs-if-needed`, `conj-if-needed`, `real-if-needed`, and
-`imag-if-needed`.</p></li>
+even though <sref ref="[linalg]"/> has provisions to find `abs`, `conj`, `real`, and
+`imag` via argument-dependent lookup. There is no "<tt><i>sqrt-if-needed</i></tt>"
+analog to <tt><i>abs-if-needed</i></tt>, <tt><i>conj-if-needed</i></tt>, 
+<tt><i>real-if-needed</i></tt>, and <tt><i>imag-if-needed</i></tt>.</p></li>
 </ol>
 <p>
-The easiest fix for both issues is just to Constrain both `Scalar` and
+The easiest fix for both issues is just to <i>Constrain</i> both `Scalar` and
 the input `mdspan`'s `value_type` to be floating-point numbers or
 specializations of `std::complex` for these two functions. This
-presumes that relaxing this Constraint and fixing the above two issues
+presumes that relaxing this <i>Constraint</i> and fixing the above two issues
 later would be a non-breaking change. If that is <em>not</em> the case, then
 I would suggest removing the two functions entirely.
 </p>
