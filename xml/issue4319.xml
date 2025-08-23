@@ -15,7 +15,8 @@
 The wording for argument forwarding call wrappers in <sref ref="[func.require]"/> p3,
 </p>
 <blockquote><p>
-This forwarding step delivers rvalue arguments as rvalue references and lvalue arguments as lvalue references.
+This forwarding step delivers rvalue arguments as rvalue references and lvalue arguments 
+as lvalue references.
 </p></blockquote>
 <p>
 requires that each wrapper binds a temporary to rvalue reference
@@ -27,7 +28,7 @@ For some wrappers more efficient implementation strategies are possible:
 </p>
 <ul>
 <li><p>`bind_front(f)/bind_back(f)` without bound args could return a copy of `f`</p></li>
-<li><p><tt>bind_front&lt;f&gt;()/bind_back&lt;f&gt;</tt> could produce a 
+<li><p><tt>bind_front&lt;f&gt;()/bind_back&lt;f&gt;()</tt> could produce a 
 <tt>__function_wrapper&lt;f&gt;</tt>, that for function pointers can be invoked using 
 a surrogate function call.</p></li>
 </ul>
