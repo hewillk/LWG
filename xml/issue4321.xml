@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4321" status="New">
+<title>How are evaluations occurring within a store and a load operation ordered where the store synchronized with the load</title>
+<section>
+<sref ref="[atomics.types.operations]"/>
+</section>
+<submitter>jim x</submitter>
+<date>20 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider this example:
+</p>
+<blockquote><pre>
+std::atomic&lt;int&gt; v = 0;
+// thread 1:
+v.store(1, memory_order::release); // #1
+// thread 2:
+v.load(memory_order::acquire); // #2
+</pre></blockquote>
+<p>
+Say, `#2` reads the value written by `#1`, `#1` synchronizes with `#2`. According to <sref ref="[intro.races]"/> p7:
+</p>
+<blockquote>
+<p>
+ An evaluation <i>A</i> <i>happens before an evaluation</i> <i>B</i> (or, equivalently, <i>B</i> 
+ happens after <i>A</i>) if either
+</p>
+<ol style="list-style-type: none">
+<li><p>(7.1) &mdash; [&hellip;]</p></li>
+<li><p>(7.2) &mdash; <i>A</i> synchronizes with <i>B</i>, or</p></li>
+<li><p>(7.3) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+<p>
+So, `#1` happens before <i>B</i>. However, <sref ref="[intro.execution]"/> p12 says:
+</p>
+<blockquote>
+<p>
+For each
+</p>
+<ol style="list-style-type: none">
+<li><p>(12.1) &mdash; function invocation,</p></li>
+<li><p>(12.2) &mdash; [&hellip;]</p></li>
+<li><p>(12.3) &mdash; [&hellip;]</p></li>
+</ol>
+<p>
+<i>F</i>, each evaluation that does not occur within <i>F</i> but is evaluated 
+on the same thread and as part of the same signal handler (if any) is either 
+sequenced before all evaluations that occur within <i>F</i> or sequenced after 
+all evaluations that occur within <i>F</i>;
+</p>
+</blockquote>
+<p>
+Because both `v.store(...)` and `v.load(...)` are function invocations, and we can think that the member 
+functions comprise some evaluations to form the operation, therefore, how are these evaluations that 
+occur within the `store` ordered with those within the `load`?
+<p/>
+The rule only says the `store` synchronizes with the `load`, hence, the evaluation of the function 
+call expression `v.store(...)` happens before the evaluation of the function call expression `v.load(...)`, 
+but how about these evaluations occurring within these functions?
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
