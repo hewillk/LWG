@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4319" status="New">
+<title>Supporting copy-elision in function wrappers</title>
+<section>
+<sref ref="[func.require]"/>
+</section>
+<submitter>Tomasz Kamiński</submitter>
+<date>19 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The wording for argument forwarding call wrappers in <sref ref="[func.require]"/> p3,
+</p>
+<blockquote><p>
+This forwarding step delivers rvalue arguments as rvalue references and lvalue arguments as lvalue references.
+</p></blockquote>
+<p>
+requires that each wrapper binds a temporary to rvalue reference
+(materializing it), and then pass that xvalue. This essentially
+codifies an implementation where wrappers provide an `operator()` that
+accepts <tt>Args&amp;&amp;...</tt>. This is fine for most of the wrappers.
+<p/>
+For some wrappers more efficient implementation strategies are possible:
+</p>
+<ul>
+<li><p>`bind_front(f)/bind_back(f)` without bound args could return a copy of `f`</p></li>
+<li><p><tt>bind_front&lt;f&gt;()/bind_back&lt;f&gt;</tt> could produce a 
+<tt>__function_wrapper&lt;f&gt;</tt>, that for function pointers can be invoked using 
+a surrogate function call.</p></li>
+</ul>
+<p>
+However, such implementation strategies are currently disallowed per
+<sref ref="[func.require]"/> p3, as invoking the function wrapper with 
+a prvalue `bind_front(f)(T())` requires a temporary to be materialized, 
+and then moved into the parameter of `f`. For example:
+</p>
+<blockquote><pre>
+struct M 
+{
+  M() { std::cout &lt;&lt; "Default" &lt; std::endl; }
+  M(M&amp;&amp; m) { std::cout &lt;&lt; "Move" &lt; std::endl; }
+};
+
+struct F
+{ 
+  void operator()(M m) {} 
+} f;
+</pre></blockquote>
+<p>
+The call `f(M{})` will print only "`Default`" but `bind_front(f)(M{})` is
+required to produce "`Default`" and "`Move`". We should allow
+implementations to elide the move operations, but not require it.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[func.require]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-3- Every call wrapper (<sref ref="[func.def]"/>) meets the <i>Cpp17MoveConstructible</i> and 
+<i>Cpp17Destructible</i> requirements. An <i>argument forwarding call wrapper</i> is a call wrapper 
+that can be called with an arbitrary argument list and delivers the arguments to the target object 
+<del>as references</del>. This forwarding step delivers <del>rvalue arguments as rvalue references 
+and lvalue arguments as lvalue references.</del><ins>:</ins>
+</p>
+<ol style="list-style-type: none">
+<li><p><ins>(3.?) &mdash; lvalue arguments as lvalues,</ins></p></li>
+<li><p><ins>(3.?) &mdash; xvalue arguments as xvalues,</ins></p></li>
+<li><p><ins>(3.?) &mdash; prvalue arguments as either prvalues or xvalues</ins></p></li>
+</ol>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
