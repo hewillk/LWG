@@ -54,6 +54,11 @@ The call `f(M{})` will print only "`Default`" but `bind_front(f)(M{})` is
 required to produce "`Default`" and "`Move`". We should allow
 implementations to elide the move operations, but not require it.
 </p>
+<p>
+The suggested changes by this issue have been 
+<a href="https://gcc.gnu.org/pipermail/libstdc++/2025-August/062992.html">implemented in libstdc++</a>
+for `bind_front/bind_back`.
+</p>
 </discussion>
 
 <resolution>
@@ -76,7 +81,7 @@ and lvalue arguments as lvalue references.</del><ins>:</ins>
 <ol style="list-style-type: none">
 <li><p><ins>(3.?) &mdash; lvalue arguments as lvalues,</ins></p></li>
 <li><p><ins>(3.?) &mdash; xvalue arguments as xvalues,</ins></p></li>
-<li><p><ins>(3.?) &mdash; prvalue arguments as either prvalues or xvalues</ins></p></li>
+<li><p><ins>(3.?) &mdash; prvalue arguments as either prvalues or xvalues.</ins></p></li>
 </ol>
 </blockquote>
 
