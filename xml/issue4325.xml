@@ -49,7 +49,7 @@ This wording is relative to <paper num="N5014"/>.
 <p>
 [<i>Drafting note:</i>: We introduce the exposition-only function <tt><i>FUN</i></tt> below to mimic
 the implicit conversion to `bool`. As a drive-by effect this helps us simplifying (and clarifying, see
-LWG <iref ref="408"/>) the existing <i>Mandates</i> element.
+LWG <iref ref="484"/>) the existing <i>Mandates</i> element.
 <p/>
 Please note that the seemingly unresolved `T` in the `requires` expression below names the first template 
 parameter of the `indirect` class template.
