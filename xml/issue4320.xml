@@ -108,6 +108,14 @@ effect functions which erase individual elements. This includes:
 <sref ref="[hive.operations]"/>:<br/>
 (`unique`) p11
 </p>
+
+<blockquote class="note">
+<p>
+This issue has some overlap to LWG <iref ref="4323"/>, and it would 
+affect the outcome wording of that issue for `unique`.
+</p>
+</blockquote>
+
 </discussion>
 
 <resolution>
@@ -318,6 +326,24 @@ element blocks.
 </li>
 
 <li><p>Modify <sref ref="[hive.operations]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> If issue LWG <iref ref="4323"/> is decided to be acted upon and 
+the proposed solution accepted, the proposed complexity wording becomes:
+</p>
+<blockquote><p>
+-11- <i>Complexity</i>: If `empty()` is `false`, exactly `size() - 1` applications 
+of the corresponding predicate, otherwise no applications of the predicate. 
+<ins>For each element erased as a result of this function call, at worst <tt>&#x1d4aa;(log n)</tt> 
+in the capacity of each block containing the element. Additionally, if any active blocks become 
+empty of elements as a result of the function call, at worst linear in the number of element 
+blocks.</ins>
+</p></blockquote>
+<p>
+]
+</p>
+</blockquote>
 
 <blockquote>
 <pre>
