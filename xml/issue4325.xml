@@ -105,7 +105,7 @@ template&lt;class U&gt;
 <ins>bool <i>FUN</i>(bool) noexcept;</ins>
 </pre></blockquote>
 <p>
--1- <i>Mandates</i>: The expression <tt><ins><i>FUN</i>(</ins>*lhs == *rhs<ins>)</ins></tt> is well-formed <del>and its result is convertible to `bool`</del>.
+-1- <i>Mandates</i>: The expression <tt><ins><i>FUN</i>(</ins>*lhs == rhs<ins>)</ins></tt> is well-formed <del>and its result is convertible to `bool`</del>.
 <p/>
 -2- <i>Returns</i>: If `lhs` is valueless, `false`; otherwise `*lhs == rhs`.
 <p/>
