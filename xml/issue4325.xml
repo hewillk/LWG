@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4325" status="New">
+<title>`std::indirect`'s `operator==` still does not support incomplete types</title>
+<section>
+<sref ref="[indirect.relops]"/>
+<sref ref="[indirect.comp.with.t]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>24 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`std::indirect`'s `operator== 
+<a href="https://github.com/cplusplus/papers/issues/1680#issuecomment-2646604309">intentionally</a> 
+uses <i>Mandates</i> instead of <i>Constraints</i> to support incomplete types. However, its 
+function signature has the following `noexcept` specification:
+</p>
+<blockquote><pre>
+template&lt;class U, class AA&gt;
+  constexpr bool operator==(const indirect&amp; lhs, const indirect&lt;U, AA&gt;&amp; rhs)
+    noexcept(noexcept(*lhs == *rhs));
+</pre></blockquote>
+<p>
+That is, we check whether the expression `*lhs == *rhs` throws, which unfortunately leads to 
+the following hard error:
+</p>
+<blockquote><pre>
+struct Incomplete;
+static_assert(std::equality_comparable&lt;std::indirect&lt;Incomplete&gt;&gt;);
+// <span  style="color:#C80000;font-weight:bold">hard error, no match for 'operator==' (operand types are 'const Incomplete' and 'const Incomplete')</span>
+</pre></blockquote>
+<p>
+This makes `operator==` not SFINAE-friendly for incomplete types, which defeats the purpose.
+<p/>
+Also, checking `noexcept(*lhs == *rhs)` seems insufficient because the result of `*lhs == *rhs` 
+might still throw during conversion to `bool`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i>: We introduce the exposition-only function <tt><i>FUN</i></tt> below to mimic
+the implicit conversion to `bool`. As a drive-by effect this helps us simplifying (and clarifying, see
+LWG <iref ref="408"/>) the existing <i>Mandates</i> element]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[indirect.relops]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U, class AA&gt;
+  constexpr bool operator==(const indirect&amp; lhs, const indirect&lt;U, AA&gt;&amp; rhs)
+    noexcept(<del>noexcept(*lhs == *rhs)</del><ins><i>see below</i></ins>);
+</pre>
+<blockquote>
+<p>
+<ins>-?- Let <tt><i>FUN</i></tt> denote the exposition-only function</ins>
+</p>
+<blockquote><pre>
+<ins>bool <i>FUN</i>(bool) noexcept;</ins>
+</pre></blockquote>
+<p>
+-1- <i>Mandates</i>: The expression <tt><ins><i>FUN</i>(</ins>*lhs == *rhs<ins>)</ins></tt> is well-formed <del>and its result is convertible to `bool`</del>.
+<p/>
+-2- <i>Returns</i>: If `lhs` is valueless or `rhs` is valueless, 
+`lhs.valueless_after_move() == rhs.valueless_after_move()`; otherwise `*lhs == *rhs`.
+<p/>
+<ins>-?- <i>Remarks</i>: The exception specification is equivalent to:</ins>
+</p>
+<blockquote><pre>
+<ins>requires (const T&amp; lhs, const U&amp; rhs) { { <i>FUN</i>(lhs == rhs) } noexcept; }</ins>
+</pre></blockquote>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[indirect.comp.with.t]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U&gt;
+  constexpr bool operator==(const indirect&amp; lhs, const U&amp; rhs) noexcept(<del>noexcept(*lhs == rhs)</del><ins><i>see below</i></ins>);
+</pre>
+<blockquote>
+<p>
+<ins>-?- Let <tt><i>FUN</i></tt> denote the exposition-only function</ins>
+</p>
+<blockquote><pre>
+<ins>bool <i>FUN</i>(bool) noexcept;</ins>
+</pre></blockquote>
+<p>
+-1- <i>Mandates</i>: The expression <tt><ins><i>FUN</i>(</ins>*lhs == *rhs<ins>)</ins></tt> is well-formed <del>and its result is convertible to `bool`</del>.
+<p/>
+-2- <i>Returns</i>: If `lhs` is valueless, `false`; otherwise `*lhs == rhs`.
+<p/>
+<ins>-?- <i>Remarks</i>: The exception specification is equivalent to:</ins>
+</p>
+<blockquote><pre>
+<ins>requires (const T&amp; lhs, const U&amp; rhs) { { <i>FUN</i>(lhs == rhs) } noexcept; }</ins>
+</pre></blockquote>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
