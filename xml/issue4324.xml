@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4324" status="New">
+<title><code>unique_ptr&lt;void&gt;::operator*</code> is not SFINAE-friendly</title>
+<section>
+<sref ref="[unique.ptr.single.observers]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>24 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+LWG <iref ref="2762"/> added a conditional `noexcept` specification to `unique_ptr::operator*`
+to make it consistent with `shared_ptr::operator*`:
+</p>
+<pre>
+constexpr add_lvalue_reference_t&lt;T&gt; operator*() const <ins>noexcept(noexcept(*declval&lt;pointer&gt;()))</ins>;
+</pre>
+<p>
+This unexpectedly makes <code>unique_ptr&lt;void&gt;::operator*</code> no longer SFINAE-friendly, 
+<a href="https://godbolt.org/z/xd15jYPhz">for example</a>:
+</p>
+<blockquote><pre>
+#include &lt;memory&gt;
+
+template&lt;class T&gt; concept dereferenceable = requires(T&amp; t) { *t; };
+
+static_assert( dereferenceable&lt;int *&gt;);
+static_assert(!dereferenceable&lt;void*&gt;);
+
+static_assert( dereferenceable&lt;std::shared_ptr&lt;int &gt;&gt;);
+static_assert(!dereferenceable&lt;std::shared_ptr&lt;void&gt;&gt;);
+
+static_assert( dereferenceable&lt;std::unique_ptr&lt;int &gt;&gt;);
+static_assert( dereferenceable&lt;std::unique_ptr&lt;void&gt;&gt;); // <span  style="color:#C80000;font-weight:bold">hard error</span>
+</pre></blockquote>
+<p>
+Given that the standard intends for `operator*` of `shared_ptr` and `unique_ptr` to be 
+SFINAE-friendly based on <sref ref="[util.smartptr.shared.obs]"/>, regardless of the value of 
+`static_assert`, it is reasonable to assume that there should be no hard error here.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[unique.ptr.single.observers]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr add_lvalue_reference_t&lt;T&gt; operator*() const noexcept(<del>noexcept(*declval&lt;pointer&gt;())</del><ins><i>see below</i></ins>);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: <tt>reference_converts_from_temporary_v&lt;add_lvalue_reference_t&lt;T&gt;, 
+decltype(*declval&lt;pointer&gt;())&gt;</tt> is `false`.
+<p/>
+-2- <i>Preconditions</i>: `get() != nullptr` is `true`.
+<p/>
+-3- <i>Returns</i>: `*get()`.
+<p/>
+<ins>-?- <i>Remarks:</i>: The exception specification is equivalent to:</ins>
+</p>
+<blockquote><pre>
+<ins>!requires { *declval&lt;pointer&gt;(); } || requires { { *declval&lt;pointer&gt;() } noexcept; }</ins>
+</pre></blockquote>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
