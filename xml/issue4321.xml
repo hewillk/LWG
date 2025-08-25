@@ -62,6 +62,14 @@ occur within the `store` ordered with those within the `load`?
 The rule only says the `store` synchronizes with the `load`, hence, the evaluation of the function 
 call expression `v.store(...)` happens before the evaluation of the function call expression `v.load(...)`, 
 but how about these evaluations occurring within these functions?
+<p/>
+A possible resolution might be: The order between all evaluations occurring within a function invocation 
+and another evaluation <i>B</i> is determined by how the evaluation of the function call expression is 
+ordered in relation to the expression <i>B</i>.
+<p/>
+For example, if `v.store()` happens-before <i>E</i>, then all evaluations occurring within the `store` 
+happen-before <i>E</i>. As well, `v.store(...)` synchronizes with `v.load(...)`, then all evaluations 
+occurring within `v.store(...)` synchronize with all evaluations occurring within `v.load(...)`.
 </p>
 </discussion>
 
