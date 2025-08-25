@@ -315,7 +315,7 @@ iterator erase(const_iterator first, const_iterator last);
 <blockquote>
 <p>
 -16- Complexity: Linear in the number of elements erased <ins>and for each
-erased element at worst <tt>&#x1d4aa;(log n)</tt> in the capacity of each block
+erased element at worst <tt>&#x1d4aa;(log n)</tt> in the capacity of the block
 containing the element</ins>. Additionally, if any active blocks become empty of elements 
 as a result of the function call, at worst linear in the number of 
 element blocks.
@@ -336,7 +336,7 @@ the proposed solution accepted, the proposed complexity wording becomes:
 -11- <i>Complexity</i>: If `empty()` is `false`, exactly `size() - 1` applications 
 of the corresponding predicate, otherwise no applications of the predicate. 
 <ins>For each element erased as a result of this function call, at worst <tt>&#x1d4aa;(log n)</tt> 
-in the capacity of each block containing the element. Additionally, if any active blocks become 
+in the capacity of the block containing the element. Additionally, if any active blocks become 
 empty of elements as a result of the function call, at worst linear in the number of element 
 blocks.</ins>
 </p></blockquote>

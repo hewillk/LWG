@@ -59,7 +59,7 @@ the proposed solution accepted, the proposed complexity wording becomes:
 -11- <i>Complexity</i>: If `empty()` is `false`, exactly `size() - 1` applications 
 of the corresponding predicate, otherwise no applications of the predicate. 
 <ins>For each element erased as a result of this function call, at worst <tt>&#x1d4aa;(log n)</tt> 
-in the capacity of each block containing the element. Additionally, if any active blocks become 
+in the capacity of the block containing the element. Additionally, if any active blocks become 
 empty of elements as a result of the function call, at worst linear in the number of element 
 blocks.</ins>
 </p></blockquote>
