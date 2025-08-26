@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4293" status="New">
+<issue num="4293" status="Tentatively Ready">
 <title>span::subspan/first/last chooses wrong constructor when T is const-qualified bool</title>
 <section><sref ref="[span.sub]"/></section>
 <submitter>Yuhan Liu</submitter>
@@ -51,6 +51,12 @@ but for the latter the meaning of list-initialization depends on the types.
 The list-initialization form will choose the initializer-list constructor
 when `data()` and `count` are both convertible to the element type.
 </p>
+
+<note>2025-08-21; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after nine votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

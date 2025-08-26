@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4291" status="New">
+<issue num="4291" status="Tentatively Ready">
 <title> <code>explicit map(const Allocator&amp;)</code> should be <code>constexpr</code> </title>
 <section><sref ref="[map.overview]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -14,6 +14,12 @@ The intent of <paper num="P3372R3"/> was for all container constructors to be
 constexpr, but during application of the paper to the working draft
 it was observed that one `map` constructor was missed.
 </p>
+
+<note>2025-08-21; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

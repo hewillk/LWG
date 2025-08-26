@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4276" status="New">
+<issue num="4276" status="Tentatively Ready">
 <title>`front()` and `back()` are not hardened for zero-length `std::array`s</title>
 <section>
 <sref ref="[array.zero]"/>
@@ -19,6 +19,12 @@ hardening by having undefined behavior for `front()` and `back()` explicitly spe
 <p/>
 Without this paragraph, `front()` and `back()` would be hardened as well, as specified in <sref ref="[sequence.reqmts]"/>.
 </p>
+
+<note>2025-08-21; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after eight votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
