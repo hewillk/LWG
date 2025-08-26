@@ -41,9 +41,8 @@ Given that the standard intends for `operator*` of `shared_ptr` and `unique_ptr`
 SFINAE-friendly based on <sref ref="[util.smartptr.shared.obs]"/>, regardless of the value of 
 `static_assert`, it is reasonable to assume that there should be no hard error here.
 </p>
-</discussion>
 
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -70,6 +69,45 @@ decltype(*declval&lt;pointer&gt;())&gt;</tt> is `false`.
 <blockquote><pre>
 <ins>!requires { *declval&lt;pointer&gt;(); } || requires { { *declval&lt;pointer&gt;() } noexcept; }</ins>
 </pre></blockquote>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</superseded>
+
+<note>2025-08-26; Reflector discussion</note>
+<p>
+During reflector triaging it had been pointed out that a better solution would be to constrain the 
+`operator*` directly. The proposed wording has been updated to that effect.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[unique.ptr.single.observers]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr add_lvalue_reference_t&lt;T&gt; operator*() const noexcept(noexcept(*declval&lt;pointer&gt;()));
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Constraints:</i>: <tt>*declval&lt;pointer&gt;()</tt> is a well-formed expression.</ins>
+<p/>
+-1- <i>Mandates</i>: <tt>reference_converts_from_temporary_v&lt;add_lvalue_reference_t&lt;T&gt;, 
+decltype(*declval&lt;pointer&gt;())&gt;</tt> is `false`.
+<p/>
+-2- <i>Preconditions</i>: `get() != nullptr` is `true`.
+<p/>
+-3- <i>Returns</i>: `*get()`.
+</p>
 </blockquote>
 </blockquote>
 
