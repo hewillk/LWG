@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4328" status="New">
+<title>Remove note in &sect;[exec.sched] regarding waiting for completion of scheduled operations</title>
+<section>
+<sref ref="[exec.sched]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>25 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The note at the end of <sref ref="[exec.sched]"/> says:
+</p>
+<blockquote><p>
+[<i>Note</i>: The ability to wait for completion of submitted function objects can be provided by the 
+associated execution resource of the scheduler &mdash; <i>end note</i>]
+</p></blockquote>
+<p>
+The suggestion that the execution resource should be used to join/wait on scheduled work is problematic 
+in situations that may involve more than one execution context, as an execution resource having an empty 
+queue of scheduled work does not necessarily imply that tasks currently running on another execution 
+context will not later schedule additional work on this execution resource.
+<p/>
+With the introduction of `counting_scope` with <paper num="P3149"/> we now have a better recommended 
+way of waiting for tasks that use a resource (including execution resources) to complete.
+<p/>
+The note as it stands represents bad guidance and should either be removed or updated to refer to 
+`counting_scope` and `simple_counting_scope` (<sref ref="[exec.counting.scopes]"/>).
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.sched]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-7- A scheduler type's destructor shall not block pending completion of any receivers connected to the sender
+objects returned from schedule.
+<p/>
+<del>[<i>Note 1</i>: The ability to wait for completion of submitted function objects can be provided by 
+the associated execution resource of the scheduler. &mdash; <i>end note</i>]</del>
+</p>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
