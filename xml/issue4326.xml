@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4326" status="New">
+<title>Standard defined queries can't customize `forwarding_query_t` by inheriting from it</title>
+<section>
+<sref ref="[exec.fwd.env]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>25 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The definition of the `forwarding_query_t` (<sref ref="[exec.fwd.env]"/>) states that a query 
+is a forwarding-query if either the expression `q.query(forwarding_query)` is a constant expression 
+that evaluates to `true` or the query type inherits from `forwarding_query_t`.
+<p/>
+However, all of the queries defined in <sref ref="[exec]"/> are defined similar to the following:
+</p>
+<blockquote><pre>
+struct get_allocator_t { <i>unspecified</i> };
+</pre></blockquote>
+<p>
+While this definition allows for the members of the class to be unspecified, it still explicitly 
+specifies that it has an empty list of base-classes and therefore cannot customize 
+`forwarding_query_t` by inheriting from `forwarding_query_t`.
+<p/>
+We should consider whether we want to change the specification of queries that are to be 
+forwarding-queries to allow inheritance from `forwarding_query_t` or otherwise remove the 
+support for customizing `forwarding_query_t` by inheriting from it.
+<p/>
+<b>Proposed Approach:</b>
+<p/>
+Remove the rule that checks for inheritance from `forwarding_query_t`. Any query can already 
+customize `forwarding_query_t` by defining a `query(forwarding_query_t)` member function, so 
+there is no loss of functionality from doing this and it would simplify the design.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.fwd.env]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `forwarding_query` denotes a query object. For some query object `q` of type `Q`, 
+`forwarding_query(q)` is expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; <tt><i>MANDATE-NOTHROW</i>(q.query(forwarding_query))</tt> if that expression is well-formed.
+<p/>
+<i>Mandates</i>: The expression above has type `bool` and is a core constant expression if `q` is a core constant
+expression.
+</p></li>
+<li><p><del>(2.2) &mdash; Otherwise, `true` if <tt>derived_from&lt;Q, forwarding_query_t&gt;</tt> is `true`.</del></p></li>
+<li><p>(2.3) &mdash; Otherwise, `false`.</p></li>
+</ol>
+
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
