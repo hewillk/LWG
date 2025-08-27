@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4327" status="New">
+<title>Equal schedulers should be required to have same behaviour</title>
+<section>
+<sref ref="[exec.sched]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>25 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The wording <sref ref="[exec.sched]"/> p4 says:
+</p>
+<blockquote><p>
+For any two values `sch1` and `sch2` of some scheduler type `Sch`, `sch1 == sch2` shall return 
+`true` only if both `sch1` and `sch2` share the same associated execution resource.
+</p></blockquote>
+<p>
+However, I don't think this requirement is sufficient for schedulers to be considered equal 
+as it is possible to have two different schedulers that share the same associated execution 
+resource but that have different behaviour.
+<p/>
+For example, two schedulers of the same type and having the same associated execution resource 
+but where one schedules items with high priority and others with low priority.
+<p/>
+Ideally we want two schedulers to be equal if and only if they can be used interchangeably 
+such that using either scheduler to schedule work has the same behaviour.
+<p/>
+Note that some use cases may also want to compare two schedulers as to whether or not they 
+share the same associated execution resource, independently of their scheduling behaviour, 
+however this could be added as a separate operator later, e.g. 
+`std::execution::same_resource(sch1, sch2)`.
+<p/>
+While the above wording does still permit implementations to return `false` even if the associated 
+execution resources are the same, it is not clear how this definition applies to schedulers 
+such as an `inline_scheduler` (added in <paper num="P3552"/>) in which has no specific associated 
+execution resource but where instances nevertheless have the same scheduling behaviour.
+<p/>
+One approach to improving this would be to change p4 to refer to the schedulers having the 
+same scheduling behaviour rather than having the same associated execution resource.
+<p/>
+For example, modify <sref ref="[exec.sched]"/> p4 to refer to schedulers having the same 
+scheduling behaviour rather than having the same associated execution resource.
+</p>
+<blockquote><p>
+For any two values `sch1` and `sch2` of some scheduler type `Sch`, `sch1 == sch2` shall 
+return `true` only if both `sch1` and `sch2` <del>share the same associated execution 
+resource</del><ins>have the same scheduling behaviour</ins>.
+</p></blockquote>
+<p>
+However, this then raises the question of exactly what "the same scheduling behaviour" is.
+For example, what if two schedulers have the same associated execution resource and the 
+same behaviour for a `schedule()` operation, but have different behaviours for customizations 
+of the `bulk()` algorithm?
+<p/>
+Alternatively, we could talk about two schedulers being equal if and only if they can be used 
+interchangeably throughout the program.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
