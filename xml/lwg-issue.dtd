@@ -30,6 +30,7 @@
 <!ELEMENT ins ANY>
 <!ATTLIST ins style CDATA #IMPLIED>
 <!ELEMENT pre ANY>
+<!ELEMENT q ANY>
 <!ELEMENT blockquote ANY>
 <!ATTLIST blockquote class (note) #IMPLIED> <!-- issue 427 needs this -->
 <!ATTLIST blockquote style CDATA #IMPLIED>
