@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4292" status="New">
+<issue num="4292" status="Tentatively Ready">
 <title>Unordered container local iterators should be constexpr iterators</title>
 <section>
 <sref ref="[unord.map.overview]"/>
@@ -20,6 +20,12 @@ constexpr iterators, but during application of the paper to the working draft
 it was observed that unordered containers don't say it for their
 local iterators.
 </p>
+
+<note>2025-08-29; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after eight votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
