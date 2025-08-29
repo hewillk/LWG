@@ -6,7 +6,7 @@
 <section><sref ref="[range.iter.op.distance]"/></section>
 <submitter>Jiang An</submitter>
 <date>24 Jul 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -24,6 +24,12 @@ imposed by <tt>sized_sentinel_for&lt;S, decay_t&lt;I&gt;&gt;</tt> are still unde
 <p/>
 I think we should only decay arrays and keep `volatile` for non-array arguments.
 </p>
+
+<note>2025-08-29; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

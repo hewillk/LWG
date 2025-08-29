@@ -8,7 +8,7 @@
 </section>
 <submitter>Jiang An</submitter>
 <date>05 Aug 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -22,6 +22,17 @@ random access iterator, and additional models `contiguous_iterator` when `T` is 
 When `T` is a function type, the possibly intended iterator would be not even an actual iterator. 
 But it seems that range-for loop over such an <tt>std::optional&lt;T&amp;&gt;</tt> can work.
 </p>
+
+<note>2025-08-29; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"How can `end()` work for a pointer to incomplete type? `begin`/`end` should
+be constrained on object types, and Mandate complete object types.
+The aliases shouldn't be defined for non-object types, but probably harmless."
+</p>
+
 </discussion>
 
 <resolution>

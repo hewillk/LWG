@@ -6,7 +6,7 @@
 <section><sref ref="[member.functions]"/></section>
 <submitter>Jiang An</submitter>
 <date>24 Jul 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -45,6 +45,12 @@ As shown by the example, the allowance in <sref ref="[member.functions]"/>/2 can
 <p/>
 So perhaps some wording change is necessary to guarantee the <i>Constraints</i> of member functions to be meaningful.
 </p>
+
+<note>2025-08-29; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

@@ -6,7 +6,7 @@
 <section><sref ref="[derivation]"/></section>
 <submitter>Jiang An</submitter>
 <date>28 Apr 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,13 @@ However, libc++ marks `join_view`'s iterator `final` for some reasons
 (<a href="https://reviews.llvm.org/D142811#inline-1383022">https://reviews.llvm.org/D142811#inline-1383022</a>). 
 Perhaps we should clarify that the `final`-ity of exposition-only class is unspecified.
 </p>
+
+<note>2025-08-29; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+Votes for P2 (due to implementation divergence), NAD, and LEWG.
+</p>
+
 </discussion>
 
 <resolution>
