@@ -70,7 +70,13 @@ will automatically do <code>make pgms</code> as a prerequisite of
 <h2>Add or change issues</h2>
 <p>There is one source file per issue, in <code>issues/xml</code>. The file
 <code>issues/xml/lwg-template.xml</code> is a template for a
-new issue.</p>
+new issue.
+The XML issue format allows most HTML elements within the
+<code>&lt;discussion&gt;</code> and <code>&lt;resolution&gt;</code> elements
+(and HTML formatting can be used in the <code>&lt;title&gt;</code> but
+should be used sparingly for inline formatting only!).
+</p>
+<p>The <code>lint.sh</code> script can be used to validate your XML.</p>
 <p>Commit files locally as you update them:</p>
 <blockquote>
   <pre><em># edit the XML files or add new XML files</em>
