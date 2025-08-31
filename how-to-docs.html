@@ -75,7 +75,17 @@ The XML issue format allows most HTML elements within the
 <code>&lt;discussion&gt;</code> and <code>&lt;resolution&gt;</code> elements
 (and HTML formatting can be used in the <code>&lt;title&gt;</code> but
 should be used sparingly for inline formatting only!).
+You can also use backticks (<code>`</code>) to format text in code font,
+but not if there are HTML elements within the backticks.
+There are some special tags defined for use in issues:
 </p>
+<ul>
+<li><code>&lt;iref ref="1234"/&gt;</code> to link to LWG issue 1234.</li>
+<li><code>&lt;sref ref="[foo.bar]"/&gt;</code> to refer to a subclause in
+the working draft.</li>
+<li><code>&lt;paper num="P1234"/&gt;</code> to link to a paper on the
+wg21.link redirect service.</li>
+</ul>
 <p>The <code>lint.sh</code> script can be used to validate your XML.</p>
 <p>Commit files locally as you update them:</p>
 <blockquote>
