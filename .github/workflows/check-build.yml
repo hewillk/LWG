@@ -34,6 +34,8 @@ jobs:
 
     - name: XML validation
       run: |
+        # Skip install man pages, to avoid slow man-db trigger.
+        sudo echo 'path-exclude /usr/share/man/*' > /etc/dpkg/dpkg.cfg.d/01_nodoc
         sudo apt-get update
         sudo apt-get install -y libxml2-utils
         bin/lint.sh
