@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4351" status="New">
+<title><code><i>integral-constant-like</i></code> needs more `remove_cvref_t`</title>
+<section><sref ref="[span.syn]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>05 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<paper num="P2781R9"/> tweaked the definition of
+<code><i>integral-constant-like</i></code> to work with `constant_wrapper`,
+like so:
+</p>
+<blockquote>
+<pre>
+template&lt;class T&gt;
+    concept <i>integral-constant-like</i> =                    <i>// exposition only</i>
+      is_integral_v&lt;<ins>remove_cvref_t&lt;</ins>decltype(T::value)<ins>&gt;</ins>&gt; &amp;&amp;
+      !is_same_v&lt;bool, remove_const_t&lt;decltype(T::value)&gt;&gt; &amp;&amp;
+      convertible_to&lt;T, decltype(T::value)&gt; &amp;&amp;
+      equality_comparable_with&lt;T, decltype(T::value)&gt; &amp;&amp;
+      bool_constant&lt;T() == T::value&gt;::value &amp;&amp;
+      bool_constant&lt;static_cast&lt;decltype(T::value)&gt;(T()) == T::value&gt;::value;
+</pre>
+</blockquote>
+<p>
+This was done so that <code>constant_wrapper&lt;int&gt;</code> models the concept,
+but it needs an additional tweak so that
+<code>constant_wrapper&lt;bool&amp;&gt;</code> does not model it.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[span.syn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T&gt;
+    concept <i>integral-constant-like</i> =                    <i>// exposition only</i>
+      is_integral_v&lt;remove_cvref_t&lt;decltype(T::value)&gt;&gt; &amp;&amp;
+      !is_same_v&lt;bool, remove_<ins>cvref</ins><del>const</del>_t&lt;decltype(T::value)&gt;&gt; &amp;&amp;
+      convertible_to&lt;T, decltype(T::value)&gt; &amp;&amp;
+      equality_comparable_with&lt;T, decltype(T::value)&gt; &amp;&amp;
+      bool_constant&lt;T() == T::value&gt;::value &amp;&amp;
+      bool_constant&lt;static_cast&lt;decltype(T::value)&gt;(T()) == T::value&gt;::value;
+</pre>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
