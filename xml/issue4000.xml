@@ -28,9 +28,8 @@ which means that <tt>.first</tt> and <tt>.second</tt> are not valid in such case
 Set priority to 3 after reflector poll in October 2023.
 </p>
 
-<p>
-"This is <paper num="P2767"/> section 6 which LWG looked at in Varna."
-</p>
+<note>2025-09-05; LWG telecon</note>
+<p>This will be resolved by <paper num="P3567"/>.</p>
 
 </discussion>
 
