@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4352" status="New">
+<title>"operations on flat_multimap are equivalent to those of flat_map"</title>
+<section><sref ref="[flat.multimap.overview]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>05 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[flat.multimap.overview]"/> p4 says:
+</p>
+<blockquote>
+Except as otherwise noted, operations on `flat_multimap` are equivalent to
+those of `flat_map`, except that `flat_multimap` operations do not remove
+or replace elements with equal keys.
+<p>
+[<i>Example 1</i>: `flat_multimap` constructors and emplace do not erase
+non-unique elements after sorting them.
+&mdash; <i>end example</i>]
+</p>
+</blockquote>
+
+<p>
+This doesn't really work, because there is no `flat_map` operation that is
+equivalent to the constructors and `insert` and `insert_range` functions that
+take a `sorted_equivalent_t` tag argument. The `flat_map` operations that the
+wording intends to refer to take a `sorted_unique_t` tag argument.
+It's a bit of a stretch to say they're equivalent when they don't even have
+the same parameters, so we need some weasel words here.
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
