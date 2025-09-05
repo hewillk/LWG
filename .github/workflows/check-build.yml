@@ -5,7 +5,7 @@
 # is well-formed and the lists can be generated, suitable for checking
 # pull requests are OK to merge.
 
-name: Check HTML generation
+name: Validate XML and check HTML generation
 
 on:
   pull_request:
