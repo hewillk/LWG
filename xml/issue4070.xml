@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4070" status="SG16">
+<issue num="4070" status="Open">
 <title>Transcoding by <code>std::formatter&lt;std::filesystem::path&gt;</code></title>
 <section><sref ref="[fs.path.fmtr.funcs]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -133,9 +133,7 @@ The minimal change is to replace "and not converting from `wchar_t` to UTF-8" wi
 is not UTF-8". The optional change is to insert "ordinary" before "literal encoding" as well. Once that is done, 
 I'll have SG16 confirm they are content with the new proposed resolution.
 </p>
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5008"/>.
 </p>
@@ -178,6 +176,95 @@ transcoding of a formatted `path` when `charT` and `path::value_type` differ
 </li>
 
 </ol>
+</superseded>
+
+<note>2025-07-30; SG16 meeting</note>
+<p>
+SG16 unanimously approved new wording produced during the discussion.
+The group concluded that the intended behavior would be best specified by
+introducing additional names to denote the sequence of transformations
+that produce the intended effect. Status &rarr; Open.
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+<ol>
+<li><p>Modify <sref ref="[fs.path.fmtr.funcs]"/> as indicated:</p>
+
+<blockquote>
+<pre><code>
+template&lt;class FormatContext&gt;
+  typename FormatContext::iterator
+    format(const filesystem::path&amp; p, FormatContext&amp; ctx) const;
+</code></pre>
+<blockquote>
+<p>
+-5-
+<em>Effects</em>:
+Let `s` be
+<code>p.generic_string<del>&lt;filesystem::path::value_type&gt;</del>()</code>
+if the `g` option is used, otherwise `p.native()`.
+<ins>Let `s2` be `s` adjusted according to the <em>path-format-spec</em>.
+Let `s3` be defined as follows:</ins>
+<ol style="list-style-type: none">
+<li>
+<ins>
+(5.1) &mdash;
+If `charT` is `char`, `path::value_type` is `wchar_t`,
+and the ordinary literal encoding is UTF-8,
+`s3` is the result of transcoding `s2`
+from the native encoding for wide character strings to UTF-8
+with maximal subparts of ill-formed subsequences substituted
+with <span style="font-variant:small-caps">U+FFFD REPLACEMENT CHARACTER</span>
+per the Unicode Standard, Chapter 3.9
+<span style="font-variant:small-caps">U+FFFD</span> Substitution in Conversion.
+</ins>
+</li>
+<li>
+<ins>
+(5.2) &mdash;
+If `charT` and `path::value_type` are the same, then `s3` is the same as `s2`.
+</ins>
+</li>
+<li>
+<ins>
+(5.3) &mdash;
+Otherwise, `s3` is the result of an implementation-defined transcoding of `s2`.
+</ins>
+</li>
+</ol>
+<ins>Writes <code>s3</code> into `ctx.out()`.</ins>
+<del>
+Writes `s` into `ctx.out()`,
+adjusted according to the <i>path-format-spec</i>.
+If `charT` is `char`, `path::value_type` is `wchar_t`, and the literal encoding 
+is UTF-8, then the escaped path
+is transcoded from the native encoding for wide character strings to UTF-8
+with maximal subparts of ill-formed subsequences substituted with
+<span style="font-variant:small-caps">u+fffd replacement character</span> per
+the Unicode Standard, Chapter 3.9 <span style="font-variant:small-caps">u+fffd</span>
+Substitution in Conversion.
+If `charT` and `path::value_type` are the same then no transcoding is performed.
+Otherwise, transcoding is implementation-defined.
+</del>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li>
+Modify the entry in the index of implementation-defined behavior as indicated:
+<blockquote>
+transcoding of a formatted `path` when `charT` and `path::value_type` differ
+<ins>and the ordinary literal encoding is not UTF-8</ins>
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
