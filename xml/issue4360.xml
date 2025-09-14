@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4360" status="New">
+<title><tt><i>awaitable-sender</i></tt> concept should qualify use of <tt><i>awaitable-receiver</i></tt> type</title>
+<section>
+<sref ref="[exec.as.awaitable]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>27 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[exec.as.awaitable]"/> p1 there is an exposition-only helper concept 
+<tt><i>awaitable-sender</i></tt> defined as follows:
+</p>
+<blockquote><pre>
+namespace std::execution {
+  template&lt;class Sndr, class Promise&gt;
+    concept <i>awaitable-sender</i> =
+      <i>single-sender</i>&lt;Sndr, env_of_t&lt;Promise&gt;&gt; &amp;&amp;
+      sender_to&lt;Sndr, <i>awaitable-receiver</i>&gt; &amp;&amp; // <i>see below</i>
+      requires (Promise&amp; p) {
+        { p.unhandled_stopped() } -> convertible_to&lt;coroutine_handle&lt;&gt;&gt;;
+      };
+}
+</pre></blockquote>
+<p>
+The mention of the type <tt><i>awaitable-receiver</i></tt> here does not refer to any exposition-only type 
+defined at namespace-scope. It seems to, instead, be referring to the nested member-type 
+<tt><i>sender-awaitable</i>&lt;Sndr, Promise&gt;::<i>awaitable-receiver</i></tt> and so should be 
+qualified as such.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.as.awaitable]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- `as_awaitable` transforms an object into one that is awaitable within a particular coroutine. 
+Subclause <sref ref="[exec.coro.util]"/> makes use of the following exposition-only entities:
+</p>
+<blockquote><pre>
+namespace std::execution {
+  template&lt;class Sndr, class Promise&gt;
+    concept <i>awaitable-sender</i> =
+      <i>single-sender</i>&lt;Sndr, env_of_t&lt;Promise&gt;&gt; &amp;&amp;
+      sender_to&lt;Sndr, <ins>typename <i>sender-awaitable</i>&lt;Sndr, Promise&gt;::</ins><i>awaitable-receiver</i>&gt; &amp;&amp; // <i>see below</i>
+      requires (Promise&amp; p) {
+        { p.unhandled_stopped() } -> convertible_to&lt;coroutine_handle&lt;&gt;&gt;;
+      };
+  [&hellip;]
+}
+</pre></blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
