@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4361" status="New">
+<title><tt><i>awaitable-receiver</i>::set_value</tt> should use <i>Mandates</i> instead of constraints</title>
+<section>
+<sref ref="[exec.as.awaitable]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>28 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[exec.as.awaitable]"/> bullet 4.1 the <tt><i>awaitable-receiver</i>::set_value</tt> member function 
+is defined as having a constraint that the <tt><i>result-type</i></tt> is constructible from the values.
+</p>
+<blockquote>
+<p>
+If <tt>constructible_from&lt;<i>result-type</i>, decltype((vs))...&gt;</tt> is satisfied, the expression 
+`set_value(rcvr, vs...)` is equivalent to:
+</p>
+<blockquote><pre>
+try {
+  rcvr.<i>result-ptr</i>-&gt;template emplace&lt;1&gt;(vs...);
+} catch(...) {
+  rcvr.<i>result-ptr</i>-&gt;template emplace&lt;2&gt;(current_exception());
+}
+rcvr.<i>continuation</i>.resume();
+</pre></blockquote>
+<p>
+Otherwise, `set_value(rcvr, vs...)` is ill-formed.
+</p>
+</blockquote>
+<p>
+Should we be using mandates here instead of constraints (or alternatively just drop the constraint altogether)?
+There shouldn't be any need to change behaviour based on whether or not the receiver's completion methods 
+are well-formed or not.
+<p/>
+It is worth noting that there is inconsistent use of constraints on `set_value` methods in other receiver 
+implementations throughout <sref ref="[exec]"/>.
+<p/>
+For example:  The following `set_value` member function applies constraints:
+</p>
+<ul>
+<li><p>In <sref ref="[exec.snd.expos]"/> <tt><i>basic-receiver</i>::set_value</tt> constrains that check that it can accept those specific value arguments</p></li>
+</ul>
+<p>
+While the following `set_value` member functions do not apply constraints:
+</p>
+<ul>
+<li><p>In <sref ref="[exec.let]"/> <tt><i>receiver2</i>::set_value</tt></p></li>
+<li><p>In <sref ref="[exec.spawn.future]"/> <tt><i>spawn-future-receiver</i>::set_value</tt></p></li>
+<li><p>in <sref ref="[exec.sync.wait]"/> <tt><i>sync-wait-receiver</i>::set_value</tt></p></li>
+</ul>
+<p>
+We should probably try to be consistent on whether or not `set_value` implementations 
+should use constraints or mandates. Given that it is not allowed to form calls to the 
+receiver unless that overload is present in the `completion_signatures`, it may be worth 
+just making them all mandates. This would tend to make uses of the `receiver_of` concept 
+less useful as satisfying <tt>receiver_of&lt;R, Sig&gt;</tt> would not necessarily 
+guarantee that actually trying to call each of `R`'s corresponding completion functions 
+will result in a well-formed program. It is arguable that this is already the status-quo, however.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.as.awaitable]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-4- Let `rcvr` be an rvalue expression of type <tt><i>awaitable-receiver</i></tt>, let 
+`crcvr` be a const lvalue that refers to `rcvr`, let `vs` be a pack of subexpressions, 
+and let `err` be an expression of type `Err`. Then:
+</p>
+<ol style="list-style-type: none">
+<li><p>(4.1) &mdash; <del>If <tt>constructible_from&lt;<i>result-type</i>, decltype((vs))...&gt;</tt> is satisfied, 
+t</del><ins>T</ins>he expression `set_value(rcvr, vs...)` is equivalent to:
+</p>
+<blockquote><pre>
+try {
+  rcvr.<i>result-ptr</i>-&gt;template emplace&lt;1&gt;(vs...);
+} catch(...) {
+  rcvr.<i>result-ptr</i>-&gt;template emplace&lt;2&gt;(current_exception());
+}
+rcvr.<i>continuation</i>.resume();
+</pre></blockquote>
+<p>
+<del>Otherwise, `set_value(rcvr, vs...)` is ill-formed</del><ins><i>Mandates:</i> 
+<tt>constructible_from&lt;<i>result-type</i>, decltype((vs))...&gt;</tt> is satisfied</ins>.</p></li>
+<li><p>(4.2) &mdash; [&hellip;]</p></li>
+<li><p>(4.3) &mdash; [&hellip;]</p></li>
+<li><p>(4.4) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+
+<li><p>Modify <sref ref="[exec.snd.expos]"/> after p25 as indicated:</p>
+
+<blockquote><pre>
+[&hellip;]
+template&lt;class Sndr, class Rcvr, class Index&gt;
+  requires <i>valid-specialization</i>&lt;<i>env-type</i>, Index, Sndr, Rcvr&gt;
+struct <i>basic-receiver</i> { // <i>exposition only</i>
+  using receiver_concept = receiver_t;
+  
+  using <i>tag-t</i> = tag_of_t&lt;Sndr&gt;; // <i>exposition only</i>
+  using <i>state-t</i> = <i>state-type</i>&lt;Sndr, Rcvr&gt;; // <i>exposition only</i>
+  static constexpr const auto&amp; <i>complete</i> = <i>impls-for</i>&lt;<i>tag-t</i>&gt;::<i>complete</i>; // exposition only
+  
+  template&lt;class... Args&gt;
+    <del>requires <i>callable</i>&lt;decltype(<i>complete</i>), Index, <i>state-t</i>&amp;, Rcvr&amp;, set_value_t, Args...&gt;</del>
+  void set_value(Args&amp;&amp;... args) &amp;&amp; noexcept {
+    <i>complete</i>(Index(), op-&gt;<i>state</i>, op-&gt;<i>rcvr</i>, set_value_t(), std::forward&lt;Args&gt;(args)...);
+  }
+  
+  template&lt;class Error&gt;
+    <del>requires <i>callable</i>&lt;decltype(<i>complete</i>), Index, <i>state-t</i>&amp;, Rcvr&amp;, set_error_t, Error&gt;</del>
+  void set_error(Error&amp;&amp; err) &amp;&amp; noexcept {
+    <i>complete</i>(Index(), op-&gt;<i>state</i>, op-&gt;<i>rcvr</i>, set_error_t(), std::forward&lt;Error&gt;(err));
+  }
+  
+  void set_stopped() &amp;&amp; noexcept
+    <del>requires <i>callable</i>&lt;decltype(<i>complete</i>), Index, <i>state-t</i>&amp;, Rcvr&amp;, set_stopped_t&gt;</del> {
+    <i>complete</i>(Index(), op-&gt;<i>state</i>, op-&gt;<i>rcvr</i>, set_stopped_t());
+  }
+  
+  auto get_env() const noexcept -&gt; <i>env-type</i>&lt;Index, Sndr, Rcvr&gt; {
+    return <i>impls-for</i>&lt;tag-t&gt;::<i>get-env</i>(Index(), op-&gt;<i>state</i>, op-&gt;<i>rcvr</i>);
+  }
+  
+  <i>basic-state</i>&lt;Sndr, Rcvr&gt;* <i>op</i>; // <i>exposition only</i>
+};
+[&hellip;]
+</pre></blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
