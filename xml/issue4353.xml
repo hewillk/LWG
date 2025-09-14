@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4353" status="New">
+<title>Uses of <tt><i>MANDATE-NOTHROW</i></tt> in CPOs should not enclose CPO argument sub-expressions</title>
+<section>
+<sref ref="[exec]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>25 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+There are a number of CPOs defined in <sref ref="[exec]"/> which have behaviour specified in terms of being 
+expression-equivalent to a <tt><i>MANDATE-NOTHROW</i></tt> expression.
+<p/>
+The intent of this is that we want to make sure that the call that the CPO dispatches to is marked `noexcept`.
+<p/>
+However, the way that these CPOs are currently specified in terms of sub-expressions means that we are currently 
+requiring that all of the expressions passed as arguments to the CPO are also `noexcept`. Outside of defining 
+these CPOs as preprocessor macros, this is unimplementable &mdash; and also undesirable behaviour.
+<p/>
+For example, <sref ref="[exec.set.value]"/> defines `set_value(rcvr, vs...)` to be equivalent to 
+<tt><i>MANDATE-NOTHROW</i>(rcvr.set_value(vs...))</tt> for sub-expressions `rcvr` and pack of sub-expressions 
+`vs`.
+<p/>
+In <sref ref="[exec.general]"/> p5 we define <tt><i>MANDATE-NOTHROW</i>(expr)</tt> as expression-equivalent to 
+`expr` but mandate that `noexcept(expr)` is `true`.
+<p/>
+So in the above definition of `set_value(rcvr, vs...)` we are actually requiring that the expression 
+`noexcept(rcvr.set_value(vs...))` is `true`.
+<p/>
+This is only true if all of the sub-expressions are `noexcept`, i.e. all of the following expressions are `true`.
+</p>
+<ul>
+<li><p><tt>noexcept(rcvr)</tt>,</p></li>
+<li><p><tt>(noexcept(vs) &amp;&amp; ...)</tt>,</p></li>
+<li><p>the member-function call to `rcvr.set_value(vs...)` including any implicit conversions of arguments.</p></li>
+</ul>
+<p>
+This means that if, for example, one of the sub-expressions in the pack `vs` was a call to some potentially-throwing 
+function then the overall `set_value` expression would be violating the mandates requirement.
+<p/>
+For example:
+</p>
+<blockquote><pre>
+struct my_receiver 
+{
+  void set_value(int x) noexcept;
+};
+
+int get_value() noexcept(false);
+
+my_receiver r;
+std::execution::set_value(r, get_value()); // <span style="color:#C80000;font-weight:bold">fails MANDATE-NOTHROW mandates</span>
+</pre></blockquote>
+<p>
+Instead, we need to redefine these CPOs as being expression-equivalent to something that does not require that the 
+argument expressions to the CPO themselves are `noexcept` &mdash; only what will be in the body of the CPO function.
+<p/>
+For example, we could change <sref ref="[exec.set.value]"/> to define `set_value(rcvr, vs...)` as expression-equivalent to:
+</p>
+<blockquote><pre>
+[](auto&amp;&amp; rcvr2, auto&amp;&amp;... vs2) noexcept -&gt; 
+  decltype(auto) requires requires { std::forward&lt;decltype(rcvr2)&gt;(rcvr2).set_value(std::forward&lt;decltype(vs2)&gt;(vs2)...); } 
+{
+  return <i>MANDATE-NOTHROW</i>(std::forward&lt;decltype(rcvr2)&gt;(rcvr2).set_value(std::forward&lt;decltype(vs2)&gt;(vs2)...));
+}(rcvr, vs...)
+</pre></blockquote>
+<p>
+The following sections all contain problematic uses of <tt><i>MANDATE-NOTHROW</i></tt>:
+</p>
+<ul>
+<li><p><sref ref="[exec.get.allocator]"/></p></li>
+<li><p><sref ref="[exec.get.stop.token]"/></p></li>
+<li><p><sref ref="[exec.get.env]"/></p></li>
+<li><p><sref ref="[exec.get.domain]"/></p></li>
+<li><p><sref ref="[exec.get.scheduler]"/></p></li>
+<li><p><sref ref="[exec.get.delegation.scheduler]"/></p></li>
+<li><p><sref ref="[exec.get.fwd.progress]"/></p></li>
+<li><p><sref ref="[exec.get.compl.sched]"/></p></li>
+<li><p><sref ref="[exec.get.await.adapt]"/></p></li>
+<li><p><sref ref="[exec.set.value]"/></p></li>
+<li><p><sref ref="[exec.set.error]"/></p></li>
+<li><p><sref ref="[exec.set.stopped]"/></p></li>
+<li><p><sref ref="[exec.opstate.start]"/></p></li>
+</ul>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
