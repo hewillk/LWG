@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4357" status="New">
+<title><tt><i>connect-awaitable</i></tt> should use `is_void_v` to check for result-type of 
+`co_await` expression instead of <tt>same_as&lt;void&gt;</tt></title>
+<section>
+<sref ref="[exec.connect]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>27 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The wording in <sref ref="[exec.connect]"/> p5 defines the <tt><i>connect-awaitable</i>()</tt> function as follows:
+</p>
+<blockquote><pre>
+<i>operation-state-task</i> <i>connect-awaitable</i>(DS sndr, DR rcvr) requires receiver_of&lt;DR, Sigs&gt; {
+  exception_ptr ep;
+  try {
+    if constexpr (same_as&lt;V, void&gt;) {
+      co_await std::move(sndr);
+      co_await <i>suspend-complete</i>(set_value, std::move(rcvr));
+    } else {
+      co_await <i>suspend-complete</i>(set_value, std::move(rcvr), co_await std::move(sndr));
+    }
+  } catch(...) {
+    ep = current_exception();
+  }
+  co_await <i>suspend-complete</i>(set_error, std::move(rcvr), std::move(ep));
+}
+</pre></blockquote>
+<p>
+The use of <tt>same_as&lt;V, void&gt;</tt> in the if-constexpr condition does not cover the case where the 
+result of the `co_await` expression has type <i>cv</i> `void`. It should use <tt>is_void_v&lt;V&gt;</tt> 
+instead to allow it to match all `void` types, not just unqualified `void`.
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.connect]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-5- Let `V` name the type <tt><i>await-result-type</i>&lt;DS, <i>connect-awaitable-promise</i>&gt;</tt>, 
+let `Sigs` name the type
+</p>
+<blockquote><pre>
+completion_signatures&lt;
+  <i>SET-VALUE-SIG</i>(V), // <i>see <sref ref="[exec.snd.concepts]"/></i>
+  set_error_t(exception_ptr),
+  set_stopped_t()&gt;
+</pre></blockquote>
+<p>
+and let <tt><i>connect-awaitable</i></tt> be an exposition-only coroutine defined as follows:
+</p>
+<blockquote><pre>
+namespace std::execution {
+  [&hellip;]
+  <i>operation-state-task</i> <i>connect-awaitable</i>(DS sndr, DR rcvr) requires receiver_of&lt;DR, Sigs&gt; {
+    exception_ptr ep;
+    try {
+      if constexpr (<del>same_as&lt;V, void&gt;</del><ins>is_void_v&lt;V&gt;</ins>) {
+        co_await std::move(sndr);
+        co_await <i>suspend-complete</i>(set_value, std::move(rcvr));
+      } else {
+        co_await <i>suspend-complete</i>(set_value, std::move(rcvr), co_await std::move(sndr));
+      }
+    } catch(...) {
+      ep = current_exception();
+    }
+    co_await <i>suspend-complete</i>(set_error, std::move(rcvr), std::move(ep));
+  }
+}  
+</pre></blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
