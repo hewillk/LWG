@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4356" status="New">
+<title>`connect()` should use `get_allocator(get_env(rcvr))` to allocate the coroutine-state for a 
+<tt><i>connect-awaitable</i></tt> coroutine</title>
+<section>
+<sref ref="[exec.connect]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>27 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The wording for `connect()` (<sref ref="[exec.connect]"/>) handles passing awaitable types as the sender argument 
+by calling the <tt><i>connect-awaitable</i></tt>() coroutine and having it execute a `co_await` expression.
+<p/>
+The <tt><i>connect-awaitable</i></tt>() coroutine will typically need to dynamically allocate storage for 
+the coroutine state and, as specified, this currently just always uses the global default allocator.
+This is because the <tt><i>connect-awaitable-promise</i></tt> type does not define any member operator 
+`new/delete` overloads.
+<p/>
+It seems desirable for this facility to use the allocator obtained from the receiver, by calling 
+`get_allocator(get_env(rcvr))`, in order to allocate storage for the coroutine-state instead of always 
+using global operator `new`. This would give the user at least some level of control over how this 
+allocation is performed.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.connect]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note: </i> This should cover the design intent, although we may want to spell this out 
+more explicitly in terms of the exact semantics in a similar way to <sref ref="[coro.generator.promise]"/> p17, 
+which lists overloads of operator `new()` and describes the rebound allocator type which allocates storage 
+in chunks of size `__STDCPP_DEFAULT_NEW_ALIGNMENT__`.]
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+-5- Let `V` name the type <tt><i>await-result-type</i>&lt;DS, <i>connect-awaitable-promise</i>&gt;</tt>, 
+let `Sigs` name the type
+</p>
+<blockquote><pre>
+[&hellip;]
+</pre></blockquote>
+<p>
+and let <tt><i>connect-awaitable</i></tt> be an exposition-only coroutine defined as follows:
+</p>
+<blockquote><pre>
+namespace std::execution {
+  [&hellip;]
+}  
+</pre></blockquote>
+<p>
+<ins>Any dynamically allocated storage required for the coroutine state allocated by an invocation 
+of the form <tt><i>connect-awaitable</i>(sndr, rcvr)</tt> is allocated using the allocator obtained 
+from `get_allocator(get_env(rcvr))`.</ins>
+<p/>
+-6- [&hellip;]
+</p>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
