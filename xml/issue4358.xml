@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4358" status="New">
+<title>&sect;[exec.as.awaitable] is using "Preconditions:" when it should probably be described in the constraint</title>
+<section>
+<sref ref="[exec.as.awaitable]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>27 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[exec.as.awaitable]"/> bullet 7.2 it states:
+</p>
+<blockquote>
+<ol style="list-style-type: none">
+<li><p>(7.2) &mdash; Otherwise, <tt>(void(p), expr)</tt> if <tt><i>is-awaitable</i>&lt;Expr, U&gt;</tt> is `true`, 
+where `U` is an unspecified class type that is not `Promise` and that lacks a member named `await_transform`.
+<p/>
+<i>Preconditions</i>: <tt><i>is-awaitable</i>&lt;Expr, Promise&gt;</tt> is `true` and the expression 
+`co_await expr` in a coroutine with promise type `U` is expression-equivalent to the same expression 
+in a coroutine with promise type `Promise`.</p></li>
+</ol>
+</blockquote>
+<p>
+The "<i>Preconditions</i>:" sentence there refers to static properties of the program and so seems like a 
+better fit for a <i>Mandates</i>: element or for folding into the constraint.
+<p/>
+Also, in the part of the precondition above which says "&hellip; and the expression `co_await expr` in a 
+coroutine with promise type `U` is expression-equivalent to the same expression in a coroutine with promise 
+type `Promise`" it is unclear how this can be satisfied, as the types involved are different and therefore 
+the expression cannot be expression-equivalent.
+<p/>
+I think perhaps what is intended here is something along the lines of the first expression having 
+"effects equivalent to" the second expression, instead of "expression-equivalent to"?
+<p/>
+However, I think there is a more direct way to express the intent here, by instead just requiring that 
+<tt>decltype(<i>GET-AWAITER</i>(expr))</tt> satisfies <tt><i>is-awaiter</i>&lt;Promise&gt;</tt>.
+This checks whether `expr` would be a valid type to return from a `Promise::await_transform()` function.
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.as.awaitable]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-7- `as_awaitable` is a customization point object. For subexpressions `expr` and `p` where `p` 
+is an lvalue, `Expr` names the type `decltype((expr))` and `Promise` names the type 
+<tt>decay_t&lt;decltype((p))&gt;</tt>, `as_awaitable(expr, p)` is expression-equivalent to, 
+except that the evaluations of `expr` and `p` are indeterminately sequenced:
+</p>
+<ol style="list-style-type: none">
+<li><p>(7.1) &mdash; `expr.as_awaitable(p)` if that expression is well-formed.
+<p/>
+<i>Mandates</i>: <tt><i>is-awaitable</i>&lt;A, Promise&gt;</tt> is `true`, where `A` is the type of 
+the expression above.</p></li>
+<li><p>(7.2) &mdash; Otherwise, <tt>(void(p), expr)</tt> if <ins><tt>decltype(<i>GET-AWAITER</i>(expr))</tt> 
+satisfies <tt><i>is-awaiter</i>&lt;Promise&gt;</tt>.</ins><del><tt><i>is-awaitable</i>&lt;Expr, U&gt;</tt> is `true`, 
+where `U` is an unspecified class type that is not `Promise` and that lacks a member named `await_transform`.</del>
+<p/>
+<del><i>Preconditions</i>: <tt><i>is-awaitable</i>&lt;Expr, Promise&gt;</tt> is `true` and the expression 
+`co_await expr` in a coroutine with promise type `U` is expression-equivalent to the same expression 
+in a coroutine with promise type `Promise`.</del></p></li>
+<li><p>(7.3) &mdash; [&hellip;]</p></li>
+<li><p>(7.4) &mdash; [&hellip;]</p></li>
+<li><p>(7.5) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
