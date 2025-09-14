@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4355" status="New">
+<title><tt><i>connect-awaitable()</i></tt> should mandate `rcvr` can receive all completion-signals rather than using constraints</title>
+<section>
+<sref ref="[exec.connect]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>27 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[exec.connect]"/> p6, the wording for the `connect()` customization-point defines a case that is 
+expression-equivalent to <tt><i>connect-awaitable</i>(new_sndr, rcvr)</tt>.
+<p/>
+The <tt><i>connect-awaitable</i></tt> function is specified in p5 as having the signature:
+</p>
+<blockquote><pre>
+<i>operation-state-task</i> <i>connect-awaitable</i>(DS sndr, DR rcvr) requires receiver_of&lt;DR, Sigs&gt;;
+</pre></blockquote>
+<p>
+The requires-clause constrains this overload to ensure that the receiver, `rcvr`, can accept all of the 
+completion signatures listed in `Sigs`. This means that `connect()` will SFINAE out if the receiver cannot 
+accept all of the completion signatures, rather than this being ill-formed.
+<p/>
+However, this seems inconsistent with the handling of the case that dispatches to <tt>new-sndr.connect(rcvr)</tt> 
+which does not constrain on this. It is also redundant with the <i>Mandates</i> element in p6 which mandates 
+that the following is satisfied:
+</p>
+<blockquote><pre>
+receiver_of&lt;Rcvr, completion_signatures_of_t&lt;Sndr, env_of_t&lt;Rcvr&gt;&gt;&gt;
+</pre></blockquote>
+<p>
+The constraint on <tt><i>connect-awaitable</i></tt> should either be removed or replaced with a 
+<i>Mandates</i> element. As <tt><i>connect-awaitable</i></tt> is only used within the definition of 
+<tt>connect()</tt> and as <tt>connect()</tt> already mandates that `receiver_of` is satisfied, 
+it seems sufficient to just remove this constraint from <tt><i>connect-awaitable</i></tt>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.connect]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-5- Let `V` name the type <tt><i>await-result-type</i>&lt;DS, <i>connect-awaitable-promise</i>&gt;</tt>, 
+let `Sigs` name the type
+</p>
+<blockquote><pre>
+completion_signatures&lt;
+  <i>SET-VALUE-SIG</i>(V), // <i>see <sref ref="[exec.snd.concepts]"/></i>
+  set_error_t(exception_ptr),
+  set_stopped_t()&gt;
+</pre></blockquote>
+<p>
+and let <tt><i>connect-awaitable</i></tt> be an exposition-only coroutine defined as follows:
+</p>
+<blockquote><pre>
+namespace std::execution {
+  [&hellip;]
+  <i>operation-state-task</i> <i>connect-awaitable</i>(DS sndr, DR rcvr) <del>requires receiver_of&lt;DR, Sigs&gt;</del> {
+    exception_ptr ep;
+    try {
+      if constexpr (same_as&lt;V, void&gt;) {
+        co_await std::move(sndr);
+        co_await <i>suspend-complete</i>(set_value, std::move(rcvr));
+      } else {
+        co_await <i>suspend-complete</i>(set_value, std::move(rcvr), co_await std::move(sndr));
+      }
+    } catch(...) {
+      ep = current_exception();
+    }
+    co_await <i>suspend-complete</i>(set_error, std::move(rcvr), std::move(ep));
+  }
+}  
+</pre></blockquote>
+<p>
+</p>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
