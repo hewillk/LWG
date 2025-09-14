@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4354" status="New">
+<title>Reconsider `weakly_parallel` as the default `forward_progress_guarantee`</title>
+<section>
+<sref ref="[exec.get.fwd.progress]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>25 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The `get_forward_progress_guarantee` CPO is intended to allow querying a scheduler as for what sort of 
+forward-progress guarantee it provides. Algorithms may use this to determine whether it is safe to execute 
+certain operations on a given scheduler. If a scheduler does not customize this query, the query will 
+fall back to returning a forward-progress guarantee of weakly_parallel.
+<p/>
+I think we should reconsider what this default should be returning and suggest it should instead return 
+`parallel` by default, as this will be by far the most common kind of scheduler, i.e. a scheduler that 
+executes on `std::thread`-like execution agents and that maintains a queue of scheduled tasks.
+<p/>
+I expect it to be common that authors of schedulers may forget to customize the 
+`get_forward_progress_guarantee_t` query and just leave it at the default. This will likely leave their 
+scheduler reporting a weaker guarantee than it actually provides and thus not being usable within generic 
+algorithms that require at least parallel forward progress.
+<p/>
+For example, the `run_loop` execution context defined in <sref ref="[exec.run.loop]"/> does not define 
+its scheduler to customize the `get_forward_progress_guarantee_t`. This means it will report the default 
+value of `weakly_parallel`.
+<p/>
+However, the scheduled operations will run on the thread that calls `run_loop::run()` and thus will 
+inherit its forward-progress guarantees. As this function might block and is therefore unsafe to invoke 
+it from a thread/agent with `weakly_parallel` forward progress guarantees (which should probably be 
+explicitly specified as having undefined-behaviour) we can safely assume that `run_loop`'s scheduler 
+can provide parallel forward-progress guarantee.
+<p/>
+It's not clear whether the current `run_loop` specification defaulting to its scheduler having 
+`weakly_parallel` forward progress guarantee is intentional or unintentional here. However, forgetting 
+to define the `get_forward_progress_guarantee` query on a scheduler is something I expect to be fairly common.
+<p/>
+Schedulers that provide `weakly_parallel` (or in future, `concurrent`) forward progress guarantees require 
+implementations to be much more aware of the fact that these are the guarantees they are providing and 
+thus could be more expected to customize the `get_forward_progress_guarantee` query to return the 
+respective values.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.get.fwd.progress]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The name `get_forward_progress_guarantee` denotes a query object. For a subexpression `sch`, let `Sch`
+be `decltype((sch))`. If `Sch` does not satisfy `scheduler`, `get_forward_progress_guarantee` is ill-formed.
+Otherwise, `get_forward_progress_guarantee(sch)` is expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; <tt><i>MANDATE-NOTHROW</i>(<i>AS-CONST</i>(sch).query(get_forward_progress_guarantee))</tt> 
+if that expression is well-formed.
+<p/>
+<i>Mandates</i>: The type of the expression above is `forward_progress_guarantee`.
+</p></li>
+<li><p>(2.2) &mdash; Otherwise, <tt>forward_progress_guarantee::<del>weakly_</del>parallel</tt>.</p></li>
+</ol>
+
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
