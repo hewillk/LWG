@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4361" status="New">
+<title>Unconditionally `constexpr current_exception()`</title>
+<section>
+<sref ref="[propagation]"/>
+</section>
+<submitter>Lénárd Szolnoki</submitter>
+<date>27 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The declaration of `current_exception()`:
+</p>
+<blockquote><pre>
+constexpr exception_ptr current_exception() noexcept;
+</pre></blockquote>
+<p>
+The `constexpr` specifier is in the current draft <paper num="N5014"/>, introduced by <paper num="P3068"/> 
+targeting C++26.
+<p/>
+It is not constrained when the expression `std::current_exception()` is constant. Consider:
+</p>
+<blockquote><pre>
+try {
+  throw 0;
+} catch (int) {
+  const bool b = (std::current_exception() != nullptr);
+}
+</pre></blockquote>
+<p>
+Since `b` is a variable of constant integral type, it is potentially-constant and its initialization 
+goes trough trial constant evaluation. `std::current_exception()` can't be implemented to return an 
+`exception_ptr` that refers to the runtime exception here during constant evaluation, so it returns 
+a null `exception_ptr` and `b` gets initialized to `false`. This is a breaking change compared to 
+C++23, where `b` is initialized to `true`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting Note:</i> Two mutually exclusive options are prepared, depicted below by <b>Option A</b> and 
+<b>Option B</b>, respectively.] 
+</p>
+</blockquote>
+
+<p>
+<b>Option A:</b>
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[propagation]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr exception_ptr current_exception() noexcept;
+</pre>
+<blockquote>
+<p>
+<ins><i>Constant When</i>: If there is a currently handled exception that was originally thrown within 
+the current constant evaluation.</ins>
+<p/>
+-9- <i>Returns</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
+<p>
+<b>Option B:</b>
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[propagation]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr exception_ptr current_exception() noexcept;
+</pre>
+<blockquote>
+<p>
+<ins><i>Constant When</i>: Current constant evaluation is not part of potentially-constant initialization 
+of a non-static variable.</ins>
+<p/>
+-9- <i>Returns</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
