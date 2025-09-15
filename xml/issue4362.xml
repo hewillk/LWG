@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4362" status="New">
+<title>Inconsistent usage of `constexpr` for `inplace_stop_token` and `inplace_stop_source`</title>
+<section>
+<sref ref="[stoptoken.inplace]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>28 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The `inplace_stop_source::get_token()` member function is declared `constexpr`, 
+but there are no `constexpr` member-functions declared on `inplace_stop_token`, 
+making the utility of being able to call this member function during constant 
+evaluation limited.
+<p/>
+Should the member functions of `inplace_stop_token` also be declared `constexpr`?
+i.e. `operator==`, `swap()`, `stop_possible()` and `stop_requested()`.
+<p/>
+The `operator==` and `stop_possible()` and `swap()` member functions should be 
+able to be made `constexpr` trivially as they are just required to compare/modify 
+pointers to the associated stop source.
+<p/>
+The `stop_requested()` member function is specified to be equivalent to calling 
+`stop_requested()` on the associated `inplace_stop_source` (if any), which is not 
+currently declared `constexpr` primarily because its implementation requires 
+synchronisation/atomic operations.
+<p/>
+Now that `std::atomic` operations are now `constexpr`, it may be possible/appropriate 
+for `stop_requested()` on both `inplace_stop_source` and `inplace_stop_token` to also 
+be declared `constexpr`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i>: This is the minimum proposed wording change. Additionally, consider adding 
+`constexpr` to the declaration of `inplace_stop_token::stop_requested()` (in 
+<sref ref="[stoptoken.inplace.general]"/> and <sref ref="[stoptoken.inplace.mem]"/>) and to 
+`inplace_stop_source::stop_requested()` (in <sref ref="[stopsource.inplace.general]"/> and 
+<sref ref="[stopsource.inplace.mem]"/>)]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[stoptoken.inplace.general]"/>, class `inplace_stop_token` synopsis, as indicated:</p>
+
+<blockquote><pre>
+namespace std {
+  class inplace_stop_token {
+  public:
+    template&lt;class CallbackFn&gt;
+      using callback_type = inplace_stop_callback&lt;CallbackFn&gt;;
+    
+    <ins>constexpr</ins> inplace_stop_token() = default;
+    <ins>constexpr</ins> bool operator==(const inplace_stop_token&amp;) const = default;
+    
+    // <i><sref ref="[stoptoken.inplace.mem]"/>, member functions</i>
+    bool stop_requested() const noexcept;
+    <ins>constexpr</ins> bool stop_possible() const noexcept;
+    <ins>constexpr</ins> void swap(inplace_stop_token&amp;) noexcept;
+    
+  private:
+    const inplace_stop_source* <i>stop-source</i> = nullptr; // <i>exposition only</i>
+  };
+}
+</pre></blockquote>
+
+</li>
+
+
+<li><p>Modify <sref ref="[stoptoken.inplace.mem]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i>: As a drive-by fix this adds the missing return type `bool` to the
+`stop_possible()` prototype]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+<ins>constexpr</ins> void swap(inplace_stop_token&amp; rhs) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Exchanges the values of <tt><i>stop-source</i></tt> and <tt>rhs.<i>stop-source</i></tt>.
+</p>
+</blockquote>
+[&hellip;]
+<pre>
+<ins>constexpr bool</ins> stop_possible() const noexcept;
+</pre>
+<blockquote>
+<p>
+-4- <i>Returns</i>: <tt><i>stop-source</i> != nullptr</tt>.
+</p>
+</blockquote>
+
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
