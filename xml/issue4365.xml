@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4365" status="New">
+<title>`boyer_moore_searcher` and `boyer_moore_horspool_searcher` should be `constexpr`-friendly</title>
+<section>
+<sref ref="[func.search.bm]"/><sref ref="[func.search.bmh]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>03 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, `boyer_moore_searcher` and `boyer_moore_horspool_searcher` are not
+`constexpr`-friendly because their underlying implementation needs to precompute 
+the shift table, which usually requires a `vector` or `unordered_map` to store.
+<p/>
+Thanks to <paper num="P3372R3"/>, unordered containers are now `constexpr`-friendly. 
+Although `std::hash` still lacks `constexpr` support, users can provide their own 
+hash functions to use unordered containers at compile time.
+<p/>
+Given that both `boyer_moore_searcher` and `boyer_moore_horspool_searcher` can 
+take a custom hash, it makes perfect sense that they could be `constexpr`-friendly.
+<p/>
+Not to mention that library implementations usually simply use arrays instead of 
+hash tables for the common string case because characters only have 256 values, 
+so `unordered_map` is not actually used.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[func.search.bm]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class RandomAccessIterator1,
+           class Hash = hash&lt;typename iterator_traits&lt;RandomAccessIterator1&gt;::value_type&gt;,
+           class BinaryPredicate = equal_to&lt;&gt;&gt;
+  class boyer_moore_searcher {
+  public:
+    <ins>constexpr</ins> boyer_moore_searcher(RandomAccessIterator1 pat_first,
+                                   RandomAccessIterator1 pat_last,
+                                   Hash hf = Hash(),
+                                   BinaryPredicate pred = BinaryPredicate());
+
+    template&lt;class RandomAccessIterator2&gt;
+      <ins>constexpr</ins> pair&lt;RandomAccessIterator2, RandomAccessIterator2&gt;
+        operator()(RandomAccessIterator2 first, RandomAccessIterator2 last) const;
+
+  private:
+    RandomAccessIterator1 pat_first_;   // <i>exposition only</i>
+    RandomAccessIterator1 pat_last_;    // <i>exposition only</i>
+    Hash hash_;                         // <i>exposition only</i>
+    BinaryPredicate pred_;              // <i>exposition only</i>
+  };
+}
+</pre>
+</blockquote>
+<pre>
+<ins>constexpr</ins> boyer_moore_searcher(RandomAccessIterator1 pat_first,
+                               RandomAccessIterator1 pat_last,
+                               Hash hf = Hash(),
+                               BinaryPredicate pred = BinaryPredicate());
+</pre>
+<blockquote>
+<p>
+-1- <i>Preconditions</i>: The value type of <code>RandomAccessIterator1</code> meets the
+   <i>Cpp17DefaultConstructible</i>, <i>Cpp17CopyConstructible</i>, and <i>Cpp17CopyAssignable</i>
+   requirements.
+</p>
+</blockquote>
+<blockquote>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;class RandomAccessIterator2&gt;
+  <ins>constexpr</ins> pair&lt;RandomAccessIterator2, RandomAccessIterator2&gt;
+    operator()(RandomAccessIterator2 first, RandomAccessIterator2 last) const;
+</pre>
+<blockquote>
+<p>
+-5- <i>Mandates</i>: <code>RandomAccessIterator1</code> and <code>RandomAccessIterator2</code>
+have the same value type.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[func.search.bmh]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class RandomAccessIterator1,
+           class Hash = hash&lt;typename iterator_traits&lt;RandomAccessIterator1&gt;::value_type&gt;,
+           class BinaryPredicate = equal_to&lt;&gt;&gt;
+  class boyer_moore_horspool_searcher {
+  public:
+   <ins>constexpr</ins> boyer_moore_horspool_searcher(RandomAccessIterator1 pat_first,
+                                           RandomAccessIterator1 pat_last,
+                                           Hash hf = Hash(),
+                                           BinaryPredicate pred = BinaryPredicate());
+
+    template&lt;class RandomAccessIterator2&gt;
+      <ins>constexpr</ins> pair&lt;RandomAccessIterator2, RandomAccessIterator2&gt;
+        operator()(RandomAccessIterator2 first, RandomAccessIterator2 last) const;
+
+  private:
+    RandomAccessIterator1 pat_first_;   // <i>exposition only</i>
+    RandomAccessIterator1 pat_last_;    // <i>exposition only</i>
+    Hash hash_;                         // <i>exposition only</i>
+    BinaryPredicate pred_;              // <i>exposition only</i>
+  };
+}
+</pre>
+</blockquote>
+<pre>
+<ins>constexpr</ins> boyer_moore_horspool_searcher(RandomAccessIterator1 pat_first,
+                                        RandomAccessIterator1 pat_last,
+                                        Hash hf = Hash(),
+                                        BinaryPredicate pred = BinaryPredicate());
+</pre>
+<blockquote>
+<p>
+-1- <i>Preconditions</i>: The value type of <code>RandomAccessIterator1</code> meets the
+<i>Cpp17DefaultConstructible</i>, <i>Cpp17CopyConstructible</i>, and <i>Cpp17CopyAssignable</i>
+requirements.
+</p>
+</blockquote>
+<blockquote>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;class RandomAccessIterator2&gt;
+  <ins>constexpr</ins> pair&lt;RandomAccessIterator2, RandomAccessIterator2&gt;
+    operator()(RandomAccessIterator2 first, RandomAccessIterator2 last) const;
+</pre>
+<blockquote>
+<p>
+-5- <i>Mandates</i>: <code>RandomAccessIterator1</code> and <code>RandomAccessIterator2</code>
+have the same value type.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
