@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4364" status="New">
+<title>SFINAE-friendliness on <tt>operator&lt;&lt;</tt> and <tt>operator&gt;&gt;</tt> for unspecified I/O manipulators</title>
+<section>
+<sref ref="[std.manip]"/><sref ref="[ext.manip]"/><sref ref="[quoted.manip]"/>
+</section>
+<submitter>Jiang An</submitter>
+<date>05 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, it is unspecified whether any of <tt>operator&lt;&lt;</tt> or <tt>operator&gt;&gt;</tt> 
+for the "<i>unspecified</i>" return type of an I/O manipulating function is SFINAE-friendly.
+<p/>
+There's implementation divergence. E.g. the following program is consistently rejected by 
+implementations although the standard doesn't strictly require it to be ill-formed. Among 
+the implementations, libstdc++ and libc++ make the failure SFINAE-friendly, while MSVC STL 
+doesn't (<a href="https://godbolt.org/z/rWYszoYa8">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;iostream&gt;
+#include &lt;iomanip&gt;
+
+int main() 
+{
+  std::cout &lt;&lt; std::setfill(L'*');
+}
+</pre></blockquote>
+<p>
+It seems better to eliminate such implementation divergence. Perhaps it's also better to 
+require them to be SFINAE-friendly to reduce potential conflicts with user-provided operators.
+<p/>
+If it's intended to allow implementation divergence, perhaps we should clarify the intent.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
