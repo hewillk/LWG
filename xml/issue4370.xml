@@ -1,0 +1,251 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4370" status="New">
+<title>Comparison of <code>optional&lt;T&gt;</code> to <code>T</code> may be ill-formed</title>
+<section>
+<sref ref="[optional.comp.with.t]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>06 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+When comparing an `optional` with its value type, the current wording specifies that the result is the
+ternary expression of `x.has_value() ? *x == v : false`, where `*x == v` returns a result that can be 
+implicitly converted to `bool`.
+<p/>
+However, when the result can also be constructed using `bool` (which is common), the ternary operation
+will be ill-formed due to ambiguity (<a href="https://godbolt.org/z/r55Wh51Y8">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;optional&gt;
+
+struct Bool {
+  Bool(bool);
+  operator bool() const;
+};
+
+struct S {
+  Bool operator==(S) const;
+};
+
+int main() {
+  return std::optional&lt;S&gt;{} == S{}; // <span style="color:#C80000;font-weight:bold">fire</span>
+}
+</pre></blockquote>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[optional.comp.with.t]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator==(const optional&lt;T&gt;&amp; x, const U&amp; v);
+</pre>
+<blockquote>
+<p>
+-1- <i>Constraints</i>: `U` is not a specialization of `optional`. The expression `*x == v` is well-formed
+   and its result is convertible to `bool`.
+<p/>
+[<i>Note 1</i>: `T` need not be <i>Cpp17EqualityComparable</i>. &mdash; end note]
+<p/>
+-2- <i>Effects</i>: Equivalent to: <del>`return x.has_value() ? *x == v : false;`</del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return *x == v;
+return false;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator==(const T&amp; v, const optional&lt;U&gt;&amp; x);
+</pre>
+<blockquote>
+<p>
+-3- <i>Constraints</i>: `T` is not a specialization of `optional`. The expression `v == *x` is well-formed
+and its result is convertible to `bool`.
+<p/>
+-4- <i>Effects</i>: Equivalent to: <del>`return x.has_value() ? v == *x : false;`</del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return v == *x;
+return false;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator!=(const optional&lt;T&gt;&amp; x, const U&amp; v);
+</pre>
+<blockquote>
+<p>
+-5- <i>Constraints</i>: `U` is not a specialization of `optional`. The expression `*x != v` is well-formed
+and its result is convertible to `bool`.
+<p/>
+-6- <i>Effects</i>: Equivalent to: <del>`return x.has_value() ? *x != v : true;`</del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return *x != v;
+return true;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator!=(const T&amp; v, const optional&lt;U&gt;&amp; x);
+</pre>
+<blockquote>
+<p>
+-7- <i>Constraints</i>: `T` is not a specialization of `optional`. The expression `v != *x` is well-formed
+and its result is convertible to `bool`.
+<p/>
+-8- <i>Effects</i>: Equivalent to: <del>`return x.has_value() ? v != *x : true;`</del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return v != *x;
+return true;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&lt;(const optional&lt;T&gt;&amp; x, const U&amp; v);
+</pre>
+<blockquote>
+<p>
+-9- <i>Constraints</i>: `U` is not a specialization of `optional`. The expression <code>*x &lt; v</code> is well-formed
+and its result is convertible to `bool`.
+<p/>
+-10- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? *x &lt; v : true;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return *x &lt; v;
+return true;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&lt;(const T&amp; v, const optional&lt;U&gt;&amp; x);
+</pre>
+<blockquote>
+<p>
+-11- <i>Constraints</i>: `T` is not a specialization of `optional`. The expression <code>v &lt; *x</code> 
+is well-formed and its result is convertible to `bool`.
+<p/>
+-12- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? v &lt; *x : false;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return v &lt; *x;
+return false;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&gt;(const optional&lt;T&gt;&amp; x, const U&amp; v);
+</pre>
+<blockquote>
+<p>
+-13- <i>Constraints</i>: `U` is not a specialization of `optional`. The expression <code>*x &gt; v</code> is 
+well-formed and its result is convertible to `bool`.
+<p/>
+-14- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? *x &gt; v : false;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return *x &gt; v;
+return false;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&gt;(const T&amp; v, const optional&lt;U&gt;&amp; x);
+</pre>
+<blockquote>
+<p>
+-15- <i>Constraints</i>: `T` is not a specialization of `optional`. The expression <code>v &gt; *x</code> 
+is well-formed and its result is convertible to `bool`.
+<p/>
+-16- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? v &gt; *x : true;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return v &gt; *x;
+return true;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&lt;=(const optional&lt;T&gt;&amp; x, const U&amp; v);
+</pre>
+<blockquote>
+<p>
+-17- <i>Constraints</i>: `U` is not a specialization of `optional`. The expression <code>*x &lt;= v</code> 
+is well-formed and its result is convertible to `bool`.
+<p/>
+-18- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? *x &lt;= v : true;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return *x &lt;= v;
+return true;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&lt;=(const T&amp; v, const optional&lt;U&gt;&amp; x);
+</pre>
+<blockquote>
+<p>
+-19- <i>Constraints</i>: `T` is not a specialization of `optional`. The expression <code>v &lt;= *x</code> 
+is well-formed and its result is convertible to `bool`.
+<p/>
+-20- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? v &lt;= *x : false;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return v &lt;= *x;
+return false;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&gt;=(const optional&lt;T&gt;&amp; x, const U&amp; v);
+</pre>
+<blockquote>
+<p>
+-21- <i>Constraints</i>: `U` is not a specialization of `optional`. The expression <code>*x &gt;= v</code> 
+is well-formed and its result is convertible to `bool`.
+<p/>
+-22- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? *x &gt;= v : false;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return *x &gt;= v;
+return false;</ins>
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class U&gt; constexpr bool operator&gt;=(const T&amp; v, const optional&lt;U&gt;&amp; x);
+</pre>
+<blockquote>
+<p>
+-23- <i>Constraints</i>: `T` is not a specialization of `optional`. The expression <code>v &gt;= *x</code> 
+is well-formed and its result is convertible to `bool`.
+<p/>
+-24- <i>Effects</i>: Equivalent to: <del><code>return x.has_value() ? v &gt;= *x : true;</code></del>
+</p>
+<blockquote><pre>
+<ins>if (x.has_value())
+  return v &gt;= *x;
+return true;</ins>
+</pre></blockquote>
+</blockquote>
+
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
