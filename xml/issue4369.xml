@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4369" status="New">
+<title><tt><i>check-types</i></tt> function for `upon_error` and `upon_stopped` is wrong</title>
+<section>
+<sref ref="[exec.then]"/>
+</section>
+<submitter>Eric Niebler</submitter>
+<date>31 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The following has been reported by Trevor Gray:
+</p>
+<p>
+In <sref ref="[exec.then]"/> p5, the <tt><i>impls-for</i>&lt;<i>decayed-typeof</i>&lt;<i>then-cpo</i>&gt;&gt;::<i>check-types</i></tt> 
+unction is specified as follows:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<pre>
+template&lt;class Sndr, class... Env&gt;
+  static consteval void <i>check-types</i>();
+</pre>
+<blockquote>
+<p>
+<i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+auto cs = get_completion_signatures&lt;<i>child-type</i>&lt;Sndr&gt;, <i>FWD-ENV-T</i>(Env)...&gt;();
+auto fn = []&lt;class... Ts&gt;(set_value_t(*)(Ts...)) {
+  if constexpr (!invocable&lt;remove_cvref_t&lt;<i>data-type</i>&lt;Sndr&gt;&gt;, Ts...&gt;)
+    throw <i>unspecified-exception</i>();
+};
+cs.<i>for-each</i>(<i>overload-set</i>{fn, [](auto){}});
+</pre></blockquote>
+<p>
+where <tt><i>unspecified-exception</i></tt> is a type derived from `exception`.
+</p>
+</blockquote>
+</blockquote>
+<p>
+The line <tt>auto fn = []&lt;class... Ts&gt;(set_value_t(*)(Ts...)) {</tt> 
+is correct when <tt><i>then-cpo</i></tt> is `then` but not when it is `upon_error` or `upon_stopped`.
+<p/>
+For `upon_error` it should be:
+</p>
+<blockquote><pre>
+auto fn = []&lt;class... Ts&gt;(set_error_t(*)(Ts...)) {
+</pre></blockquote>
+<p>
+and for `upon_stopped` it should be:
+</p>
+<blockquote><pre>
+auto fn = []&lt;class... Ts&gt;(set_stopped_t(*)(Ts...)) {
+</pre></blockquote>
+<p>
+We can achieve that by replacing `set_value_t` in the problematic line with <tt><i>decayed-typeof</i>&lt;<i>set-cpo</i>&gt;</tt>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.then]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class Sndr, class... Env&gt;
+  static consteval void <i>check-types</i>();
+</pre>
+<blockquote>
+<p>
+-5- <i>Effects:</i> Equivalent to:
+</p>
+<blockquote><pre>
+auto cs = get_completion_signatures&lt;<i>child-type</i>&lt;Sndr&gt;, <i>FWD-ENV-T</i>(Env)...&gt;();
+auto fn = []&lt;class... Ts&gt;(<del>set_value_t</del><ins><i>decayed-typeof</i>&lt;<i>set-cpo</i>&gt;</ins>(*)(Ts...)) {
+  if constexpr (!invocable&lt;remove_cvref_t&lt;<i>data-type</i>&lt;Sndr&gt;&gt;, Ts...&gt;)
+    throw <i>unspecified-exception</i>();
+};
+cs.<i>for-each</i>(<i>overload-set</i>{fn, [](auto){}});
+</pre></blockquote>
+<p>
+where <tt><i>unspecified-exception</i></tt> is a type derived from `exception`.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
