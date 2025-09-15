@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4368" status="New">
+<title>Potential dangling reference returned from `transform_sender`</title>
+<section>
+<sref ref="[exec.domain.default]"/>
+</section>
+<submitter>Eric Niebler</submitter>
+<date>31 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The following has been reported by Trevor Gray to me:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+There is a potential stack-use-after-scope in `execution::transform_sender` 
+with `execution::default_domain::transform_sender`.
+<p/>
+I'll give an example of the problem using `starts_on` with the `default_domain`.
+<p/>
+`starts_on` defines a `transform_sender` so `execution::transform_sender` will expand to:
+</p>
+<blockquote><pre>
+return transform_sender(
+    dom,
+    dom.transform_sender(std::forward&lt;Sndr&gt;(sndr), env...),
+    env...);
+</pre></blockquote>
+<p>
+where `dom` is the `default_domain` and `sndr` is `starts_on`.
+<p/>
+Execution flow:
+</p>
+<ul>
+<li><p><tt>dom.transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)</tt> uses `default_domain` 
+to invoke `start_on`'s `transform_sender`. The return type is `T` (where `T` is a `let_value` sender)</p></li>
+<li><p><tt>transform_sender(dom, declval&lt;T&gt;(), env...)</tt> is then run which uses `default_domain` 
+to just return <tt>std::forward&lt;T&gt;(t)</tt>.</p></li>
+</ul>
+<p>
+This means the value returned from the entire expression is <tt>T&amp;&amp;</tt> which a reference 
+to a temporary variable in the frame of `transform_sender` which is no longer valid after the return.
+</p>
+</blockquote>
+<p>
+In the reference implementation, this scenario does not create a dangling reference because 
+its implementation of `default_domain::transform_sender` does not conform to the spec. By default, 
+it returns an rvalue sender as a prvalue instead of an xvalue as the spec requires.
+<p/>
+The fix is for the spec to follow suit and return prvalues when an xvalue would otherwise be returned.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.domain.default]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;sender Sndr, <i>queryable</i>... Env&gt;
+  requires (sizeof...(Env) &lt;= 1)
+constexpr sender decltype(auto) transform_sender(Sndr&amp;&amp; sndr, const Env&amp;... env)
+  noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-2- Let `e` be the expression
+</p>
+<blockquote><pre>
+tag_of_t&lt;Sndr&gt;().transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+if that expression is well-formed; otherwise, <tt><ins>static_cast&lt;Sndr&gt;(</ins>std::forward&lt;Sndr&gt;(sndr)<ins>)</ins></tt>.
+<p/>
+-3- <i>Returns</i>: `e`.
+<p/>
+-4- <i>Remarks</i>: The exception specification is equivalent to `noexcept(e)`.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
