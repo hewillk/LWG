@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4363" status="New">
+<title>`transform_sender` comparing types ignoring <i>cv</i>-qualifiers doesn't take into account differences in value category</title>
+<section>
+<sref ref="[exec.snd.transform]"/>
+</section>
+<submitter>Lewis Baker</submitter>
+<date>28 Aug 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[exec.snd.transform]"/> p1, the specification for `transform_sender()` states:
+</p>
+<blockquote>
+<p>
+Let <tt><i>transformed-sndr</i></tt> be the expression
+</p>
+<blockquote><pre>
+dom.transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+if that expression is well-formed; otherwise,
+</p>
+<blockquote><pre>
+default_domain().transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+Let <tt><i>final-sndr</i></tt> be the expression <tt><i>transformed-sndr</i></tt> if 
+<tt><i>transformed-sndr</i></tt> and <tt><i>sndr</i></tt> have the same type ignoring 
+cv-qualifiers; otherwise, it is the expression <tt>transform_sender(dom, <i>transformed-sndr</i>, env...)</tt>.
+</p>
+</blockquote>
+<p>
+However, the use of the phrase "have the same type ignoring cv-qualifiers" asks to compare 
+the types without `const` or `volatile` qualifiers, but doesn't take into account differences 
+in value category of the types of these expressions.
+<p/>
+For example `sndr` might have type <tt>T&amp;&amp;</tt> and <tt><i>transformed-sndr</i></tt> 
+might return a new prvalue of type `T`.
+<p/>
+My interpretation of the current wording is that I should apply the test 
+<tt>same_as&lt;remove_cv_t&lt;decltype(sndr)&gt;, remove_cv_t&lt;decltype(<i>transformed-sndr</i>)&gt;&gt;</tt>.
+<p/>
+However, `remove_cv_t` does not remove reference-qualifiers from a type <tt>Sndr&amp;&amp;</tt> 
+(which in the above example, is the type of `sndr`), and thus would compare as different to 
+a <tt><i>transform-sndr</i></tt> type of `Sndr`.
+<p/>
+I believe the intention is that this should instead use 
+<tt>same_as&lt;remove_cvref_t&lt;decltype(sndr)&gt;, remove_cvref_t&lt;decltype(<i>transformed-sndr</i>)&gt;&gt;</tt>. 
+For example, the 
+<a href="https://github.com/NVIDIA/stdexec/blob/4669060ad3b70508740449f9c30f06867a9bd890/include/stdexec/__detail/__transform_sender.hpp#L88">
+implementation</a> in NVIDIA's stdexec repository uses <tt>same_as&lt;decay_t&lt;T&gt;, decay_t&lt;U&gt;&gt;</tt> 
+for this check.
+<p/>
+The wording should be modified to use a phrase that removes both reference and cv-qualifiers when comparing types.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.snd.transform]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::execution {
+  template&lt;class Domain, sender Sndr, <i>queryable</i>... Env&gt;
+    requires (sizeof...(Env) &lt;= 1)
+  constexpr sender decltype(auto) transform_sender(Domain dom, Sndr&amp;&amp; sndr, const Env&amp;... env)
+    noexcept(<i>see below</i>);
+}
+</pre>
+<blockquote>
+<p>
+-1- Let <tt><i>transformed-sndr</i></tt> be the expression
+</p>
+<blockquote><pre>
+dom.transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+if that expression is well-formed; otherwise,
+</p>
+<blockquote><pre>
+default_domain().transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+Let <tt><i>final-sndr</i></tt> be the expression <tt><i>transformed-sndr</i></tt> if 
+<tt><i>transformed-sndr</i></tt> and <tt><i>sndr</i></tt> have the same <ins>decayed</ins>
+type <del>ignoring cv-qualifiers</del>; otherwise, it is the expression 
+<tt>transform_sender(dom, <i>transformed-sndr</i>, env...)</tt>.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
