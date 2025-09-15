@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4366" status="New">
+<title>Heterogeneous comparison of `expected` may be ill-formed</title>
+<section>
+<sref ref="[expected.object.eq]"/><sref ref="[expected.void.eq]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>06 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+These comparison functions all explicitly `static_cast` the result of the underlying comparison to
+`bool`. However, the <i>Constraints</i> only require the implicit conversion, not the explicit one 
+(i.e., "convertible to `bool`" rather than "models <code><i>boolean-testable</i></code>").
+<p/>
+This means that in some pathological cases it will lead to hard errors 
+(<a href="https://godbolt.org/z/b9ehzv3h4">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;expected&gt;
+
+struct E1 {};
+struct E2 {};
+
+struct Bool {
+  operator bool() const;
+  explicit operator bool() = delete;
+};
+Bool operator==(E1, E2);
+
+int main() {
+  std::unexpected e1{E1{}};
+  std::unexpected e2{E2{}};
+  return std::expected&lt;int, E1&gt;{e1} == e2; // <span style="color:#C80000;font-weight:bold">fire</span>
+}
+</pre></blockquote>
+<p>
+It is reasonable to specify return consistency with actual <i>Constraints</i>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[expected.object.eq]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T2&gt; friend constexpr bool operator==(const expected&amp; x, const T2&amp; v);
+</pre>
+<blockquote>
+<p>
+-3- <i>Constraints</i>: `T2` is not a specialization of `expected`. The expression `*x == v` is well-formed
+and its result is convertible to `bool`.
+<p/>
+[<i>Note 1</i>: <code>T</code> need not be <i>Cpp17EqualityComparable</i>. &mdash; <i>end note</i>]
+<p/>
+-4- <i>Returns</i>: <ins>If</ins> `x.has_value()` <ins>is `true`,</ins>
+<code><del>&amp;&amp; static_cast&lt;bool&gt;(</del>*x == v<del>)</del></code><ins>; otherwise `false`</ins>.
+</p>
+</blockquote>
+<pre>
+template&lt;class E2&gt; friend constexpr bool operator==(const expected&amp; x, const unexpected&lt;E2&gt;&amp; e);
+</pre>
+<blockquote>
+<p>
+-5- <i>Constraints</i>: The expression `x.error() == e.error()` is well-formed and its result is convertible 
+to `bool`.
+<p/>
+-6- <i>Returns</i>: <ins>If</ins> `!x.has_value()` <ins>is `true`,</ins>
+<code><del>&amp;&amp; static_cast&lt;bool&gt;(</del>x.error() == e.error()<del>)</del></code><ins>; otherwise `false`</ins>.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[expected.void.eq]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T2, class E2&gt; requires is_void_v&lt;T2&gt;
+  friend constexpr bool operator==(const expected&amp; x, const expected&lt;T2, E2&gt;&amp; y);
+</pre>
+<blockquote>
+<p>
+-1- <i>Constraints</i>: The expression `x.error() == y.error()` is well-formed and its result 
+is convertible to `bool`.
+<p/>
+-2- <i>Returns</i>: If `x.has_value()` does not equal `y.has_value()`, `false`; 
+otherwise <ins>if</ins> `x.has_value()` <ins>is `true`, `true`; otherwise</ins>
+<code><del>|| static_cast&lt;bool&gt;(</del>x.error() == y.error()<del>)</del></code>.
+</p>
+</blockquote>
+<pre>
+template&lt;class E2&gt;
+  friend constexpr bool operator==(const expected&amp; x, const unexpected&lt;E2&gt;&amp; e);
+</pre>
+<blockquote>
+<p>
+-3- <i>Constraints</i>: The expression `x.error() == e.error()` is well-formed and its 
+result is convertible to `bool`.
+<p/>
+-4- <i>Returns</i>: <ins>If</ins> `!x.has_value()` <ins>is `true`,</ins>
+<code><del>&amp;&amp; static_cast&lt;bool&gt;(</del>x.error() == e.error()<del>)</del></code>
+<ins>; otherwise `false`</ins>.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
