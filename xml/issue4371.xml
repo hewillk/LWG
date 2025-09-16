@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4371" status="New">
+<title>Container adaptor's `empty`/`size` should be `noexcept`</title>
+<section>
+<sref ref="[queue.defn]"/>
+<sref ref="[priqueue.overview]"/>
+<sref ref="[stack.defn]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>09 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+C++23 container adaptors <tt>flat_<i>meow</i></tt> all have `noexcept` `size`/`empty` members.
+<p/>
+However, the `size`/`empty` members of other container adaptors are not mark `noexcept`, 
+even though they behave the same as <tt>flat_<i>meow</i></tt> that returning the `size`/`empty` 
+of the underlying container.
+<p/>
+It makes sense to make them `noexcept` as well for consistency. Although the standard doesn't
+explicitly say those two members of the container must not throw, the fact that all standard 
+containers and common third-party containers mark them as unconditionally `noexcept` implies 
+that it's perfectly reasonable to assume that they never will.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[queue.defn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class Container = deque&lt;T&gt;&gt;
+  class queue {
+  public:
+    [&hellip;]
+    constexpr bool              empty() const <ins>noexcept</ins> { return c.empty(); }
+    constexpr size_type         size()  const <ins>noexcept</ins> { return c.size(); }
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[priqueue.overview]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class Container = vector&lt;T&gt;,
+           class Compare = less&lt;typename Container::value_type&gt;&gt;
+  class priority_queue {
+  public:
+    [&hellip;]
+    constexpr bool            empty() const <ins>noexcept</ins> { return c.empty(); }
+    constexpr size_type       size()  const <ins>noexcept</ins> { return c.size(); }
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[stack.defn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class Container = deque&lt;T&gt;&gt;
+  class stack {
+  public:
+    [&hellip;]
+    constexpr bool              empty() const <ins>noexcept</ins> { return c.empty(); }
+    constexpr size_type         size()  const <ins>noexcept</ins> { return c.size(); }
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
