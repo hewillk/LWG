@@ -18,7 +18,9 @@ From=${EMAIL}
 
 usage()
 {
-  echo "Usage: $0 [--help] [--to=<address>] [--from=<address>] ISSUE-NUMBER" ;
+  echo "Usage: $0 [--help] [--to=<address>] [--from=<address>] ISSUE-NUMBER..."
+  echo
+  echo "ISSUE-NUMBER can be a single number or a range, e.g. 4321 or 4321-4325"
   exit $1
 }
 
@@ -35,8 +37,6 @@ do
   shift
 done
 
-[ $# -eq 1 ] || usage 1 >&2
-
 if [ -z "$From" ]; then
   if From="$(git config user.email)"; then
     if name="$(git config user.name)"; then
@@ -48,18 +48,52 @@ fi
 
 [ -n "$From" ] || die 'address not set, use --from or $EMAIL'
 
+issues=''
+
+# Get list of issues
+for i
+do
+  if [[ $i =~ [[:digit:]]+-[[:digit:]]+ ]]
+  then
+    range=$(seq ${i/-/ })
+    [ "$range" == '' ] && die "$0: Invalid argument: $i"
+    issues="$issues $range"
+  elif [[ $i =~ [[:digit:]]+ ]]
+  then
+    issues="$issues $i"
+  fi
+done
+
+[ "$issues" == '' ] && usage 1 >&2
+
+# Make unique, sorted list of issue numbers
+issues=$(for i in $issues; do echo $i ; done | sort -u -n)
+
+if [ -n "$DO_NOT_SEND" ] # define in the environment to test the script
+then
+  echo 'Not sending email due to $DO_NOT_SEND in the environment' >&2
+fi
+
+send_email()
+{
 issue=$1
+
 if ! xml=$(printf "xml/issue%04d.xml" $issue) || [ ! -f "$xml" ]
 then
   die "No such issue: $issue"
 fi
 
-if [ $(xpath -q -e '/issue/priority/text()' $xml) != 99 ]
-then
-  die "Priority already set: $issue"
-elif [ "$(xpath -q -e '/issue/@status' $xml)" != ' status="New"' ]
+if [ "$(xpath -q -e '/issue/@status' $xml)" != ' status="New"' ]
 then
   die "Status is not \"New\": $issue"
+fi
+
+if ! prio=$(xpath -q -e '/issue/priority/text()' $xml) || [ -z "$prio" ]
+then
+  die "Issue has no priority element: $issue"
+elif [ "$prio" != 99 ]
+then
+  die "Priority already set: $issue [priority=$prio]"
 fi
 
 # Convert HTML to plain text (specifically, replace entities).
@@ -68,6 +102,12 @@ fi
 
 # Use xpath to select text content of <title> element, with entities replaced.
 title=$(xpath -q -e 'normalize-space(/issue/title)' $xml)
+
+  if [ -n "$DO_NOT_SEND" ]
+  then
+    echo "Not Sent: Issue $issue: $title"
+    return 1
+  fi
 
 draft=`mktemp /tmp/draft.prio.mail.XXXXXX` || exit
 
@@ -112,3 +152,13 @@ fi
 echo "Sent: Issue $issue: $title"
 
 rm $draft
+}
+
+delay=0
+
+# Send the emails
+for i in $issues
+do
+  sleep $delay
+  send_email $i && delay=1
+done
