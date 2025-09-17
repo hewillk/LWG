@@ -31,8 +31,8 @@ This wording is relative to <paper num="N5014"/>.
 
 <blockquote>
 <p>
--7- `as_awaitable` is a customization point object. For subexpressions `expr` and `p` <del>where `p` 
-is an lvalue</del>, `Expr` names the type `decltype((expr))` and `Promise` names the type 
+-7- `as_awaitable` is a customization point object. For subexpressions `expr` and `p` where <del>`p` 
+is an lvalue,</del> `Expr` names the type `decltype((expr))` and `Promise` names the type 
 <tt>decay_t&lt;decltype((p))&gt;</tt>, <ins>if `p` is not an lvalue, `as_awaitable(expr, p)` is 
 ill-formed, otherwise</ins> `as_awaitable(expr, p)` is expression-equivalent to, 
 except that the evaluations of `expr` and `p` are indeterminately sequenced:
