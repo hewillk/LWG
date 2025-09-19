@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4374" status="New">
+<title><tt>flat_<i>meow</i></tt> range insertion behavior is unclear if in-place merge cannot allocate additional memory</title>
+<section>
+<sref ref="[flat.map.modifiers]"/>
+<sref ref="[flat.set.modifiers]"/>
+<sref ref="[flat.multiset.modifiers]"/>
+</section>
+<submitter>Tim Song</submitter>
+<date>09 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The range insertion operations of `flat_map`/`multimap`/`set`/`multiset` have this <i>Remarks</i>: element: 
+</p>
+<blockquote><p>
+Since this operation performs an in-place merge, it may allocate memory.
+</p></blockquote>
+<p>
+It is not clear what happens if that allocation fails. If the `inplace_merge` algorithm is used, 
+it will fall back to a less efficient <tt>&#x1d4aa;(N log N)</tt> algorithm, but this is not reflected 
+in the <i>Complexity</i>: element. Alternatively, if the allocation failure is reported by an exception, 
+that should be called out in the spec.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
