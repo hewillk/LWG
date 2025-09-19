@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4372" status="New">
+<title>Weaken <i>Mandates:</i> for dynamic padding values in padded layouts</title>
+<section>
+<sref ref="[mdspan.layout.leftpad.overview]"/>
+<sref ref="[mdspan.layout.rightpad.overview]"/>
+</section>
+<submitter>Luc Grosheintz</submitter>
+<date>09 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Two new layouts were added to <tt>&lt;mdspan&gt;</tt> in C++26. Both have a template
+parameter `size_t PaddingValue`. This value is allowed to be `std::dynamic_extent` 
+to signal that the padding value isn't known at compile time.
+<p/>
+A class <i>Mandates:</i> element (in <sref ref="[mdspan.layout.leftpad.overview]"/> (5.2)
+and <sref ref="[mdspan.layout.rightpad.overview]"/> (5.2), respectively) requires 
+(unconditionally) that
+</p>
+<ul>
+<li><p>`PaddingValue` is representable as a value of `index_type`.</p></li>
+</ul>
+<p>
+Since `std::dynamic_extent` is defined as `size_t(-1)` (in <sref ref="[span.syn]"/>)
+this immediately prohibits all dynamically padded layout mappings for
+any `index_type` for which:
+</p>
+<blockquote><pre>
+numeric_limit&lt;index_type&gt;::max() &lt; numeric_limit&lt;size_t&gt;::max()
+</pre></blockquote>
+<p>
+One example is `int` on a 64-bit system.
+<p/>
+The proposed resolution states that the modified representability
+<i>Mandates:</i> element holds for <tt>rank &lt;= 1</tt>, even though in that case the 
+`PaddingValue` has no other effect. Hence, the <i>Mandates:</i> element could 
+be weakened further.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[mdspan.layout.leftpad.overview]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-5- <i>Mandates</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>(5.1) &mdash; [&hellip;]</p></li>
+<li><p>(5.2) &mdash; <ins>if `padding_value` is not equal to `dynamic_extent`, then</ins> 
+`padding_value` is representable as a value of type `index_type`.</p></li>
+<li><p>(5.3) &mdash; [&hellip;]</p></li>
+<li><p>(5.4) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[mdspan.layout.rightpad.overview]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-5- <i>Mandates</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>(5.1) &mdash; [&hellip;]</p></li>
+<li><p>(5.2) &mdash; <ins>if `padding_value` is not equal to `dynamic_extent`, then</ins> 
+`padding_value` is representable as a value of type `index_type`.</p></li>
+<li><p>(5.3) &mdash; [&hellip;]</p></li>
+<li><p>(5.4) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
