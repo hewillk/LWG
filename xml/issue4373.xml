@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4373" status="New">
+<title>`function_ref` should provide `result_type`</title>
+<section>
+<sref ref="[func.wrap.ref.class]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>12 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, `function`, `move_only_function`, and `copyable_function` all have a
+type member `result_type`, but `function_ref` does not:
+</p>
+<blockquote>
+<pre>
+static_assert(is_same_v&lt;          function    &lt;int(int)&gt;::result_type, int&gt;);
+static_assert(is_same_v&lt;move_only_function    &lt;int(int)&gt;::result_type, int&gt;);
+static_assert(is_same_v&lt; copyable_function    &lt;int(int)&gt;::result_type, int&gt;);
+static_assert(is_same_v&lt;          function_ref&lt;int(int)&gt;::result_type, int&gt;); // <span style="color:#C80000;font-weight:bold">error</span>
+</pre>
+</blockquote>
+<p>
+It seems worthwhile to also provide it for the latter, as it is consistent with the other
+wrappers and allows the user to easily extract the return type.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[func.wrap.ref.class]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class R, class... ArgTypes&gt;
+  class function_ref&lt;R(ArgTypes...) <i>cv</i> noexcept(<i>noex</i>)&gt; {
+  public:
+    <ins>using result_type = R;</ins>
+
+    // <i><sref ref="[func.wrap.ref.ctor]"/>, constructors and assignment operators</i>
+    template&lt;class F&gt; function_ref(F*) noexcept;
+    [&hellip;]
+  };
+
+}
+</pre>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
