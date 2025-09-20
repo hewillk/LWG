@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4377" status="New">
+<title>Misleading note about lock-free property of `std::atomic_ref`</title>
+<section>
+<sref ref="[atomics.ref.ops]"/>
+</section>
+<submitter>Brian Bi</submitter>
+<date>15 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Note 1 to <sref ref="[atomics.ref.ops]"/> states:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+Hardware could require an object referenced by an `atomic_ref` to have stricter alignment 
+(<sref ref="[basic.align]"/>) than other objects of type `T`. Further, whether operations 
+on an `atomic_ref` are lock-free could depend on the alignment of the referenced object. 
+For example, lock-free operations on <tt>std::complex&lt;double&gt;</tt> could be supported 
+only if aligned to `2*alignof(double)`.
+</p>
+</blockquote>
+<p>
+By using the word "Further", the note misleadingly implies that `required_alignment` may 
+need to be greater than `alignof(T)` even before considering lock freedom, i.e., that 
+<tt>std::atomic_ref&lt;T&gt;</tt> may be completely unimplementable on given hardware if 
+the stricter alignment requirement is not met. However, that can never be true because 
+falling back to a lock-based implementation is always possible.
+<p/>
+The note could also be misinterpreted to imply that even though an object may be aligned to 
+`required_alignment` and thus referenceable by an `atomic_ref`, operations could still fail 
+to be lock-free because there is a stricter alignment requirement that the object does not 
+meet. Such an interpretation is, however, at odds with p4.
+<p/>
+The example given by the note is also confusing in that it does not necessarily demonstrate 
+a situation in which <tt>std::atomic_ref&lt;T&gt;::required_alignment</tt> is greater than 
+`alignof(T)`.
+<p/>
+In conclusion, this note appears to be a convoluted way of saying that, in order to ensure 
+that operations on <tt>atomic_ref&lt;T&gt;</tt> are lock-free, the implementation may 
+define `required_alignment` to a value greater than `alignof(T)`. The note should be 
+modified to say this much more clearly.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+
+<li><p>Modify <sref ref="[atomics.ref.ops]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+static constexpr size_t required_alignment;
+</pre>
+<blockquote>
+<p>
+-1- The alignment required for an object to be referenced by an atomic reference, which is at least
+`alignof(T)`.
+<p/>
+-2- [<i>Note 1</i>: <del>Hardware could require an object referenced by an `atomic_ref` to have stricter 
+alignment (<sref ref="[basic.align]"/>) than other objects of type `T`. Further, whether operations 
+on an `atomic_ref` are lock-free could depend on the alignment of the referenced object. For example, 
+lock-free operations on <tt>std::complex&lt;double&gt;</tt> could be supported only if aligned to 
+`2*alignof(double)`</del><ins>An implementation can choose to define 
+<tt>atomic_ref&lt;T&gt;::required_alignment</tt> to a value greater than `alignof(T)` in order to 
+ensure that operations on all objects of type <tt>atomic_ref&lt;T&gt;</tt> are lock-free</ins>. 
+&mdash; <i>end note</i>]
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
