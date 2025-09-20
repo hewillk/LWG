@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4376" status="New">
+<title>ABI tag in return type of [simd.mask.unary] is overconstrained</title>
+<section>
+<sref ref="[simd.mask.unary]"/>
+</section>
+<submitter>Matthias Kretz</submitter>
+<date>15 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[simd.mask.unary]"/> spells out the return type with the ABI tag of 
+the `basic_mask` specialization. That's problematic / overconstrained.
+</p>
+<ol>
+<li><p>Consider Intel SandyBridge/IvyBridge-like targets:
+</p>
+<blockquote><pre>
+vec&lt;float&gt;::size() -&gt; 8
+vec&lt;int&gt;::size() -&gt; 4
+mask&lt;float&gt;::size() -&gt; 8
+</pre></blockquote>
+<p>
+The ABI tag in this case encodes for <tt>vec&lt;float&gt;</tt> that one object holds 8
+elements and is passed via <em>one</em> register. <tt>vec&lt;int&gt;</tt> uses a 
+different ABI tag that says 4 elements passed via <em>one</em> register. 
+<tt>vec&lt;int, 8&gt;</tt>'s ABI tag says 8 elements passed via <em>two</em> registers.
+<p/>
+Now what should <tt>+mask&lt;float&gt;()</tt> return? The working draft says it must 
+return a <tt>basic_vec&lt;int, mask&lt;float&gt;::abi_type&gt;</tt>. And 
+<tt>mask&lt;float&gt;::abi_type</tt> is constrained to be the same as 
+<tt>vec&lt;float&gt;::abi_type</tt>. The working draft thus makes it
+impossible to implement ABI tags that encode number of elements + number of
+registers (+ bit-masks vs. vector-masks, but that's irrelevant for this
+issue). Instead, an ABI tag would have to encode the native SIMD width of all
+vectorizable types. And that's unnecessarily making compatible types
+incompatible. Also we make it harder to add to the set of vectorizable types
+in the future.</p></li>
+<li><p>The issue is even worse for an implementation that implements
+<tt>vec&lt;complex&lt;T&gt;&gt;</tt> using different ABI tags. Encoding 
+whether the value-type is complex into the ABI is useful because it impacts 
+how the mask is stored (<tt>mask&lt;complex&lt;float&gt;, 8&gt;</tt> is 
+internally stored as a 16-element bit-mask (for interleaved `complex`), while 
+<tt>mask&lt;double, 8&gt;</tt> is stored as an 8-element bit-mask). The ABI 
+tag can also be used to implement interleaved vs. contiguous storage, which 
+is useful for different architectures. If we require 
+<tt>+mask&lt;complex&lt;float&gt;&gt;()</tt> to be of a different type than 
+any <tt>vec&lt;long long&gt;</tt> would ever be, that's just brittle and 
+unnecessary template bloat.</p></li>
+</ol>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> LWG <iref ref="4238"/> is closely related.]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.expos]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+using <i>simd-size-type</i> = <i>see below</i>;                      // <i>exposition only</i>
+template&lt;size_t Bytes&gt; using <i>integer-from</i> = <i>see below</i>; // <i>exposition only</i>
+
+template&lt;class T, class Abi&gt;
+  constexpr <i>simd-size-type</i> <i>simd-size-v</i> = <i>see below</i>;               // <i>exposition only</i>
+template&lt;class T&gt; constexpr size_t <i>mask-element-size</i> = <i>see below</i>; // <i>exposition only</i>
+
+<ins>template &lt;size_t Bytes, class Abi&gt;
+  using <i>simd-vec-from-mask-t</i> = <i>see below</i>;                         // <i>exposition only</i></ins>
+[&hellip;]
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[simd.expos.defn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T&gt; constexpr size_t <i>mask-element-size</i> = <i>see below</i>; // <i>exposition only</i>
+</pre>
+<blockquote>
+<p>
+-4- <tt><i>mask-element-size</i>&lt;basic_mask&lt;Bytes, Abi&gt;&gt;</tt> has the value `Bytes`.
+</p>
+</blockquote>
+<pre>
+<ins>template &lt;size_t Bytes, class Abi&gt;
+  using <i>simd-vec-from-mask-t</i> = <i>see below</i>;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <tt><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</tt> is an alias for an enabled 
+specialization of `basic_vec` if and only if <tt>basic_mask&lt;Bytes, Abi&gt;</tt> is a 
+data-parallel type and <tt><i>integer-from</i>&lt;Bytes&gt;</tt> is valid and a vectorizable type.</ins>
+<p/>
+<ins>-?- <tt><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;::size() == basic_mask&lt;Bytes, Abi&gt;::size()</tt>
+is `true`.</ins>
+<p/>
+<ins>-?- <tt>typename <i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;::value_type</tt> is 
+<tt><i>integer-from</i>&lt;Bytes&gt;</tt></ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[simd.mask.overview]"/>, class template `basic_mask overview` synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;size_t Bytes, class Abi&gt; class basic_mask {
+  public:
+    [&hellip;]
+    // <i><sref ref="[simd.mask.unary]"/>, basic_mask unary operators</i>
+    constexpr basic_mask operator!() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator+() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator-() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator~() const noexcept;    
+    [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[simd.mask.unary]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr basic_mask operator!() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator+() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator-() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator~() const noexcept;    
+</pre>
+<blockquote>
+<p>
+-1- Let <tt><i>op</i></tt> be the operator.
+<p/>
+-2- <i>Returns</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol></resolution>
+
+</issue>
