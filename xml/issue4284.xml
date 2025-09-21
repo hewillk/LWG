@@ -32,9 +32,8 @@ be well-formed.
 Perhaps we should require enabled `std::formatter` specializations for integer-class types to get rid of 
 such uncertainty and inconsistency.
 </p>
-</discussion>
 
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5008"/>.
 </p>
@@ -63,6 +62,67 @@ This wording is relative to <paper num="N5008"/>.
 </blockquote>
 </li>
 
+</ol>
+</superseded>
+
+<note>2025-09-18; Jiang An improves wording</note>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[format.formatter.spec]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- [&hellip;] Each header that declares the template
+`formatter` provides the following enabled specializations:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; [&hellip;]</p></li>
+<li><p>(2.2) &mdash; [&hellip;]</p></li>
+<li><p>(2.3) &mdash; [&hellip;]</p></li>
+<li><p><ins>(2.?) &mdash; For each `charT`, for each cv-unqualified integer-class type 
+(<sref ref="[iterator.concept.winc]"/>) `IntegerClass`, a specialization</ins>
+</p>
+<blockquote><pre>
+<ins>template&lt;&gt; struct formatter&lt;IntegerClass, charT&gt;;</ins>
+</pre></blockquote>
+</li>
+<li><p>(2.4) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[format.string.std]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-20- The meaning of some non-string presentation types is defined in terms of a call to 
+`to_chars`. In such cases, let `[first, last)` be a range large enough to hold the 
+`to_chars` output and `value` be the formatting argument value. <ins>If the formatting 
+argument is of an integer-class type (<sref ref="[iterator.concept.winc]"/>), the 
+formatting argument value is as-if converted to a hypothetical extended integer type 
+of the same signedness and width as the integer-class type first.</ins> Formatting is done as if 
+by calling `to_chars` as specified and copying the output through the output
+iterator of the format context.
+</p>
+
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[tab:format.type.int]"/> (Table 107) as indicated:</p>
+
+<blockquote>
+<p>
+<b>Table 107 &mdash; Meaning of type options for integer <ins>and integer-class</ins> types [tab:format.type.int]</b>
+</p>
+
+</blockquote>
+</li>
 </ol>
 </resolution>
 
