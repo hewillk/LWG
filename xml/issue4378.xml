@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4378" status="New">
+<title>Inconsistency between `std::basic_string`'s `data()` and `operator[]` specification</title>
+<section>
+<sref ref="[string.access]"/>
+</section>
+<submitter>Peter Bindels</submitter>
+<date>16 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+From the working draft <paper num="N5014"/>, the specification for `operator[]` in <sref ref="[string.access]"/> 
+p2 says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Returns</i>: <tt>*(begin() + pos)</tt> if <tt>pos &lt; size()</tt>. Otherwise, returns a reference 
+to an object of type `charT` with value `charT()`, where modifying the object to any value other than 
+`charT()` leads to undefined behavior.
+</p>
+</blockquote>
+<p>
+The specification for data() in <sref ref="[string.accessors]"/> p1 (and p4) says, however:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Returns</i>: A pointer `p` such that `p + i == addressof(operator[](i))` for each `i` in `[0, size()]`.
+</p>
+</blockquote>
+<p>
+The former implies that `str[str.size()]` is allowed to be the address of any null terminator, 
+while the latter restricts it to only being the null terminator belonging to the string.
+<p/>
+Suggested fix: Change wording around `operator[]` to
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Returns</i>: `*(begin() + pos)` if <tt>pos &lt;= size()</tt>. The program shall not modify the value 
+stored at `size()` to any value other than `charT()`; otherwise, the behavior is undefined.
+</p>
+</blockquote>
+<p>
+This moves it inline with the `data()` specification. Given the hardened precondition that 
+<tt>pos &lt;= size()</tt> this does not change behavior for any in-contract access, and we do 
+not define what the feature does when called with broken preconditions. I have been looking at 
+the latter but that will be an EWG paper instead.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+
+<li><p>Modify <sref ref="[string.access]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr const_reference operator[](size_type pos) const;
+constexpr       reference operator[](size_type pos);
+</pre>
+<blockquote>
+<p>
+-1- <i>Hardened preconditions</i>: <tt>pos &lt;= size()</tt> is `true`.
+<p/>
+-2- <i>Returns</i>: `*(begin() + pos)` if <tt>pos &lt;<ins>=</ins> size()</tt>. <del>Otherwise, returns a reference 
+to an object of type `charT` with value `charT()`, where modifying the object to any value other 
+than `charT()` leads to undefined behavior</del><ins>The program shall not modify the value 
+stored at `size()` to any value other than `charT()`; otherwise, the behavior is undefined</ins>.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
