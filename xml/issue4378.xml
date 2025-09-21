@@ -71,8 +71,14 @@ constexpr       reference operator[](size_type pos);
 <p/>
 -2- <i>Returns</i>: `*(begin() + pos)` if <tt>pos &lt;<ins>=</ins> size()</tt>. <del>Otherwise, returns a reference 
 to an object of type `charT` with value `charT()`, where modifying the object to any value other 
-than `charT()` leads to undefined behavior</del><ins>The program shall not modify the value 
-stored at `size()` to any value other than `charT()`; otherwise, the behavior is undefined</ins>.
+than `charT()` leads to undefined behavior.</del>
+<p/>
+-3- <i>Throws</i>: Nothing.
+<p/>
+-4- <i>Complexity</i>: Constant time.
+<p/>
+<ins>-?- <i>Remarks</i> The program shall not modify the value stored at `size()` to any value other than `charT()`; 
+otherwise, the behavior is undefined</ins>
 </p>
 </blockquote>
 </blockquote>
