@@ -1,8 +1,7 @@
 #!/bin/bash
 # Send email for LWG issue prioritization poll.
 # To batch send use a command like:
-# git pull
-# for i in `seq 3858 3864` ; do bin/priority_poll $i || break ; sleep 2 ; done
+# git pull && do bin/priority_poll 3858-3864
 
 # Email will be sent using 'mutt' if present, or 'mailx' otherwise.
 # The sender address can be set by the first one found of: --from option;
