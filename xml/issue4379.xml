@@ -27,7 +27,7 @@ if (n &gt; capacity() &amp;&amp; capacity() + <i>current-limits</i>.min &gt; max
 In addition, in the above scenario if we increase `max_size()` to 140 and `n` to 130, 
 we can see that although we could add one block with a capacity of <tt><i>current-limits</i>.min</tt>,
 adding another would be impossible; we still cannot make <tt>capacity &gt;= n</tt> without also 
-being <tt>&gt;= max_size</tt>.
+being <tt>&gt; max_size</tt>.
 <p/>
 This is currently not stated in the <i>Throws:</i> element. I've implemented the requested additional 
 throws and they are easily achievable.
