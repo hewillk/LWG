@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4381" status="New">
+<title>`std::ranges::to specification` using CTAD not supported by core language
+</title>
+<section>
+<sref ref="[range.utility.conv.to]"/>
+</section>
+<submitter>Jens Maurer</submitter>
+<date>23 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[range.utility.conv.to]"/> p4 defines a <tt><i>DEDUCE_EXPR</i></tt> 
+that attempts CTAD (class template argument deduction) on a template template 
+parameter `C`.
+<p/>
+This is not supported by the core language; 
+<a href="https://cplusplus.github.io/CWG/issues/3003.html">CWG 3003</a> will 
+clarify the core wording accordingly.
+<p/>
+Suggested resolution: Remove <sref ref="[range.utility.conv.to]"/> p3, p4, p5 
+and the respective entry in the synopsis as unimplementable.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[ranges.syn]"/>, header <tt>&lt;ranges&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+namespace std::ranges {
+  [&hellip;]
+  // <i><sref ref="[range.utility.conv]"/>, range conversions</i>
+  template&lt;class C, input_range R, class... Args&gt; requires (!view&lt;C&gt;)
+    constexpr C to(R&amp;&amp; r, Args&amp;&amp;... args);
+  <del>template&lt;template&lt;class...&gt; class C, input_range R, class... Args&gt;
+    constexpr auto to(R&amp;&amp; r, Args&amp;&amp;... args);</del>
+  template&lt;class C, class... Args&gt; requires (!view&lt;C&gt;)
+    constexpr auto to(Args&amp;&amp;... args);
+  template&lt;template&lt;class...&gt; class C, class... Args&gt;
+    constexpr auto to(Args&amp;&amp;... args);  
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[range.utility.conv.to]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+<del>template&lt;template&lt;class...&gt; class C, input_range R, class... Args&gt;
+  constexpr auto to(R&amp;&amp; r, Args&amp;&amp;... args);</del>
+</pre>
+<blockquote>
+<p>
+<del>-3- Let <tt><i>input-iterator</i></tt> be an exposition-only type:</del>
+</p>
+<blockquote><pre><del>
+struct <i>input-iterator</i> { <i>// exposition only</i>
+  using iterator_category = input_iterator_tag;
+  using value_type = range_value_t&lt;R&gt;;
+  using difference_type = ptrdiff_t;
+  using pointer = add_pointer_t&lt;range_reference_t&lt;R&gt;&gt;;
+  using reference = range_reference_t&lt;R&gt;;
+  reference operator*() const;
+  pointer operator->() const;
+  <i>input-iterator</i>&amp; operator++();
+  <i>input-iterator</i> operator++(int);
+  bool operator==(const <i>input-iterator</i>&amp;) const;
+};
+</del></pre></blockquote>
+<p>
+<del>[<i>Note 1</i>: <tt><i>input-iterator</i></tt> meets the syntactic requirements of 
+<i>Cpp17InputIterator</i>. &mdash; <i>end note</i>]</del>
+<p/>
+<del>-4- Let <tt><i>DEDUCE_EXPR</i></tt> be defined as follows:</del>
+</p>
+<ol style="list-style-type: none">
+<li><p><del>(4.1) &mdash; <tt>C(declval&lt;R&gt;(), declval&lt;Args&gt;()...)</tt> if that is a valid expression,</del></p></li>
+<li><p><del>(4.2) &mdash; otherwise, <tt>C(from_range, declval&lt;R&gt;(), declval&lt;Args&gt;()...)</tt> if 
+that is a valid expression,</del></p></li>
+<li><p><del>(4.3) &mdash;  otherwise,</del></p>
+<blockquote><pre><del>
+C(declval&lt;<i>input-iterator</i>&gt;(), declval&lt;<i>input-iterator</i>&gt;(), declval&lt;Args&gt;()...)
+</del></pre></blockquote>
+<p><del>if that is a valid expression,</del></p>
+</li>
+<li><p><del>(4.4) &mdash; otherwise, the program is ill-formed.</del></p></li>
+</ol>
+<p>
+<del>-5- <i>Returns</i>: <tt>to&lt;decltype(<i>DEDUCE_EXPR</i>)>(std::forward&lt;R&gt;(r), std::forward&lt;Args&gt;(args)...)</tt>.</del>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
