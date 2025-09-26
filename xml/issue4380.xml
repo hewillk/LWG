@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4380" status="New">
+<title>`hive::reserve()` complexity does not reflect potential deallocation of blocks
+</title>
+<section>
+<sref ref="[hive.capacity]"/>
+</section>
+<submitter>Matt Bentley</submitter>
+<date>23 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+As noted by Arthur in issue <iref ref="4379"/>, `reserve(n)` could choose to deallocate some 
+reserved (empty) blocks if in doing so it could then allocate blocks which brought `capacity()` 
+closer to `n`.
+<p/>
+For example if `capacity()` is `460`, `n` is `480`, the <tt><i>current-limits</i>.min</tt> is 
+`40` and there is a reserved block of capacity `70`, the latter could be deallocated and a 
+new reserved block allocated of capacity `90`, bringing total capacity to `480`. As opposed 
+to allocating a new reserved block at the min capacity of `40`, bringing the total capacity 
+to `500`.
+<p/>
+The implicit assumption in this issue is that we want `reserve()` to be able to deallocate. 
+No-one has objected to this before, but if you want to, please speak up.
+<p/>
+Anyway, the <i>Complexity</i> of `reserve()` does not presently reflect this ability.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+
+<li><p>Modify <sref ref="[hive.capacity]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+void reserve(size_type n);
+</pre>
+<blockquote>
+<p>
+-3- <i>Effects</i>: If <tt>n &lt;= capacity()</tt> is `true`, there are no effects. Otherwise increases 
+`capacity()` by allocating reserved blocks.
+<p/>
+-4- <i>Postconditions</i>: <tt>capacity() &gt;= n</tt> is `true`.
+<p/>
+-5- <i>Throws</i>: `length_error` if `n` <tt>&gt; max_size()</tt>, as well as any exceptions 
+thrown by the allocator.
+<p/>
+-6- <i>Complexity</i>: It does not change the size of the sequence and takes at most linear time in the number of
+reserved blocks allocated <ins>and deallocated</ins>.
+<p/>
+-7- <i>Remarks</i>: All references, pointers, and iterators referring to elements in `*this`, as well as the 
+past-the-end iterator, remain valid.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
