@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4382" status="New">
+<title>The <tt>simd::basic_mask(bool)</tt> overload needs to be more constrained
+</title>
+<section>
+<sref ref="[simd.mask.ctor]"/>
+</section>
+<submitter>Matthias Kretz</submitter>
+<date>24 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[simd.mask.ctor]"/> defines the overloads `basic_mask(bool)` and
+`basic_mask(unsigned_integral auto)`. This leads to the following pitfall:
+</p>
+<blockquote><pre>
+auto g0() {
+  unsigned short k = 0xf;
+  return simd::mask&lt;float, 8&gt;(k); // mov eax, 15
+}
+
+auto g1() {
+  unsigned short k = 0xf;
+  return simd::mask&lt;float, 8&gt;(k >> 1); // mov eax, -1 ⚠️
+}
+
+auto g2() {
+  unsigned int k = 0xf;
+  return simd::mask&lt;float, 8&gt;(k >> 1); // mov eax, 7
+}
+</pre></blockquote>
+<p>
+In `g1`, `k` is promoted to `int`, shifted and then passed to 
+the mask constructor. Instead of failing, `int(0x7)` is 
+converted to `bool` and the mask thus initialized to all `true`.
+<p/>
+Also consider:
+</p>
+<ol>
+<li><p><tt>simd::mask&lt;float&gt;(true_type());</tt></p></li>
+<li><p><tt>unsigned_integral&lt;bool&gt;</tt> is `true` => 
+<tt>same_as&lt;bool&gt; auto</tt> instead of 'bool' makes 
+the overload set ambiguous</p></li>
+<li><p>`float` is convertible to `bool`, thus 
+<tt>simd::mask&lt;float&gt;(1.f)</tt> continues to compile</p></li>
+</ol>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.mask.overview]"/>, <tt>class template basic_mask</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;size_t Bytes, class Abi&gt; class basic_mask {
+  public:
+    [&hellip;]
+    
+    constexpr basic_mask() noexcept = default;
+    
+    // <i><sref ref="[simd.mask.ctor]"/>, basic_mask constructors</i>
+    constexpr explicit basic_mask(value_type) noexcept;
+    template&lt;size_t UBytes, class UAbi&gt;
+      constexpr explicit basic_mask(const basic_mask&lt;UBytes, UAbi&gt;&amp;) noexcept;
+    template&lt;class G&gt;
+      constexpr explicit basic_mask(G&amp;&amp; gen) noexcept;
+    constexpr basic_mask(const bitset&lt;size()&gt;&amp; b) noexcept;
+    constexpr explicit basic_mask(unsigned_integral auto val) noexcept;
+    <ins>basic_mask(signed_integral auto) = delete;</ins>
+    
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
