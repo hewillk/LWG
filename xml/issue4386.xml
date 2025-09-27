@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4386" status="New">
+<title><code>std::simd::select(bool c, const T&amp; a, const U&amp; b)</code> is underconstrained
+</title>
+<section>
+<sref ref="[simd.alg]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>27 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+This function currently only requires that `c ? a : b` be a well-formed expression, which simply
+returns `c ? a : b`.
+<p/>
+Given that it seems intended to work with `basic_vec`, `basic_mask`, or vectorizable type,
+requiring `T` and `U` to be copyable seems reasonable since they are trivially copyable. 
+It shouldn't take non-copyable objects and produce hard errors in the function body.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.syn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  [&hellip;]
+  // <i><sref ref="[simd.alg]"/>, algorithms</i>
+  [&hellip;]
+  template&lt;<ins>copyable</ins><del>class</del> T, <ins>copyable</ins><del>class</del> U&gt;
+    constexpr auto select(bool c, const T&amp; a, const U&amp; b)
+    -&gt; remove_cvref_t&lt;decltype(c ? a : b)&gt;;
+  [&hellip;]
+};
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[simd.alg]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<ins>copyable</ins><del>class</del> T, <ins>copyable</ins><del>class</del> U&gt;
+  constexpr auto select(bool c, const T&amp; a, const U&amp; b)
+    -&gt; remove_cvref_t&lt;decltype(c ? a : b)&gt;;
+</pre>
+<blockquote>
+<p>
+-9- <i>Effects</i>: Equivalent to: <code>return c ? a : b;</code>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
