@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4387" status="New">
+<title>Including <tt>&lt;stacktrace&gt;</tt> doesn't provide `std::begin/end`
+</title>
+<section>
+<sref ref="[iterator.range]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>27 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`basic_stacktrace` is explicitly specified as a reversible container, an allocator-aware container, 
+and a const-qualified sequence container, with members `begin`/`end`, `rbegin`/`rend`,
+`cbegin`/`cend`, `crbegin`/`crend`, `empty`, `size`, etc.
+<p/>
+Thus, it's worth making the corresponding free functions available when introducing
+<code>&lt;stacktrace&gt;</code>, just like other containers.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[iterator.range]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- In addition to being available via inclusion of the <tt>&lt;iterator&gt;</tt> header, the function
+templates in <sref ref="[iterator.range]"/> are available when any of the following headers are included: 
+<tt>&lt;array&gt;</tt>,
+<tt>&lt;deque&gt;</tt>, <tt>&lt;flat_map&gt;</tt>, <tt>&lt;flat_set&gt;</tt>,
+<tt>&lt;forward_list&gt;</tt>,
+<tt>&lt;hive&gt;</tt>,
+<tt>&lt;inplace_vector&gt;</tt>, <tt>&lt;list&gt;</tt>, <tt>&lt;map&gt;</tt>,
+<tt>&lt;regex&gt;</tt>, <tt>&lt;set&gt;</tt>,  
+<tt>&lt;span&gt;</tt>, <ins><tt>&lt;stacktrace&gt;</tt></ins>, 
+<tt>&lt;string&gt;</tt>, <tt>&lt;string_view&gt;</tt>,
+<tt>&lt;unordered_map&gt;</tt>, <tt>&lt;unordered_set&gt;</tt>, and <tt>&lt;vector&gt;</tt>.
+
+</p>
+</blockquote>
+
+</li>
+
+</ol>
+</resolution>
+
+</issue>
