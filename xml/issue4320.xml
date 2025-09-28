@@ -350,7 +350,7 @@ as opposed to relocating subsequent elements during erasure. <ins>The same or di
 may be utilized to find and re-use these locations during subsequent insertions.</ins> 
 <p/>
 <ins>[<i>Note</i>: The techniques are permitted to be at worst logarithmic in the capacity of the 
-element blocks being inserted into or erased from while maintaining constant-time iteration, to allow 
+element blocks being inserted into or erased from, while maintaining constant-time iteration, to allow 
 latitude for implementation-specific optimizations. &mdash; <i>end note</i>]</ins>
 </p>
 </blockquote>
