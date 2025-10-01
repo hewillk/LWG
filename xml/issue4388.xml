@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4388" status="New">
+<title>Align new definition of `va_start` with C23</title>
+<section><sref ref="[cstdarg.syn]"/></section>
+<submitter>Jakub Jelinek</submitter>
+<date>1 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<paper num="p3348r4"/> changed the `va_start` macro to match C23,
+but the following wording from C is not present in C++:
+<blockquote>
+If any additional arguments expand to include unbalanced parentheses,
+or a preprocessing token that does not convert to a token,
+the behavior is undefined.
+</blockquote>
+</p>
+<p>
+The importance of that wording was not realized during review of P3348R4.
+The wording is intended to ensure that any discarded arguments to
+`va_start` are actually lexable by the compiler,
+rather than containing unbalanced parentheses or brackets.
+It also makes the following undefined:
+</p>
+<pre><code>#define BAD ); format_disk(
+va_start(ap, BAD);
+</code></pre>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ul>
+<li><p>Modify <sref ref="[cstdarg.syn]"/> as indicated:</p>
+
+<blockquote>
+<p>
+(1.2) &mdash;
+<ins>
+If more than one argument is present for `va_start`
+and any of the second or subsequent arguments expands
+to include unbalanced parentheses,
+or a preprocessing token that does not convert to a token,
+the program is ill-formed, no diagnostic required.
+</ins>
+The preprocessing tokens comprising the second and subsequent arguments to
+`va_start` (if any) are discarded.
+[Note 1: va_start accepts a second argument for compatibility with prior revisions of C++.
+— end note]
+</p>
+</blockquote>
+</li>
+</ul>
+
+</resolution>
+
+</issue>
