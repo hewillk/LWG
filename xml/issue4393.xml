@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4393" status="New">
+<title>`simd::unchecked_scatter_to` is underconstrained</title>
+<section><sref ref="[simd.permute.memory]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>29 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Both `simd::unchecked_scatter_to` and `simd::partial_scatter_to` are used to write a
+`simd::vec` into a range `R`.
+<p/>
+However, they only require `R` to be `contiguous_range` and `sized_range.
+Requiring `R` to be `output_range` is also necessary; otherwise, the 
+`constant_range` cannot be written.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.syn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  [&hellip;]
+  template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+    requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+    constexpr void
+      unchecked_scatter_to(const V&amp; v, R&amp;&amp; out,
+                           const I&amp; indices, flags&lt;Flags...&gt; f = {});
+  template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+    requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+    constexpr void
+      unchecked_scatter_to(const V&amp; v, R&amp;&amp; out, const typename I::mask_type&amp; mask,
+                           const I&amp; indices, flags&lt;Flags...&gt; f = {});
+
+  template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+    requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+    constexpr void
+      partial_scatter_to(const V&amp; v, R&amp;&amp; out,
+                         const I&amp; indices, flags&lt;Flags...&gt; f = {});
+  template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+    requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+    constexpr void
+      partial_scatter_to(const V&amp; v, R&amp;&amp; out, const typename I::mask_type&amp; mask,
+                         const I&amp; indices, flags&lt;Flags...&gt; f = {});
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.permute.memory]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+  constexpr void unchecked_scatter_to(const V&amp; v, R&amp;&amp; out, const I&amp; indices,
+                                      flags&lt;Flags...&gt; f = {});
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+  constexpr void unchecked_scatter_to(const V&amp; v, R&amp;&amp; out, const typename I::mask_type&amp; mask,
+                                      const I&amp; indices, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-10- Let `mask` be `typename I::mask_type(true)` for the overload with no `mask` parameter.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+  constexpr void
+  partial_scatter_to(const V&amp; v, R&amp;&amp; out, const I&amp; indices, flags&lt;Flags...&gt; f = {});
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <ins>&amp;&amp; ranges::output_range&lt;R, typename V::value_type&gt;</ins>
+  constexpr void partial_scatter_to(const V&amp; v, R&amp;&amp; out, const typename I::mask_type&amp; mask,
+                                    const I&amp; indices, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-13- Let `mask` be `typename I::mask_type(true)` for the overload with no `mask` parameter.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
