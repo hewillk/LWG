@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4392" status="New">
+<title>`simd::unchecked_load` misses difference type casting</title>
+<section><sref ref="[simd.loadstore]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>29 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, `simd::unchecked_load`/`partial_load`/`unchecked_store`/`partial_store` construct a 
+`span` via `span(first, n)` when taking an iterator `first` and its difference type `n`.
+<p/>
+However, the construction is ill-formed when the difference type is an integer-class type; we should perform
+an explicit casting here.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+
+<li><p>In subclause <sref ref="[simd.loadstore]"/> replace all occurrences of 
+</p>
+<blockquote><pre>
+R(first, n)
+</pre></blockquote>
+<p>
+by
+</p>
+<blockquote><pre>
+R(first, <ins>static_cast&lt;size_t&gt;(</ins>n<ins>)</ins>)
+</pre></blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
