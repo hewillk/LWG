@@ -13,7 +13,7 @@
 Both `simd::unchecked_scatter_to` and `simd::partial_scatter_to` are used to write a
 `simd::vec` into a range `R`.
 <p/>
-However, they only require `R` to be `contiguous_range` and `sized_range.
+However, they only require `R` to be `contiguous_range` and `sized_range`.
 Requiring `R` to be `output_range` is also necessary; otherwise, the 
 `constant_range` cannot be written.
 </p>
