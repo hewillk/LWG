@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4389" status="New">
+<title>`ranges::for_each` possibly behaves differently from range-based `for`</title>
+<section><sref ref="[range.range]"/></section>
+<submitter>Jiang An</submitter>
+<date>28 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+It was found in the blog post 
+<a href="https://quuxplusone.github.io/blog/2024/12/09/foreach-versus-for/">
+"When `ranges::for_each` behaves differently from `for`"</a>  that `ranges::for_each` 
+can behave differently from range-based `for`, because
+</p>
+<ol>
+<li><p>`ranges::begin` and `ranges::end` possibly use different rules, i.e. one calls a member 
+and the other calls an ADL-found non-member function, and</p></li>
+<li><p>these CPOs continue to perform ADL when a member `begin/end` is found but the 
+function call is not valid, while the range-for stops and renders the program ill-formed.</p></li>
+</ol>
+<p>
+Perhaps the intent of Ranges was that the `ranges::range` concept should be stricter than 
+plain range-for and all range types can be iterated via range-for with the same semantics 
+as `ranges::for_each`. However, it seems very difficult (if not impossible) for a library 
+implementation to tell whether a class has member `begin/end` but the corresponding member 
+call is ill-formed with C++20 core language rules, and such determination is critical for 
+eliminating the semantic differences between `ranges::for_each` and range-for.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<blockquote class="note">
+<p>
+Two mutually exclusive resolutions are proposed here. One enforces semantic-identity checks, 
+while the other doesn't and makes weird types satisfy but not model the range concept. I 
+prefer the stricter one because the semantic-identity checks are fully static, but this probably 
+requires compilers to add new intrinsics when reflection is absent.
+</p>
+</blockquote>
+
+<p>
+<b>Option A</b>: (stricter)
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[range.access.begin]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- Given a subexpression `E` with type `T`, let `t` be an lvalue that denotes the reified object for `E`. Then:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; [&hellip;]</p></li>
+<li><p>(2.2) &mdash; [&hellip;]</p></li>
+<li><p>(2.3) &mdash; [&hellip;]</p></li>
+<li><p>(2.4) &mdash; [&hellip;]</p></li>
+<li><p><ins>(2.?) &mdash; Otherwise, if <tt>remove_cvref_t&lt;T&gt;</tt> is a class type and search for 
+`begin` in the scope of that class finds at least one declaration, `ranges::begin(E)` is ill-formed.</ins></p></li>
+<li><p>(2.5) &mdash; [&hellip;]</p></li>
+<li><p>(2.6) &mdash; Otherwise, `ranges::begin(E)` is ill-formed.</p></li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.access.end]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-2- Given a subexpression `E` with type `T`, let `t` be an lvalue that denotes the reified object for `E`. Then:
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; [&hellip;]</p></li>
+<li><p>(2.2) &mdash; [&hellip;]</p></li>
+<li><p>(2.3) &mdash; [&hellip;]</p></li>
+<li><p>(2.4) &mdash; [&hellip;]</p></li>
+<li><p>(2.5) &mdash; [&hellip;]</p></li>
+<li><p><ins>(2.?) &mdash; Otherwise, if <tt>remove_cvref_t&lt;T&gt;</tt> is a class type and search for 
+`end` in the scope of that class finds at least one declaration, `ranges::end(E)` is ill-formed.</ins></p></li>
+<li><p>(2.6) &mdash; [&hellip;]</p></li>
+<li><p>(2.7) &mdash; Otherwise, `ranges::end(E)` is ill-formed.</p></li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.range]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- [&hellip;]
+</p>
+<pre>
+template&lt;class T&gt;
+  concept range =
+    requires(T&amp; t) {
+      ranges::begin(t);    // <i>sometimes equality-preserving (see below)</i>
+      ranges::end(t);
+    } <ins>&amp;&amp; <i>has-consistent-begin-end</i>&lt;T&gt;</ins>; <ins>// <i>see below</i></ins>
+</pre>
+<p>
+-2- [&hellip;]
+<p/>
+-3- [&hellip;]
+<p/>
+<ins>-?- <tt><i>has-consistent-begin-end</i>&lt;T&gt;</tt> is a constant expression of type `bool`, 
+and it is `true` if and only if for the `t` introduced in the requires-expression above, either</ins>
+</p>
+<ol style="list-style-type: none">
+<li><p><ins>(?.1) &mdash; both `ranges::begin(t)` and `ranges::end(t)` are specified to select 
+`auto(t.begin())` and `auto(t.end())` respectively, or</ins></p></li>
+<li><p><ins>(?.2) &mdash; both `ranges::begin(t)` and `ranges::end(t)` are specified not 
+to select `auto(t.begin())` and `auto(t.end())` respectively.</ins></p></li>
+</ol>
+</blockquote>
+</li>
+</ol>
+
+<p>
+<b>Option B</b>: (looser)
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[range.range]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-1- [&hellip;]
+</p>
+<pre>
+template&lt;class T&gt;
+  concept range =
+    requires(T&amp; t) {
+      ranges::begin(t);    // <i>sometimes equality-preserving (see below)</i>
+      ranges::end(t);
+    }
+</pre>
+<p>
+-2- Given an expression `t` such that `decltype((t))` is <tt>T&amp;</tt>, `T` models `range` only if
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; [&hellip;]</p></li>
+<li><p>(2.2) &mdash; [&hellip;]</p></li>
+<li><p>(2.3) &mdash; [&hellip;]</p></li>
+<li><p><ins>(2.?) &mdash; The range-based `for` statement <tt>for (auto&amp;&amp; x: t);</tt> is well-formed, 
+and variable definitions <tt>auto <i>begin</i> = <i>begin-expr</i>;</tt> and <tt>auto <i>end</i> = <i>end-expr</i>;</tt> 
+in the equivalent form (<sref ref="[stmt.ranged]"/>) of that statement are semantically equivalent to 
+<tt>auto <i>begin</i> = ranges::begin(t);</tt> and <tt>auto <i>end</i> = ranges::end(t);</tt> respectively.</ins></p></li>
+</ol>
+
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
