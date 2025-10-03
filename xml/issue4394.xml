@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4394" status="New">
+<title>`simd::unchecked_load(I first, S last)` construct `span` maybe ill-formed</title>
+<section><sref ref="[simd.loadstore]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>30 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, `simd::unchecked_load`/`partial_load`/`unchecked_store`/`partial_store`
+constructs a `span` via `span(first, last)` when taking an iterator-sentinel pair
+`first` and `last`.
+<p/>
+However, the construction may not be well-behaved or well-formed when the sentinel type 
+can be implicitly converted to an integer type. Consider:
+</p>
+<blockquote><pre>
+struct I {
+  using value_type = int;
+  using difference_type = int;
+  using iterator_category = std::contiguous_iterator_tag;
+  // contiguous iterator operators
+  // ...
+ 
+  operator int() const;
+};
+
+int main() {
+   std::simd::unchecked_load(I{}, I{});
+}
+</pre></blockquote>
+<p>
+Above, `unchecked_load` invokes `unchecked_load(I first, S last)` and we attempt to
+construct `span` through `span(first, last)`.
+However, this is invalid because the constructor requires that the sentinel type should not be convertible to
+`size_t`, so we fall back into `span(first, n)` via implicitly converting `I` to `size_t`. Such
+behavior is subtle and likely unintended.
+<p/>
+Now consider:
+</p>
+<blockquote><pre>
+struct I {
+  using value_type = int;
+  using difference_type = int;
+  using iterator_category = std::contiguous_iterator_tag;
+  // contiguous iterator operators
+  // ...
+
+  operator int() &amp;&amp;;
+};
+
+int main() {
+   std::simd::unchecked_load(I{}, I{});
+}
+</pre></blockquote>
+<p>
+We still attempt to construct the `span` by calling `span(first, last)`, which is invalid,
+but because the lvalue sentinel cannot be converted to `size_t`, the call of `span(first, n)`
+is also invalid. This makes the construction of the `span` ill-formed and leads to a hard error in
+the function body.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+
+<li><p>In subclause <sref ref="[simd.loadstore]"/> replace all occurrences of 
+</p>
+<blockquote><pre>
+R(first, last)
+</pre></blockquote>
+<p>
+by
+</p>
+<blockquote><pre>
+R(first, <ins>static_cast&lt;size_t&gt;(</ins>last<ins> - first)</ins>)
+</pre></blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
