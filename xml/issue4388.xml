@@ -35,7 +35,7 @@ va_start(ap, BAD);
 This wording is relative to <paper num="N5014"/>.
 </p>
 
-<ul>
+<ol>
 <li><p>Modify <sref ref="[cstdarg.syn]"/> as indicated:</p>
 
 <blockquote>
@@ -50,12 +50,12 @@ the program is ill-formed, no diagnostic required.
 </ins>
 The preprocessing tokens comprising the second and subsequent arguments to
 `va_start` (if any) are discarded.
-[Note 1: va_start accepts a second argument for compatibility with prior revisions of C++.
-— end note]
+[<i>Note 1</i>: `va_start` accepts a second argument for compatibility with prior revisions of C++.
+&mdash; <i>end note</i>]
 </p>
 </blockquote>
 </li>
-</ul>
+</ol>
 
 </resolution>
 
