@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4390" status="New">
+<title><code>simd::basic_vec(U&amp;&amp;)</code> default template parameter</title>
+<section><sref ref="[simd.ctor]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>29 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<code>simd::basic_vec</code> supports <code>complex</code> after <paper num="P2663R7"/>, defaulting
+the template parameter of its broadcast constructor seems to be reasonable, as this allows the 
+intuitive spelling:
+</p>
+<pre>
+simd::vec&lt;complex&lt;double&gt;&gt; sc1   ({-1.0, 0.5}); // <span style="color:#C80000;font-weight:bold">current ill-formed</span>
+simd::vec&lt;complex&lt;double&gt;&gt; sc2 = {{-1.0, 0.5}}; // <span style="color:#C80000;font-weight:bold">current ill-formed</span></pre>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.overview]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;class T, class Abi&gt; class basic_vec {
+  public:
+    [&hellip;]
+    template&lt;class U <ins>= T</ins>&gt;
+      constexpr explicit(<i>see below</i>) basic_vec(U&amp;&amp; value) noexcept;
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U <ins>= T</ins>&gt; constexpr explicit(<i>see below</i>) basic_vec(U&amp;&amp; value) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
