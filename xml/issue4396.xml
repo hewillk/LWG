@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4396" status="New">
+<title>Improve <code>inplace_vector(from_range_t, R&amp;&amp; rg)</code></title>
+<section><sref ref="[sequence.reqmts]"/><sref ref="[inplace.vector.cons]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>01 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider:
+</p>
+<blockquote><pre>
+std::array&lt;int, 42&gt; a;
+std::inplace_vector&lt;int, 5&gt; v(std::from_range, a);
+</pre></blockquote>
+<p>
+The above throws `std::bad_alloc` at runtime because the size of `array` is larger than
+capacity of `inplace_vector`. However, we should reject it at compile time since the 
+`array` size is a constant expression.
+<p/>
+Given that we do a lot of compile-time size checking in <code>&lt;simd&gt;</code>,
+it's worth applying that here as well. Compile-time errors are better than runtime ones.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[sequence.reqmts]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+a.assign_range(rg)
+</pre>
+<blockquote>
+<p>
+-60- <i>Result</i>: <code>void</code>
+<p/>
+-61- <i>Mandates</i>: <code>assignable_from&lt;T&amp;, ranges::range_reference_t&lt;R&gt;&gt;</code> is modeled.
+<ins>For `inplace_vector`, if `ranges::size(rg)` is a constant expression then `ranges::size(rg)` ≤ `a.max_size()`</ins>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[inplace.vector.cons]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<i>container-compatible-range</i>&lt;T&gt; R&gt;
+  constexpr inplace_vector(from_range_t, R&amp;&amp; rg);
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Mandates</i>: If `ranges::size(rg)` is a constant expression then `ranges::size(rg)` ≤ `N`.</ins>
+<p/>
+-9- <i>Effects</i>: Constructs an `inplace_vector` with the elements of the range `rg`.
+<p/>
+-10- <i>Complexity</i>: Linear in `ranges::distance(rg)`.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
