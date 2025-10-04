@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4395" status="New">
+<title>`write_env` implementation-detail lambda should have explicit return type</title>
+<section><sref ref="[exec.write.env]"/></section>
+<submitter>Robert A.H. Leahy</submitter>
+<date>29 Sep 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[exec.write.env]"/> the impls for `std::execution::write_env` has <tt><i>get-env</i></tt> 
+specified as:
+</p>
+<blockquote><pre>
+static constexpr auto <i>get-env</i> =
+  [](auto, const auto&amp; state, const auto&amp; rcvr) noexcept {
+    return <i>see-below</i>;
+  };
+</pre></blockquote>
+<p>
+This uses automatic return type deduction which means that the body of the lambda is actually instantiated 
+in a SFINAE-unfriendly way when attempting to compute various properties of the lambda (invocability, 
+return type, et cetera). This is undesirable and surprising as has been discovered in actual use/deployment 
+(see: <a href="https://github.com/NVIDIA/stdexec/pull/1654">https://github.com/NVIDIA/stdexec/pull/1654</a>).
+<p/>
+The fix is to explicitly provide a return type for the lambda which computes the type of the body.
+<p/>
+Note: This issue may indicate that the use of automatic return type deduction in the specification of
+sender algorithms more generally ought to be reconsidered/-examined.
+</p>
+</discussion>
+
+<resolution>
+</resolution>
+
+</issue>
