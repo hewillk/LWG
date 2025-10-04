@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4402" status="New">
+<title>List-initialization of iterators in [simd.mask.overview]</title>
+<section>
+<sref ref="[simd.mask.overview]"/>
+</section>
+<submitter>Arthur O'Dwyer</submitter>
+<date>02 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[simd.mask.overview]"/> has
+</p>
+<blockquote><pre>
+namespace std::simd {
+ template&lt;class V&gt;
+ class <i>simd-iterator</i> { // exposition only
+  V* <i>data_</i> = nullptr; // exposition only
+  <i>simd-size-type</i> <i>offset_</i> = 0; // exposition only
+  <b>constexpr <i>simd-iterator</i>(V&amp; d, <i>simd-size-type</i> off) noexcept; // <i>exposition only</i></b>
+  [&hellip;]
+ };
+[&hellip;]
+ template&lt;size_t Bytes, class Abi&gt;
+  class basic_mask {
+  public:
+   using value_type = bool;
+   using abi_type = Abi;
+   using iterator = <i>simd-iterator</i>&lt;basic_mask&gt;;
+   using const_iterator = <i>simd-iterator</i>&lt;const basic_mask&gt;;
+   <b>constexpr iterator begin() noexcept { return {*this, 0}; }</b>
+   constexpr const_iterator begin() const noexcept { return {*this, 0}; }
+   constexpr const_iterator cbegin() const noexcept { return {*this, 0}; }
+   constexpr default_sentinel_t end() const noexcept { return {}; }
+   constexpr default_sentinel_t cend() const noexcept { return {}; }
+   [&hellip;]
+</pre></blockquote>
+<p>
+It's unclear whether the "exposition-only" constructor is required to be present. If it is present, 
+as written, without `explicit`, then `{someBasicMask, 0}` becomes a valid initializer for an iterator. 
+Evidence in favor of its intentionality: the use of `return {*this, 0}` in `basic_mask::begin()`.
+(The constructor is `private`, but it still participates in overload resolution and will ambiguate 
+other possible conversions.) But this makes many expressions ambiguous that could be unambiguous to a human.
+</p>
+<blockquote><pre>
+using Mask = std::simd::mask&lt;int&gt;;
+
+void overloaded(std::string, std::pair&lt;Mask, int&gt; kv);
+void overloaded(std::string, Mask::iterator it);
+
+int main() {
+  Mask m;
+  overloaded("the pair is", {m, 0});  // ambiguous?
+}
+</pre></blockquote>
+<p>
+At the very least, we should say that this list-initialization is intentional, and add wording to 
+class <tt><i>simd-iterator</i></tt> and/or remove the "exposition only" from <tt><i>simd-iterator</i></tt>'s 
+constructor. That makes it clear that the above program is indeed intended to be ambiguous. But IMO 
+we should instead simply make the above program valid.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.iterator]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;class V&gt;
+  class <i>simd-iterator</i> {                                                  // <i>exposition only</i>
+    V* <i>data_</i> = nullptr;                                                  // <i>exposition only</i>
+    <i>simd-size-type</i> <i>offset_</i> = 0;                                          // <i>exposition only</i>
+    constexpr <ins>explicit</ins> <i>simd-iterator</i>(V&amp; d, <i>simd-size-type</i> off) noexcept; // <i>exposition only</i>
+    
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.mask.overview]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;size_t Bytes, class Abi&gt; class basic_mask {
+  public:
+    using value_type = bool;
+    using abi_type = Abi;
+    using iterator = <i>simd-iterator</i>&lt;basic_mask&gt;;
+    using const_iterator = <i>simd-iterator</i>&lt;const basic_mask&gt;;
+    constexpr iterator begin() noexcept { return <ins>iterator(</ins><del>{</del>*this, 0<del>}</del><ins>)</ins>; }
+    constexpr const_iterator begin() const noexcept { return <ins>const_iterator(</ins><del>{</del>*this, 0<del>}</del><ins>)</ins>; }
+    constexpr const_iterator cbegin() const noexcept { return <ins>const_iterator(</ins><del>{</del>*this, 0<del>}</del><ins>)</ins>; }
+    constexpr default_sentinel_t end() const noexcept { return {}; }
+    constexpr default_sentinel_t cend() const noexcept { return {}; }
+    
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
