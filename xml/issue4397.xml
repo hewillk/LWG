@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4397" status="New">
+<title>Improve <code>span(R&amp;&amp; r)</code></title>
+<section><sref ref="[span.cons]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>02 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+It is preferable to reject <code>span&lt;int, 42&gt;(views::empty&lt;int&gt;)</code>
+at compile-time after <paper num="P2280R4"/>, since applying `ranges::size` on those 
+ranges is a constant expression now.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[span.cons]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class R&gt; constexpr explicit(extent != dynamic_extent) span(R&amp;&amp; r);
+</pre>
+<blockquote>
+<p>
+<ins>-?- <i>Mandates</i>: If `extent` is not equal to `dynamic_extent` and `ranges::size(r)` is a
+constant expression, then `ranges::size(r) == extent` is `true`.</ins>
+<p/>
+-16- <i>Constraints</i>: Let `U` be <code>remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;</code>. 
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
