@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4398" status="New">
+<title>`enable_nonlocking_formatter_optimization` should be disabled for container adaptors</title>
+<section><sref ref="[queue.syn]"/><sref ref="[stack.syn]"/></section>
+<submitter>Tomasz Kamiński</submitter>
+<date>02 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+As the standard currently defines formatters for `queue`, `prioriy_queue`, and `stack`  
+`enable_nonlocking_formatter_optimization` is specialized to `true` for these adaptors per 
+<sref ref="[format.formatter.spec]"/> p3:
+</p>
+<blockquote>
+<p>
+Unless specified otherwise, for each type `T` for which a formatter specialization is provided 
+by the library, each of the headers provides the following specialization: 
+</p>
+<blockquote><pre>
+template&lt;&gt; inline constexpr bool enable_nonlocking_formatter_optimization&lt;T&gt; = true;
+</pre></blockquote>
+</blockquote>
+<p>
+However, formatting an adaptor requires formatting of the underlying range, and we disable 
+the nonlocking_optimizations for all ranges.
+<p/>
+This problem does not occur for the `flat_set`, `flat_map` adaptors, which are also ranges, and 
+do not have a specialized formatter, and use range one.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[queue.syn]"/>, header <tt>&lt;queue&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+// <i><sref ref="[container.adaptors.format]"/>, formatter specialization for queue</i>
+template&lt;class charT, class T, formattable&lt;charT&gt; Container&gt;
+  struct formatter&lt;queue&lt;T, Container&gt;, charT&gt;;
+  
+<ins>template&lt;class T, class Container&gt;
+  constexpr bool enable_nonlocking_formatter_optimization&lt;queue&lt;T, Container&gt;&gt; = false;</ins>
+
+// <i><sref ref="[priority.queue]"/>, class template priority_queue</i>
+template&lt;class T, class Container = vector&lt;T&gt;,
+         class Compare = less&lt;typename Container::value_type&gt;&gt;
+  class priority_queue;
+[&hellip;]
+// <i><sref ref="[container.adaptors.format]"/>, formatter specialization for priority_queue</i>
+template&lt;class charT, class T, formattable&lt;charT&gt; Container, class Compare&gt;
+  struct formatter&lt;priority_queue&lt;T, Container, Compare&gt;, charT&gt;;
+  
+<ins>template&lt;class T, class Container, class Compare&gt;
+  constexpr bool enable_nonlocking_formatter_optimization&lt;priority_queue&lt;T, Container, Compare&gt;&gt; = false;</ins>
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[stack.syn]"/>, header <tt>&lt;stack&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+
+// <i><sref ref="[container.adaptors.format]"/>, formatter specialization for stack</i>
+template&lt;class charT, class T, formattable&lt;charT&gt; Container&gt;
+  struct formatter&lt;stack&lt;T, Container&gt;, charT&gt;;
+
+<ins>template&lt;class T, class Container&gt;
+  constexpr bool enable_nonlocking_formatter_optimization&lt;stack&lt;T, Container&gt;&gt; = false;</ins>
+
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
