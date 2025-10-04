@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4401" status="New">
+<title>`join_view` should be `sized_range` when applied to ranges of `simd::vec`</title>
+<section>
+<sref ref="[range.join.view]"/>
+<sref ref="[range.join.with.view]"/>
+<sref ref="[range.lazy.split.view]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>02 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Consider:
+<p/>
+Collecting a `simd::vec` into a `vector` for output is a common use case. <paper num="P3480R6"/>
+makes `simd::vec` a range so we can simply flatten it with `views::join` (original example from
+the paper):
+</p>
+<blockquote><pre>
+std::vector&lt;std::simd::vec&lt;float&gt;&gt; data;
+auto range_of_float = data | std::views::join;
+</pre></blockquote>
+<p>
+In this case, it makes sense for `join_view` to be `sized_range` because `simd::vec::size()` 
+is a constant expression that can be multiplied by the original `vector` size to get the 
+result size of the `join_view`.
+<p/>
+In <code>&lt;ranges&gt;</code>, we use the <code><i>tiny-range</i></code> concept
+to consider types that can obtain static sizes specifically, and `simd::vec` 
+seems to be a good fit.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[range.join.view]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> The proposed wording follows the <code><i>tiny-range</i></code>'s way to check if
+`R::size()` is a constant expression instead of further checking `ranges::size(r)` for simplicity.]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+namespace std::ranges {
+  <ins>template&lt;auto&gt; struct <i>require-constant</i>;  // <i>exposition only</i>
+
+  template&lt;class R&gt;
+  concept <i>static-sized-range</i> =             // <i>exposition only</i>
+    sized_range&lt;R&gt; &amp;&amp;
+    requires { typename <i>require-constant</i>&lt;remove_reference_t&lt;R&gt;::size()&gt;; };</ins>
+
+  template&lt;input_range V&gt;
+    requires view&lt;V&gt; &amp;&amp; input_range&lt;range_reference_t&lt;V&gt;&gt;&gt;
+  class join_view : public view_interface&lt;join_view&lt;V&gt;&gt; {
+  [&hellip;]
+  public:
+    [&hellip;]
+    <ins>constexpr auto size()
+      requires sized_range&lt;V&gt; &amp;&amp; <i>static-sized-range</i>&lt;<i>InnerRng</i>&gt; {
+      using CT = common_type_t&lt;range_size_t&lt;V&gt;, range_size_t&lt;<i>InnerRng</i>&gt;&gt;;
+      return CT(ranges::size(<i>base_</i>)) * CT(remove_reference_t&lt;<i>InnerRng</i>&gt;::size());
+    }
+
+    constexpr auto size() const
+      requires sized_range&lt;const V&gt; &amp;&amp;
+               <i>static-sized-range</i>&lt;range_reference_t&lt;const V&gt;&gt; {
+      using <i>InnerConstRng</i> = range_reference_t&lt;const V&gt;;
+      using CT = common_type_t&lt;range_size_t&lt;V&gt;, range_size_t&lt;<i>InnerConstRng</i>&gt;&gt;;
+      return CT(ranges::size(<i>base_</i>)) * CT(remove_reference_t&lt;<i>InnerConstRng</i>&gt;::size());
+    }</ins>
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.join.with.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::ranges {
+  [&hellip;]
+  template&lt;input_range V, forward_range Pattern&gt;
+    requires view&lt;V&gt; &amp;&amp; input_range&lt;range_reference_t&lt;V&gt;&gt;
+          &amp;&amp; view&lt;Pattern&gt;
+          &amp;&amp; <i>concatable</i>&lt;range_reference_t&lt;V&gt;, Pattern&gt;
+  class join_with_view : public view_interface&lt;join_with_view&lt;V, Pattern&gt;&gt; {
+  [&hellip;]
+  public:
+    [&hellip;]
+    <ins>constexpr auto size()
+      requires sized_range&lt;V&gt; &amp;&amp; sized_range&lt;Pattern&gt; &amp;&amp;
+               <i>static-sized-range</i>&lt;<i>InnerRng</i>&gt; {
+      using CT = common_type_t&lt;
+        range_size_t&lt;V&gt;, range_size_t&lt;<i>InnerRng</i>&gt;, range_size_t&lt;Pattern&gt;&gt;;
+      const auto base_size = ranges::size(<i>base_</i>);
+      if (base_size == 0)
+        return CT(0);
+      return CT(base_size) * CT(remove_reference_t&lt;<i>InnerRng</i>&gt;::size()) +
+             CT(base_size - 1) * CT(ranges::size(<i>pattern_</i>));
+    }
+
+    constexpr auto size() const
+      requires sized_range&lt;const V&gt; &amp;&amp; sized_range&lt;const Pattern&gt; &amp;&amp;
+               <i>static-sized-range</i>&lt;range_reference_t&lt;const V&gt;&gt; {
+      using <i>InnerConstRng</i> = range_reference_t&lt;const V&gt;;
+      using CT = common_type_t&lt;
+        range_size_t&lt;const V&gt;, range_size_t&lt;<i>InnerConstRng</i>&gt;, range_size_t&lt;const Pattern&gt;&gt;;
+      const auto base_size = ranges::size(<i>base_</i>);
+      if (base_size == 0)
+        return CT(0);
+      return CT(base_size) * CT(remove_reference_t&lt;<i>InnerConstRng</i>&gt;::size()) +
+             CT(base_size - 1) * CT(ranges::size(<i>pattern_</i>));
+    }</ins>
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[range.lazy.split.view]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::ranges {
+  <del>template&lt;auto&gt; struct <i>require-constant</i>;                       // <i>exposition only</i></del>
+
+  template&lt;class R&gt;
+  concept <i>tiny-range</i> =                                          // <i>exposition only</i>
+    <ins><i>static-sized-range</i>&lt;R&gt;</ins><del>sized_range&lt;R&gt; &amp;&amp;
+    requires { typename <i>require-constant</i>&lt;remove_reference_t&lt;R&gt;::size()&gt;; }</del> &amp;&amp;
+    (remove_reference_t&lt;R&gt;::size() &lt;= 1);
+  
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
