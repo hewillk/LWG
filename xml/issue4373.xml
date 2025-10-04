@@ -27,6 +27,20 @@ static_assert(is_same_v&lt;          function_ref&lt;int(int)&gt;::result_type, 
 It seems worthwhile to also provide it for the latter, as it is consistent with the other
 wrappers and allows the user to easily extract the return type.
 </p>
+
+<note>2025-10-03; Hewill comments</note>
+<p>
+Additionally, given that some third-party implementations also provide a mechanism for
+extracting the return type, for example, `type_safe::function_ref` provides a public member
+type alias
+<a
+   href="https://github.com/foonathan/type_safe/blob/cdf334cd8e5fcb5e21ab470decdfcbd190ef7347/include/type_safe/reference.hpp#L566">
+<code>return_type</code></a>, and `llvm::function_ref` can work with
+<a
+   href="https://github.com/llvm/llvm-project/blob/cd32b9b6c3b2fda3a781d9ce0a0cf8e21c9d0137/llvm/include/llvm/ADT/STLExtras.h#L67">
+<code>llvm::function_traits</code></a> to obtain the return type, providing such a member
+type alias for `std::function_ref` meets user potential demands.
+</p>
 </discussion>
 
 <resolution>
