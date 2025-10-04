@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4400" status="New">
+<title>`enable_nonlocking_formatter_optimization` for durations with custom rep</title>
+<section><sref ref="[time.format]"/></section>
+<submitter>Tomasz Kamiński</submitter>
+<date>02 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently the `enable_nonlocking_formatter_optimization` is enabled for 
+<tt>duration&lt;Rep, Ratio&gt;</tt> if it is enabled for `Rep`.
+</p>
+<blockquote><pre>
+template&lt;class Rep, class Period&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::duration&lt;Rep, Period&gt;&gt;
+    =  enable_nonlocking_formatter_optimization&lt;Rep&gt;;
+</pre></blockquote>
+<p>
+However, this does not take into the consideration that for custom `Rep` types, the arithmetic 
+operations on `Rep` may also lock the stream leading to deadlock (for example log on overflow).
+Since they are required to handle the specifiers such as `%S` we should specialize 
+`enable_nonlocking_formatter_optimization` only for built-in types:
+</p>
+<blockquote><pre>
+template&lt;class Rep, class Period&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::duration&lt;Rep, Period&gt;&gt;
+    =  is_arithmetic_v&lt;Rep&gt;;
+</pre></blockquote>
+<p>
+Furtheremore, for all types that are currently templated on `Duration` (`hh_mm_ss`, `sys_time`, 
+`local_time`, etc.), we `enable_nonlocking_formatter_optimization` by default. This again does 
+not take into consideration the arithmetic operations performed as duration. We should specialize 
+`enable_nonlocking_formatter_optimization` for all of them to be enabled if 
+`enable_nonlocking_formatter_optimization` is enabled for `duration`:
+</p>
+<blockquote><pre>
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::hh_mm_ss&lt;Duration&gt;&gt;
+    =  enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+</pre></blockquote>
+<p>
+Note, that forwarding to `enable_nonlocking_formatter_optimization` on `Duration` instead of 
+checking `Duration::rep` allows users to specialize `enable_nonlocking_formatter_optimization` for 
+Durations with there custom representation types.
+<p/>
+The proposed wording has recently been implemented in 
+<a href="https://gcc.gnu.org/pipermail/libstdc++/2025-October/063758.html">gcc's libstdc++</a>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[time.format]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-8- For `chrono::duration`<ins>, `chrono::hh_mm_ss`, `chrono::sys_time`, `chrono::utc_time`, 
+`chrono::tai_time`, `chrono::gps_time`, `chrono::file_time`, `chrono::local_time`, 
+<tt>chrono::<i>local-time-format-t</i></tt>, and `chrono::zoned_time`</ins> the library only 
+provides the following specialization<ins>s</ins> of `enable_nonlocking_formatter_optimization`:
+</p>
+<blockquote>
+<pre>
+template&lt;class Rep, class Period&gt;
+  constexpr bool enable_nonlocking_formatter_optimization&lt;
+    chrono::duration&lt;Rep, Period&gt;&gt; =
+      <del>enable_nonlocking_formatter_optimization</del><ins>is_arithmetic_v</ins>&lt;Rep&gt;;
+      
+<ins>template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::hh_mm_ss&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::sys_time&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::utc_time&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::tai_time&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::gps_time&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::file_time&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::local_time&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;
+
+template&lt;class Duration&gt; 
+  constexpr bool enable_nonlocking_formatter_optimization&lt;chrono::<i>local-time-format-t</i>&lt;Duration&gt;&gt; 
+     = enable_nonlocking_formatter_optimization&lt;Duration&gt;;</ins>
+</pre>
+</blockquote>
+<p>
+<del>-9- For `chrono::zoned_time` the library only provides the following specialization of 
+`enable_nonlocking_formatter_optimization`:</del>
+</p>
+<blockquote>
+<pre>
+template&lt;class Duration&gt;
+  constexpr bool enable_nonlocking_formatter_optimization&lt;
+    chrono::zoned_time&lt;Duration, const std::chrono::time_zone*&gt;&gt; 
+      = <del>true</del><ins>enable_nonlocking_formatter_optimization&lt;Duration&gt;</ins>;
+</pre>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
