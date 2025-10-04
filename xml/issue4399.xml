@@ -23,6 +23,9 @@ template&lt;class... Ts&gt;
 As consequence <tt>pair&lt;const std::string, int&gt;</tt> or 
 <tt>pair&lt;const std::string&amp;, int&amp;&gt;</tt> (`map` and `flat_map` reference types) 
 will not use unbuffered prints.
+<p/>
+The proposed wording has recently been implemented in 
+<a href="https://gcc.gnu.org/pipermail/libstdc++/2025-October/063758.html">gcc's libstdc++</a>.
 </p>
 </discussion>
 
