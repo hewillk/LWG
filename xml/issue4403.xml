@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4403" status="New">
+<title>`simd::basic_vec` CTAD misses difference type casting</title>
+<section>
+<sref ref="[simd.ctor]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>04 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, `basic_vec` can take an object `r` of range type `R` whose size is a
+constant expression and deduced to <code>vec&lt;ranges::range_value_t&lt;R&gt;, ranges::size(r)&gt;</code>.
+<p/>
+However, such a deduced type is ill-formed when `R` has a an integer-class type size which cannot
+be implicitly converted to <code><i>simd-size-type</i></code>, which is a signed integer type.
+<p/>
+It is necessary to perform difference type casting here, and the narrowing
+conversion will still correctly be rejected due to the constructor's constraints.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class R, class... Ts&gt;
+  basic_vec(R&amp;&amp; r, Ts...) -&gt; <i>see below</i>;
+</pre>
+<blockquote>
+<p>
+-17- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+  <li><p>
+  (17.1) &mdash; `R` models `ranges::contiguous_range` and `ranges::sized_range`, and
+  </p></li>
+  <li><p>
+  (17.2) &mdash; `ranges::size(r)` is a constant expression.
+  </p></li>
+</ol>
+<p>
+-18- <i>Remarks</i>: The deduced type is equivalent to <code>
+vec&lt;ranges::range_value_t&lt;R&gt;, <ins>static_cast&lt;<i>simd-size-type</i>&gt;(</ins>ranges::size(r)<ins>)</ins>&gt;
+</code>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
