@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4404" status="New">
+<title>Should <code>span(R&amp;&amp;)</code> CTAD apply P2280?</title>
+<section>
+<sref ref="[span.deduct]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>04 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Thanks to <paper num="P2280R4"/>, `simd::basic_vec`'s CTAD can specify template parameters 
+directly through `ranges::size`:
+</p>
+<blockquote><pre>
+basic_vec(R&amp;&amp; r, ...) -&gt; vec&lt;ranges::range_value_t&lt;R&gt;, ranges::size(r)&gt;
+</pre></blockquote>
+<p>
+However, <code>span</code> with similar CTAD forms do not have this automatic static size optimization applied:
+</p>
+<blockquote><pre>
+span(R&amp;&amp;) -&gt; span&lt;remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;&gt;;
+</pre></blockquote>
+<p>
+Do we need to do it for <code>span</code>?
+<p/>
+Note that the `span` constructor actually requires `R` to be a `contiguous_range` and a
+`sized_range`. If it is further required that `ranges::size` be a constant expression, only raw array,
+`array`, `span`, `ranges::empty_view`, and `ranges::single_view` satisfy this requirement. 
+Given that `span` already has CTAD for raw arrays and `array`s, this improvement is not 
+significant, but it still seems worthwhile as a compile-time optimization for certain
+user-defined types or in some specialized cases (<a href="https://godbolt.org/z/EW6xnnfe1">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;array&gt;
+#include &lt;ranges&gt;
+
+constexpr std::size_t N = 42;
+
+auto to_span(auto&amp; r) { 
+  static_assert(std::ranges::size(r) == N); // ok after P2280
+  return std::span(r);
+}
+
+std::array&lt;int, N&gt; a;
+auto s1 = to_span(a);
+static_assert(std::same_as&lt;decltype(s1), std::span&lt;int, N&gt;&gt;);
+
+auto r = std::array&lt;int, N&gt;{} | std::views::as_const; // as_const_view&lt;owning_view&lt;array&lt;int, N&gt;&gt;&gt;
+auto s2 = to_span(r);
+static_assert(std::same_as&lt;decltype(s2), std::span&lt;const int, N&gt;&gt;); // <span style="color:red;font-weight:bolder">fire, ok after this PR</span>
+</pre></blockquote>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[span.overview]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class ElementType, size_t Extent = dynamic_extent&gt;
+  class span {
+    [&hellip;]
+  };
+  [&hellip;]
+  template&lt;class R&gt;
+    span(R&amp;&amp; <ins>r</ins>) -&gt; <ins><i>see below</i></ins><del>span&lt;remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;&gt;</del>;
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[span.deduct]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class R&gt;
+  span(R&amp;&amp; <ins>r</ins>) -&gt; <ins><i>see below</i></ins><del>span&lt;remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;&gt;</del>;
+</pre>
+<blockquote>
+<p>
+-2- <i>Constraints</i>: `R` satisfies `ranges::contiguous_range`.
+<p/>
+<ins>-?- <i>Remarks</i>: Let `T` denote the type <code>remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;</code>.
+The deduced type is equivalent to</ins>
+</p>
+<ol style="list-style-type: none">
+  <li><p>
+  <ins>(?.1) &mdash; <code>span&lt;T, static_cast&lt;size_t&gt;(ranges::size(r))&gt;</code>
+if `R` satisfies `ranges::sized_range` and `ranges::size(r)` is a constant expression.</ins>
+  </p></li>
+  <li><p>
+  <ins>(?.2) &mdash; <code>span&lt;T&gt;</code> otherwise.</ins>
+  </p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
