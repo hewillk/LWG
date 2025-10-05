@@ -32,7 +32,7 @@ Note that the `span` constructor actually requires `R` to be a `contiguous_range
 `array`, `span`, `ranges::empty_view`, and `ranges::single_view` satisfy this requirement. 
 Given that `span` already has CTAD for raw arrays and `array`s, this improvement is not 
 significant, but it still seems worthwhile as a compile-time optimization for certain
-user-defined types or in some specialized cases (<a href="https://godbolt.org/z/EW6xnnfe1">demo</a>):
+user-defined types or in some specialized cases (<a href="https://godbolt.org/z/vjPxKzdTf">demo</a>):
 </p>
 <blockquote><pre>
 #include &lt;array&gt;
