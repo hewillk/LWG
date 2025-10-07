@@ -8,7 +8,7 @@
 </section>
 <submitter>Jonathan B. Coe</submitter>
 <date>20 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -41,6 +41,25 @@ to be evaluated.
 <i>Constraints</i> on `T` should be converted to <i>Mandates</i> on `T` so that constraint evaluation 
 does not require `T` to be a complete type.
 </p>
+
+<note>2025-10-07; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"Do we have a concrete use case of an A-like type? Is making the traits give
+wrong answers preferable to hard errors? I don't think the `polymorphic` part
+makes sense. Since the constraints still require `U`/`UU` to be complete,
+either `T` is a base class and it must be complete, or it is not and it doesn't
+matter."
+</p>
+<p>
+"The problematic members are non-template functions, so they are instantiated
+early and the requires clauses are checked too soon. Think this can be solved
+without giving up SFINAE-friendliness, by making the affected members
+themselves templates."
+</p>
+
 </discussion>
 
 <resolution>
