@@ -58,15 +58,19 @@ auto report_date_file_last_modified(std::filesystem::path const & filename, lwg:
    using namespace std::chrono;
    system_clock::time_point t;
    int id = std::stoi(filename.filename().stem().native().substr(5));
+   // Use the Git commit date of the file if available.
    if (auto it = meta.git_commit_times.find(id); it !=  meta.git_commit_times.end())
       t = system_clock::from_time_t(it->second);
    else {
+     // Otherwise use the modification time of the file.
       auto mtime = fs::last_write_time(filename);
 #if __cpp_lib_chrono >= 201803L
       t = clock_cast<system_clock>(mtime);
 #else
-      auto fnow = fs::file_time_type::clock::now();
-      t = system_clock::now() - round<seconds>(fnow - mtime);
+      // clock_cast isn't supported, so convert to sys_time manually.
+      static const auto snow = system_clock::now();
+      static const auto fnow = fs::file_time_type::clock::now();
+      t = snow - round<seconds>(fnow - mtime);
 #endif
    }
 
