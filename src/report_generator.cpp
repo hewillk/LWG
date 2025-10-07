@@ -29,7 +29,7 @@ namespace
 auto const timestamp = [] {
   // Allow the timestamp to be set from a unix timestamp in the environment,
   // to support reproducible HTML output. For example:
-  // LWG_REVISION_TIME=$(date +%s -d "2025-10-07 at 09:38:29 UTC") make lists
+  // LWG_REVISION_TIME=$(date +%s -d "2025-10-07 09:38:29 UTC") make lists
   if (const char* revtime = std::getenv("LWG_REVISION_TIME"))
     return std::chrono::sys_seconds(std::chrono::seconds(std::stol(revtime)));
   auto now = std::chrono::system_clock::now();
