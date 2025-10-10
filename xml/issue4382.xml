@@ -47,9 +47,8 @@ the overload set ambiguous</p></li>
 <li><p>`float` is convertible to `bool`, thus 
 <tt>simd::mask&lt;float&gt;(1.f)</tt> continues to compile</p></li>
 </ol>
-</discussion>
 
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -81,6 +80,85 @@ namespace std::simd {
   };
 }
 </pre>
+</blockquote>
+
+</li>
+
+</ol>
+</superseded>
+
+<note>2025-10-06; Matthias Kretz improves wording after reflector discussion</note>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.mask.overview]"/>, <tt>class template basic_mask</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;size_t Bytes, class Abi&gt; class basic_mask {
+  public:
+    [&hellip;]
+    
+    constexpr basic_mask() noexcept = default;
+    
+    // <i><sref ref="[simd.mask.ctor]"/>, basic_mask constructors</i>
+    constexpr explicit basic_mask(<ins>same_as&lt;</ins>value_type<ins>&gt; auto</ins>) noexcept;
+    template&lt;size_t UBytes, class UAbi&gt;
+      constexpr explicit basic_mask(const basic_mask&lt;UBytes, UAbi&gt;&amp;) noexcept;
+    template&lt;class G&gt;
+      constexpr explicit basic_mask(G&amp;&amp; gen) noexcept;
+    <ins>template&lt;same_as&lt;bitset&lt;size()&gt;&gt; T&gt;</ins>
+      constexpr basic_mask(const <ins>T</ins><del>bitset&lt;size()&gt;</del>&amp; b) noexcept;
+    <ins>template&lt;unsigned_integral T&gt; requires (!same_as&lt;T, value_type&gt;)</ins>
+      constexpr explicit basic_mask(<ins>T</ins><del>unsigned_integral auto</del> val) noexcept;
+    
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[simd.mask.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr explicit basic_mask(<ins>same_as&lt;</ins>value_type<ins>&gt; auto</ins> x) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Initializes each element with `x`.
+</p>
+</blockquote>
+[&hellip;]
+<pre>
+<ins>template&lt;same_as&lt;bitset&lt;size()&gt;&gt; T&gt;</ins>
+  constexpr basic_mask(const <ins>T</ins><del>bitset&lt;size()&gt;</del>&amp; b) noexcept;
+</pre>
+<blockquote>
+<p>
+-7- <i>Effects</i>: Initializes the <tt><i>i</i></tt><sup>th</sup> element with <tt>b[<i>i</i>]</tt> 
+for all <tt><i>i</i></tt> in the range `[0, size())`.
+</p>
+</blockquote>
+<pre>
+<ins>template&lt;unsigned_integral T&gt; requires (!same_as&lt;T, value_type&gt;)</ins>
+  constexpr explicit basic_mask(<ins>T</ins><del>unsigned_integral auto</del> val) noexcept;
+</pre>
+<blockquote>
+<p>
+-8- <i>Effects</i>: Initializes the first <tt><i>M</i></tt> elements to the corresponding bit values 
+in `val`, [&hellip;]
+</p>
+</blockquote>
 </blockquote>
 
 </li>
