@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4407" status="New">
+<title><code><i>constexpr-wrapper-like</i></code> needs `remove_cvref_t` in `simd::basic_vec`
+constructor</title>
+<section>
+<sref ref="[simd.ctor]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>05 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`decltype(From::value)` would be <code>const int&amp;</code> if `From` is a type of <code>std::cw&lt;42&gt;</code>, 
+so the reference also needs to be removed for checking the arithmetic type.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) basic_vec(U&amp;&amp; value) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- Let `From` denote the type <tt>remove_cvref_t&lt;U&gt;</tt>.
+<p/>
+[&hellip;]
+<p/>
+-4- <i>Remarks</i>:  The expression inside `explicit` evaluates to `false` if and only if `U` 
+satisfies <code>convertible_to&lt;value_type&gt;</code>, and either
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(4.1) &mdash; `From` is not an arithmetic type and does not satisfy <code><i>constexpr-wrapper-like</i></code>,
+</p></li>
+<li><p>
+(4.2) &mdash; `From` is an arithmetic type and the conversion from `From` to `value_type` is 
+value-preserving (<sref ref="[simd.general]"/>), or
+</p></li>
+<li><p> 
+(4.3) &mdash; `From` satisfies <code><i>constexpr-wrapper-like</i></code>, 
+<code><ins>remove_cvref_t</ins><del>remove_const_t</del>&lt;decltype(From::value)&gt;</code> 
+is an arithmetic type, and `From::value` is representable by `value_type`.
+</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
