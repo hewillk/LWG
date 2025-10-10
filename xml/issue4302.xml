@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4302" status="New">
+<issue num="4302" status="Ready">
 <title>Problematic `vector_sum_of_squares` wording</title>
 <section><sref ref="[linalg.algs.blas1.ssq]"/></section>
 <submitter>Mark Hoemmen</submitter>
@@ -61,6 +61,9 @@ about QoI of `vector_two_norm` should already know what to do. If
 somebody cares sufficiently, they can propose it back for C++29 and
 think about how to make it work for generic number types.
 </p>
+
+<note>LWG telecon 2025-10-10; Status &rarr; Ready</note>
+
 </discussion>
 
 <resolution>

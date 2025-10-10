@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4315" status="New">
+<issue num="4315" status="Ready">
 <title>Insufficient specification of `vector_two_norm` and `matrix_frob_norm`</title>
 <section>
 <sref ref="[linalg.algs.blas1.nrm2]"/>
@@ -130,6 +130,8 @@ Use <i>Mandates</i>: for the new requirements, because we plan to change
 this later so want to make it ill-formed, not something that is statically
 checkable as part of the API.
 </p>
+
+<note>LWG telecon 2025-10-10; Status &rarr; Ready</note>
 
 </discussion>
 
