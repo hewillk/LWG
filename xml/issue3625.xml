@@ -26,7 +26,7 @@ This issue is related to LWG <iref ref="3624"/>.
 Set priority to 3 after reflector poll.
 </p>
 
-<note>2025-10-07; Status &rarr; Open</note>
+<note>2025-10-07; Status updated New &rarr; Open</note>
 <p>
 This will be resolved by <paper num="P3016R6"/>.
 The <tt>&lt;initializer_list&gt;</tt> part is covered by <iref ref="3624"/>.

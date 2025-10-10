@@ -101,7 +101,7 @@ or <code>numpunct<ins>&lt;charT&gt;</ins>::falsename</code>.
 <p>
 SG16 unanimously approved new wording from Victor.
 The new wording incorporates similar wording as added by <paper num="P2419R2"/>
-to address <iref ref="3565"/>. Status &rarr; Open.
+to address <iref ref="3565"/>. Status updated SG16 &rarr; Open.
 </p>
 
 </discussion>

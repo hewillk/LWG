@@ -24,7 +24,7 @@ Thus, it's worth making the corresponding free functions available when introduc
 <note>2025-10-07; Reflector poll</note>
 <p>
 Approved as Tentatively Ready, but this is a duplicate of <iref ref="3625"/>
-which will be resolved by <paper num="P3016R6"/>. So move Status &rarr; Open.
+which will be resolved by <paper num="P3016R6"/>. So move Status New &rarr; Open.
 </p>
 
 </discussion>

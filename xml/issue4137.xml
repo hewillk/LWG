@@ -347,7 +347,7 @@ template&lt;class ExecutionPolicy,
 <note>LWG telecon 2025-10-10; Fix proposed resolution after review</note>
 <p>Add missing `()` in one place and change `(0, 1)` to `()` in another.</p>
 
-<note>LWG telecon 2025-10-10; Status &rarr; Ready</note>
+<note>LWG telecon 2025-10-10; Status updated New &rarr; Ready</note>
 
 </discussion>
 

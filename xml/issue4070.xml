@@ -183,7 +183,7 @@ transcoding of a formatted `path` when `charT` and `path::value_type` differ
 SG16 unanimously approved new wording produced during the discussion.
 The group concluded that the intended behavior would be best specified by
 introducing additional names to denote the sequence of transformations
-that produce the intended effect. Status &rarr; Open.
+that produce the intended effect. Status updated SG16 &rarr; Open.
 </p>
 
 </discussion>
