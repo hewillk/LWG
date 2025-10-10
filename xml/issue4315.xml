@@ -37,9 +37,7 @@ presumes that relaxing this <i>Constraint</i> and fixing the above two issues
 later would be a non-breaking change. If that is <em>not</em> the case, then
 I would suggest removing the two functions entirely.
 </p>
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -124,6 +122,103 @@ sum use `Scalar`'s precision or greater.
 </li>
 
 </ol>
+</superseded>
+
+<note>LWG telecon 2025-10-10; Fix proposed resolution after review</note>
+<p>
+Use <i>Mandates</i>: for the new requirements, because we plan to change
+this later so want to make it ill-formed, not something that is statically
+checkable as part of the API.
+</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> As a drive-by fix the proposed wording adds a missing closing parentheses in 
+<sref ref="[linalg.algs.blas1.nrm2]"/> p2.]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify <sref ref="[linalg.algs.blas1.nrm2]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<i>in-vector</i> InVec, class Scalar&gt;
+  Scalar vector_two_norm(InVec v, Scalar init);
+template&lt;class ExecutionPolicy, <i>in-vector</i> InVec, class Scalar&gt;
+  Scalar vector_two_norm(ExecutionPolicy&amp;&amp; exec, InVec v, Scalar init);
+</pre>
+<blockquote>
+<p>
+-1- [<i>Note 1</i>: [&hellip;] &mdash; <i>end note</i>]
+<p/>
+-2- <i>Mandates</i>:
+<ins>`InVec::value_type` and `Scalar` are either a floating-point type, or
+a specialization of `complex`.</ins>
+Let `a` be <tt><i>abs-if-needed</i>(declval&lt;typename InVec::value_type&gt;())</tt>. 
+Then, <tt>decltype(init + a * a<ins>)</ins></tt> is convertible to `Scalar`.
+<p/>
+-3- <i>Returns</i>: The square root of the sum of the square of `init` and the squares of the 
+absolute values of the elements of `v`.
+<p/>
+[<i>Note 2</i>: For `init` equal to zero, this is the Euclidean norm (also called 2-norm) of the vector 
+`v`. &mdash; <i>end note</i>]
+<p/>
+-4- <i>Remarks</i>: If <del>`InVec::value_type`, and `Scalar` are all floating-point types or specializations of `complex`,
+and if</del> `Scalar` has higher precision than `InVec::value_type`, then intermediate terms in the sum use
+`Scalar`'s precision or greater.
+<p/>
+[<i>Note 3</i>: An implementation of this function for floating-point types `T` can use the `scaled_sum_of_squares`
+result `from vector_sum_of_squares(x, {.scaling_factor=1.0, .scaled_sum_of_squares=init})`. &mdash; <i>end note</i>]
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[linalg.algs.blas1.matfrobnorm]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;<i>in-matrix</i> InMat, class Scalar&gt;
+  Scalar matrix_frob_norm(InMat A, Scalar init);
+template&lt;class ExecutionPolicy, <i>in-matrix</i> InMat, class Scalar&gt;
+  Scalar matrix_frob_norm(ExecutionPolicy&amp;&amp; exec, InMat A, Scalar init);
+</pre>
+<blockquote>
+<p>
+-2- <i>Mandates</i>:
+<ins>`InVec::value_type` and `Scalar` are either a floating-point type, or
+a specialization of `complex`.</ins>
+Let `a` be <tt><i>abs-if-needed</i>(declval&lt;typename InMat::value_type&gt;())</tt>. 
+Then, <tt>decltype(init + a * a)</tt> is convertible to `Scalar`.
+<p/>
+-3- <i>Returns</i>: The square root of the sum of squares of `init` and the absolute values 
+of the elements of `A`.
+<p/>
+[<i>Note 2</i>: For `init` equal to zero, this is the Frobenius norm of the matrix `A`. &mdash; <i>end note</i>]
+<p/>
+-4- <i>Remarks</i>: If <del>`InMat::value_type` and `Scalar` are all floating-point types or specializations of 
+`complex`, and if</del> `Scalar` has higher precision than `InMat::value_type`, then intermediate terms in the 
+sum use `Scalar`'s precision or greater.
+</p>
+<blockquote><pre>
+</pre></blockquote>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
 </resolution>
 
 </issue>
