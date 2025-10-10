@@ -57,13 +57,21 @@ requires compilers to add new intrinsics when reflection is absent.
 -2- Given a subexpression `E` with type `T`, let `t` be an lvalue that denotes the reified object for `E`. Then:
 </p>
 <ol style="list-style-type: none">
-<li><p>(2.1) &mdash; [&hellip;]</p></li>
-<li><p>(2.2) &mdash; [&hellip;]</p></li>
-<li><p>(2.3) &mdash; [&hellip;]</p></li>
-<li><p>(2.4) &mdash; [&hellip;]</p></li>
+<li><p>(2.1) &mdash; If `E` is an rvalue and <tt>enable_borrowed_range&lt;remove_cv_t&lt;T&gt;&gt;</tt> is 
+`false`, `ranges::begin(E)` is ill-formed.</p></li>
+<li><p>(2.2) &mdash; Otherwise, if `T` is an array type (<sref ref="[dcl.array]"/>) and 
+<tt>remove_all_extents_t&lt;T&gt;</tt> is an incomplete type, `ranges::begin(E)` is 
+ill-formed with no diagnostic required.</p></li>
+<li><p>(2.3) &mdash; Otherwise, if `T` is an array type, `ranges::begin(E)` is 
+expression-equivalent to `t + 0`.</p></li>
+<li><p>(2.4) &mdash; Otherwise, if `auto(t.begin())` is a valid expression whose type models 
+`input_or_output_iterator`, `ranges::begin(E)` is expression-equivalent to `auto(t.begin())`.</p></li>
 <li><p><ins>(2.?) &mdash; Otherwise, if <tt>remove_cvref_t&lt;T&gt;</tt> is a class type and search for 
 `begin` in the scope of that class finds at least one declaration, `ranges::begin(E)` is ill-formed.</ins></p></li>
-<li><p>(2.5) &mdash; [&hellip;]</p></li>
+<li><p>(2.5) &mdash; Otherwise, if `T` is a class or enumeration type and `auto(begin(t))` 
+is a valid expression whose type models `input_or_output_iterator` where the meaning of `begin` 
+is established as-if by performing argument-dependent lookup only (<sref ref="[basic.lookup.argdep]"/>), 
+then `ranges::begin(E)` is expression-equivalent to that expression.</p></li>
 <li><p>(2.6) &mdash; Otherwise, `ranges::begin(E)` is ill-formed.</p></li>
 </ol>
 </blockquote>
@@ -76,14 +84,24 @@ requires compilers to add new intrinsics when reflection is absent.
 -2- Given a subexpression `E` with type `T`, let `t` be an lvalue that denotes the reified object for `E`. Then:
 </p>
 <ol style="list-style-type: none">
-<li><p>(2.1) &mdash; [&hellip;]</p></li>
-<li><p>(2.2) &mdash; [&hellip;]</p></li>
-<li><p>(2.3) &mdash; [&hellip;]</p></li>
-<li><p>(2.4) &mdash; [&hellip;]</p></li>
-<li><p>(2.5) &mdash; [&hellip;]</p></li>
+<li><p>(2.1) &mdash; If `E` is an rvalue and <tt>enable_borrowed_range&lt;remove_cv_t&lt;T&gt;&gt;</tt> 
+is `false`, `ranges::end(E)` is ill-formed.</p></li>
+<li><p>(2.2) &mdash; Otherwise, if `T` is an array type (<sref ref="[dcl.array]"/>) and 
+<tt>remove_all_extents_t&lt;T&gt;</tt> is an incomplete type, `ranges::end(E)` is ill-formed 
+with no diagnostic required.</p></li>
+<li><p>(2.3) &mdash; Otherwise, if `T` is an array of unknown bound, `ranges::end(E)` is ill-formed.</p></li>
+<li><p>(2.4) &mdash; Otherwise, if `T` is an array, `ranges::end(E)` is expression-equivalent to 
+<tt>t + extent_v&lt;T&gt;</tt>.</p></li>
+<li><p>(2.5) &mdash; Otherwise, if `auto(t.end())` is a valid expression whose type models 
+<tt>sentinel_for&lt;iterator_t&lt;T&gt;&gt;</tt> then `ranges::end(E)` is expression-equivalent to 
+`auto(t.end())`.</p></li>
 <li><p><ins>(2.?) &mdash; Otherwise, if <tt>remove_cvref_t&lt;T&gt;</tt> is a class type and search for 
 `end` in the scope of that class finds at least one declaration, `ranges::end(E)` is ill-formed.</ins></p></li>
-<li><p>(2.6) &mdash; [&hellip;]</p></li>
+<li><p>(2.6) &mdash; Otherwise, if `T` is a class or enumeration type and `auto(end(t))` 
+is a valid expression whose type models <tt>sentinel_for&lt;iterator_t&lt;T&gt;&gt;</tt> 
+where the meaning of end is established as-if by performing argument-dependent
+lookup only (<sref ref="[basic.lookup.argdep]"/>), then `ranges::end(E)` is expression-equivalent 
+to that expression.</p></li>
 <li><p>(2.7) &mdash; Otherwise, `ranges::end(E)` is ill-formed.</p></li>
 </ol>
 </blockquote>
