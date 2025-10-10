@@ -21,6 +21,15 @@ could possibly be removed.
 See the related issue <iref ref="3213"/> for the <tt>Size</tt> template parameter.
 </p>
 
+<note>2025-10-10; Jonathan comments</note>
+<p>
+The SGI STL has the requirement that
+"`Distance` is an integral type that is convertible to `InputIterator`'s
+distance type." But the SGI STL also required that `Size` arguments to
+`fill_n` etc. have integral types, and the standard only requires them to
+be convertible to integral types. Presumably that relaxation was intentional.
+</p>
+
 <note>2020-05-09; Reflector prioritization</note>
 <p>
 Set priority to 3 after reflector discussions.
