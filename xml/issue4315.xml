@@ -124,7 +124,7 @@ sum use `Scalar`'s precision or greater.
 </ol>
 </superseded>
 
-<note>LWG telecon 2025-10-10; Fix proposed resolution after review</note>
+<note>LWG telecon 2025-10-10; Update proposed resolution after review</note>
 <p>
 Use <i>Mandates</i>: for the new requirements, because we plan to change
 this later so want to make it ill-formed, not something that is statically
