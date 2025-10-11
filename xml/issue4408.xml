@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4408" status="New">
+<title>Hardening `simd::vec::operator[]`</title>
+<section>
+<sref ref="[simd.subscr]"/>
+<sref ref="[simd.mask.subscr]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>07 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`simd::vec::operator[]` satisfies the criteria in <paper num="P3471R4"/> and <paper num="P3697R1"/> : 
+"violating the precondition results in a memory safety issue", which means that hardening is reasonable.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.subscr]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr value_type operator[](<i>simd-size-type</i> i) const;
+</pre>
+<blockquote>
+<p>
+-1- <i><ins>Hardened </ins><del>P</del><ins>p</ins>reconditions</i>: <code>i &gt;= 0 &amp;&amp; i &lt; size()</code> is `true`.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.mask.subscr]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr value_type operator[](<i>simd-size-type</i> i) const;
+</pre>
+<blockquote>
+<p>
+-1- <i><ins>Hardened </ins><del>P</del><ins>p</ins>reconditions</i>: <code>i &gt;= 0 &amp;&amp; i &lt; size()</code> is `true`.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
