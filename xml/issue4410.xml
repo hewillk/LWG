@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4410" status="New">
+<title>`basic_string_view(It begin, End end)` is underconstrained</title>
+<section>
+<sref ref="[string.view.cons]"/>
+</section>
+<submitter>Hewill Kang</submitter>
+<date>12 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The following lead to a hard error in the <code>string_view</code> constructor 
+(<a href="https://godbolt.org/z/dz3M3fevc">demo</a>):
+</p>
+<blockquote><pre>
+volatile char* p;
+std::string_view sv(p, p); // <span style="color:red;font-weight:bolder">error: invalid conversion from 'volatile char*' to 'const char*'</span>
+</pre></blockquote>
+<p>
+Because the constructor currently only requires that the value type of the contiguous iterator be 
+`char`, which does not reject `volatile char*`, which fires when further initializing `const char*`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[string.view.cons]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class It, class End&gt;
+  constexpr basic_string_view(It begin, End end);
+</pre>
+<blockquote>
+<p>
+-7- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(7.1) &mdash; `It` satisfies `contiguous_iterator`.
+</p></li>
+<li><p>
+(7.2) &mdash; `End` satisfies <code>sized_sentinel_for&lt;It&gt;</code>.
+</p></li>
+<li><p>
+(7.3) &mdash; <code>is_same_v&lt;iter_value_t&lt;It&gt;, charT&gt;</code> is `true`.
+</p></li>
+<li><p>
+<ins>(7.?) &mdash; <code>is_convertible_v&lt;add_pointer_t&lt;iter_reference_t&lt;It&gt;&gt;, const_pointer&gt;</code>
+is `true`.</ins>
+</p></li>
+<li><p>
+(7.4) &mdash; <code>is_convertible_v&lt;End, size_type&gt;</code> is `false`.
+</p></li>
+</ol>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;class R&gt;
+  constexpr explicit basic_string_view(R&amp;&amp; r);
+</pre>
+<blockquote>
+<p>
+-11- Let `d` be an lvalue of type <code>remove_cvref_t&lt;R&gt;</code>.
+<p/>
+-12- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(12.1) &mdash; <code>remove_cvref_t&lt;R&gt;</code> is not the same type as `basic_string_view`,
+</p></li>
+<li><p>
+(12.2) &mdash; `R` models `ranges::contiguous_range` and `ranges::sized_range`,
+</p></li>
+<li><p>
+(12.3) &mdash; <code>is_same_v&lt;ranges::range_value_t&lt;R&gt;, charT&gt;</code> is `true`,
+</p></li>
+<li><p>
+<ins>(12.?) &mdash; <code>is_convertible_v&lt;add_pointer_t&lt;ranges::range_reference_t&lt;R&gt;&gt;, 
+const_pointer&gt;</code> is `true`,</ins>
+</p></li>
+<li><p>
+(12.4) &mdash; <code>is_convertible_v&lt;R, const charT*&gt;</code> is `false`, and
+</p></li>
+<li><p>
+(12.5) &mdash; <code>d.operator ::std::basic_string_view&lt;charT, traits&gt;()</code> is not a
+valid expression.
+</p></li>
+</ol>
+<p>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
