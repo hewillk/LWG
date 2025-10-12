@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4409" status="New">
+<title>Constant expression `ranges::size(r)` <i>Constraints</i> and <i>Mandates</i> in [simd]</title>
+<section>
+<sref ref="[simd]"/>
+</section>
+<submitter>Lénárd Szolnoki</submitter>
+<date>10 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Various <i>Constraints</i> and <i>Mandates</i> in <sref ref="[simd]"/> are conditioned on `ranges::size(r)`, 
+assuming that subsequent operations on the result are also constant expression. This is not a given, 
+since `ranges::size(r)` is allowed to return an integer-class type, and it is not mandated that operations 
+on integer-class types are usable in constant expressions.
+<p/>
+In particular:
+</p>
+<ol>
+<li><p>
+<sref ref="[simd.ctor]"/> p13:
+</p>
+<blockquote>
+<p>
+<i>Constraints</i>: 
+</p>
+<ul>
+<li><p>`R` models `ranges::contiguous_range` and `ranges::sized_range`,</p></li>
+<li><p>`ranges::size(r)` is a constant expression, and</p></li>
+<li><p>`ranges::size(r)` is equal to `size()`.</p></li>
+</ul>
+</blockquote>
+<p>
+Here `ranges::size(r) == size()` might not be a constant expression, even when `ranges::size(r)` 
+is. Operations that are not accounted for:
+</p>
+<ul>
+<li><p>Possible conversion from `range::size(r)` to <tt><i>simd-size-type</i></tt>.</p></li>
+<li><p>Possible operator overloading on ==.</p></li>
+</ul>
+</li>
+
+<li><p>
+<sref ref="[simd.ctor]"/> p17+18:
+</p>
+<blockquote>
+<p>
+<i>Constraints</i>: 
+</p>
+<ul>
+<li><p>`R` models `ranges::contiguous_range` and `ranges::sized_range`, and</p></li>
+<li><p>`ranges::size(r)` is a constant expression</p></li>
+</ul>
+<p>
+<i>Remarks:</i> The deduced type is equivalent to <tt>vec&lt;ranges::range_value_t&lt;R&gt;, ranges::size(r)&gt;</tt>.
+</p>
+</blockquote>
+<p>
+Here the second constraint is simply redundant, if failure to form the type is in the immediate context. 
+If we want to type it out in the constraints then we should account for conversion to <tt><i>simd-size-type</i></tt> 
+and narrowing.
+</p>
+</li>
+
+<li><p>
+<sref ref="[simd.loadstore]"/> p2:
+</p>
+<blockquote>
+<p>
+<i>Mandates</i>: If `ranges::size(r)` is a constant expression then `ranges::size(r)` ≥ `V::size()`. 
+</p>
+</blockquote>
+<p>
+Here <tt>ranges::size(r) &gt;= V::size()</tt> might not be a constant expression, even when 
+`ranges::size(r)` is. It is unclear why a mathematical operator symbol is used here (and further 
+down in the preconditions).
+</p>
+</li>
+</ol>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, flags&lt;Flags...&gt; = {});
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, const mask_type&amp; mask, flags&lt;Flags...&gt; = {});
+</pre>
+<blockquote>
+<p>
+-12- Let `mask` be `mask_type(true)` for the overload with no `mask` parameter.
+<p/>
+-13- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(13.1) &mdash; `R` models `ranges::contiguous_range` and `ranges::sized_range`, <ins>and</ins>
+</p></li>
+<li><p>
+(13.2) &mdash; <tt>ranges::size(r) <ins>== size()</ins></tt> is a constant expression, and <ins>evaluates to `true`.</ins>
+</p></li>
+<li><p>
+<del>(13.3) &mdash; `ranges::size(r)` is equal to `size()`.</del>
+</p></li>
+</ol>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;class R, class... Ts&gt;
+  basic_vec(R&amp;&amp; r, Ts...) -&gt; <i>see below</i>;
+</pre>
+<blockquote>
+<p>
+-17- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<del>(17.1) &mdash;</del> `R` models `ranges::contiguous_range` and `ranges::sized_range`<del>, and</del><ins>.</ins>
+</p></li>
+<li><p>
+<del>(17.2) &mdash; `ranges::size(r)` is a constant expression.</del>
+</p></li>
+</ol>
+<p>
+-18- <i>Remarks</i>: The deduced type is equivalent to <tt>vec&lt;ranges::range_value_t&lt;R&gt;, ranges::size(r)&gt;</tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.loadstore]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class V = <i>see below</i>, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V unchecked_load(R&amp;&amp; r, flags&lt;Flags...&gt; f = {});
+[&hellip;]
+template&lt;class V = <i>see below</i>, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  constexpr V unchecked_load(I first, S last, const typename V::mask_type&amp; mask,
+                             flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-1- Let [&hellip;]
+<p/>
+-2- <i>Mandates</i>: If <tt>ranges::size(r) <ins>&gt;= V::size()</ins></tt> is a constant expression 
+then <del>`ranges::size(r)` ≥ `V::size()`</del><ins>it evaluates to `true`</ins>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
