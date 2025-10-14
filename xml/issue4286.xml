@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4286" status="New">
+<issue num="4286" status="Tentatively Ready">
 <title>Some more feature-test macros for fully freestanding features are not marked freestanding</title>
 <section>
 <sref ref="[version.syn]"/><sref ref="[memory.syn]"/>
@@ -27,6 +27,12 @@ A note about `is_sufficiently_aligned`: <paper num="P2897R7"/> does indicate in 
 freestanding, but somehow the wording didn't say so. The following wording includes the function and its FTM anyway 
 since hopefully this is just an omission when wording the paper.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after nine votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
