@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4305" status="New">
+<issue num="4305" status="Tentatively Ready">
 <title>Missing user requirements on `type_order` template</title>
 <section><sref ref="[compare.type]"/></section>
 <submitter>Daniel Krügler</submitter>
@@ -57,6 +57,12 @@ I think ill-formed would be better. It shouldn't be difficult for implementation
 Given the already existing experience with `std::initializer_list` the proposed wording below
 therefore follows the ill-formed program approach.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after seven votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
