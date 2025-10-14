@@ -57,7 +57,7 @@ auto parse_date(std::istream & temp) -> std::chrono::year_month_day {
 auto report_date_file_last_modified(std::filesystem::path const & filename, lwg::metadata const& meta) -> std::chrono::year_month_day {
    using namespace std::chrono;
    system_clock::time_point t;
-   int id = std::stoi(filename.filename().stem().native().substr(5));
+   int id = lwg::stoi(filename.filename().stem().native().substr(5));
    // Use the Git commit date of the file if available.
    if (auto it = meta.git_commit_times.find(id); it !=  meta.git_commit_times.end())
       t = system_clock::from_time_t(it->second);
@@ -161,7 +161,7 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
    auto num = tx.substr(k, l-k);
    if (!filename.ends_with(std::format("issue{:0>4}.xml", num)))
      std::cerr << "warning: issue number " << num << " in " << filename << " does not match issue number\n";
-   is.num = std::stoi(num);
+   is.num = lwg::stoi(num);
 
    // Get issue status
    match = "status=\"";
@@ -270,7 +270,7 @@ auto lwg::parse_issue_from_file(std::string tx, std::string const & filename,
       if (l == std::string::npos) {
          throw bad_issue_file{filename, "Corrupt 'priority' element: no closing tag"};
       }
-      is.priority = std::stoi(tx.substr(k, l-k));
+      is.priority = lwg::stoi(tx.substr(k, l-k));
    }
 
    // Trim text to <discussion>

@@ -48,6 +48,24 @@ auto parse_issue_from_file(std::string file_contents, std::string const & filena
   //
   // The filename is passed only to improve diagnostics.
 
+
+inline int stoi(const std::string& s)
+{
+    std::size_t idx = 0;
+    try
+    {
+        return std::stoi(s, &idx);
+    }
+    catch (const std::out_of_range&)
+    {
+        throw std::out_of_range("std::stoi: out of range: \"" + s + '"');
+    }
+    catch (const std::invalid_argument&)
+    {
+        throw std::invalid_argument("std::stoi: invalid argument: \"" + s + '"');
+    }
+}
+
 } // close namespace lwg
 
 #endif // INCLUDE_LWG_ISSUES_H

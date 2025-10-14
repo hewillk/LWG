@@ -132,7 +132,7 @@ auto read_issues_from_toc(std::string const & s) -> std::vector<std::tuple<int, 
       if (i == std::string::npos) {
          break;
       }
-      int num = std::stoi(extract_link_text("number"));
+      int num = lwg::stoi(extract_link_text("number"));
       i += 4;
       std::string status = extract_link_text("status");
       if (status == "(i)") {
