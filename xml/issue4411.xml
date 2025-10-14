@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4411" status="New">
+<title>Even more feature-test macros for fully freestanding features are not marked freestanding</title>
+<section><sref ref="[version.syn]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>14 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+During the review of LWG <iref ref="4286"/> it was noticed that the
+proposed resolution did not include a change to `__cpp_lib_ranges_indices`,
+which was added in Sofia by <paper num="P3060R3"/>
+(which was after the issue was opened).
+
+It also doesn't change `__cpp_lib_constexpr_utility, and probably should do.
+
+It doesn't change `__cpp_lib_tuple_like`,
+but that's less clear whether it should do.
+The relevant changes in
+<code>&lt;tuple&gt;</code> and <code>&lt;pair&gt;</code>
+are obviously available in a freestanding implementation,
+but the changes in
+<code>&lt;map&gt;</code> and <code>&lt;unordered_map&gt;</code>
+are not.
+</p>
+</discussion>
+
+<resolution>
+<p>
+</p>
+</resolution>
+
+</issue>
