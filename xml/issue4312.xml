@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4312" status="New">
+<issue num="4312" status="Tentatively Ready">
 <title>Const and value category mismatch for `allocator_arg_t`/`allocator_arg` in the description 
 of uses-allocator construction</title>
 <section>
@@ -27,6 +27,22 @@ rvalue of `allocator_arg_t`, which can be inferred from using plain `allocator_a
 It seems that such mismatch was present even since C++11 (per <paper num="N3337"/> [allocator.uses.construction]/1.2). 
 If the use of plain `allocator_arg_t` is considered correct, I think we should fix the description.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
+</p>
+<p>
+Unless the `std::allocator_arg` tag object is not supposed to be used,
+wouldn't it make more sense to preserve the
+"if `T` has a constructor invocable as `T(allocator_arg, alloc, args...)`"
+wording and change every `allocator_arg_t` into
+<code>const allocator_arg_t&amp;</code>, so that we check for construction
+from the const tag object, and then actually use a const value in the
+constructor arguments.
+Strongly don't care though.
+</p>
+
 </discussion>
 
 <resolution>
