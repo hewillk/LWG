@@ -8,7 +8,7 @@
 </section>
 <submitter>Tomasz Kamiński</submitter>
 <date>19 Aug 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -60,6 +60,22 @@ The suggested changes by this issue have been
 <a href="https://gcc.gnu.org/pipermail/libstdc++/2025-August/062992.html">implemented in libstdc++</a>
 for `bind_front/bind_back`.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+The submitter prefers to withdraw the issue because the proposed resolution
+changes the result of overload resolution in unspecified ways. It would
+no longer be specified whether `bind_front(F{})({})` works or not,
+as it would depend whether `bind_front(F{})` returned a call wrapper or the
+`F` object without wrapping. It would also make the effects of
+`bind_front(S{})(0, 0)` unspecified if the call could resolve to either
+`S::operator()(long, long)` or `S::operator()(int, void*)`, depending on
+whether `bind_front(S{})` returns a call wrapper or the `S` object.
+</p>
+
 </discussion>
 
 <resolution>

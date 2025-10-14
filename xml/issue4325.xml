@@ -9,7 +9,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>24 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -38,6 +38,25 @@ This makes `operator==` not SFINAE-friendly for incomplete types, which defeats 
 Also, checking `noexcept(*lhs == *rhs)` seems insufficient because the result of `*lhs == *rhs` 
 might still throw during conversion to `bool`.
 </p>
+<p>
+We could add a note similar to <sref ref="[refwrap.general]"/>.
+</p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+Even if we don't want to support incomplete types, we still need to fix
+the noexcept-specifier to consider whether the conversion to `bool` throws,
+e.g. <tt>noexcept(noexcept(<ins>bool(</ins>*lhs == *rhs<ins>)</ins>))</tt>.
+</p>
+<p>
+"The proposed resolution may result in the noexcept operator giving different
+results when evaluated in different translation units where the type `T` of
+`indirect` was incomplete or not. Ill-formed seems safer than inconsistent."
+</p>
+
 </discussion>
 
 <resolution>

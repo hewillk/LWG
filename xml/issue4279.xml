@@ -8,7 +8,7 @@
 </section>
 <submitter>Jonathan Wakely</submitter>
 <date>16 Jun 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -25,6 +25,15 @@ The part about `!exists(p)` not being an error could definitely be a <i>Recommen
 Referring to "secondary storage" might need to be phrased differently to be normative (maybe with a note 
 clarifying that the normative wording is referring to "secondary storage").
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+Could the `!exists(p)` part be implementation-defined?
+</p>
+
 </discussion>
 
 <resolution>

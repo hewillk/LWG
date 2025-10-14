@@ -6,7 +6,7 @@
 <section><sref ref="[meta.const.eval]"/></section>
 <submitter>Corentin</submitter>
 <date>09 Aug 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <blockquote><pre>
@@ -20,6 +20,21 @@ of a non-object does not make sense, and the lack of constraint makes the
 implementation and use of that function and underlying built-in more 
 convoluted than necessary.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"What about `void*`, should that be allowed? The compiler should know which
+union member the `void*` came from, as this is only using during constant
+evaluation."
+</p>
+<p>
+"NAD, a function could have its lifetime constrained by a dynamic loader,
+so it seems wrong to assume that taling of function lifetimes makes no sense."
+</p>
+
 </discussion>
 
 <resolution>

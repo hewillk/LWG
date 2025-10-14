@@ -6,7 +6,7 @@
 <section><sref ref="[tuple.cnstr]"/></section>
 <submitter>Jiang An</submitter>
 <date>24 May 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -19,6 +19,16 @@ deleted according to <sref ref="[tuple.cnstr]"/>/33. However, it's confusing tha
 sometimes non-deleted when the tuple contains a reference, while there are hard errors in an instantiation 
 instead.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"There is a defect, but the right fix is to just define uses-allocator
+construction of references as equivalent to normal construction."
+</p>
+
 </discussion>
 
 <resolution>
