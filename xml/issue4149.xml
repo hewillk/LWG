@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4149" status="New">
+<issue num="4149" status="Resolved">
 <title>User defined macros without standard headers (294 redux)</title>
 <section><sref ref="[macro.names]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -48,6 +48,8 @@ that could still break the library header. For example, the library macro
 `assert` typically uses `void` and so `#define void ...` would break `assert`
 even if it happens after including <code>&lt;cassert&gt;</code>.
 </p>
+
+<note>2025-10-14; Resolved by <paper num="P2843R3"/>. Status changed: New &rarr; Resolved.</note>
 </discussion>
 
 <resolution>
