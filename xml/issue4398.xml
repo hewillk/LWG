@@ -6,7 +6,7 @@
 <section><sref ref="[queue.syn]"/><sref ref="[stack.syn]"/></section>
 <submitter>Tomasz Kamiński</submitter>
 <date>02 Oct 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -35,6 +35,16 @@ optimization for that formatter.
 The proposed wording has recently been implemented in 
 <a href="https://gcc.gnu.org/pipermail/libstdc++/2025-October/063758.html">gcc's libstdc++</a>.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+This is a duplicate of LWG <iref ref="4146"/>,
+with a different proposed resolution.
+</p>
+
 </discussion>
 
 <resolution>

@@ -6,7 +6,7 @@
 <section><sref ref="[format.formatter.spec]"/><sref ref="[container.adaptors.format]"/></section>
 <submitter>Casey Carter</submitter>
 <date>31 Aug 2024</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -38,6 +38,16 @@ with that design to ignore the "container" part of "container adaptors" and only
 elements that are going to be formatted. (I have prototyped this resolution on MSVCSTL, albeit slightly 
 modified since neither MSVC nor Clang like this partial specialization form.)
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+This is a duplicate of LWG <iref ref="4398"/>,
+with a different proposed resolution.
+</p>
+
 </discussion>
 
 <resolution>
