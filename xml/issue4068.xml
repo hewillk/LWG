@@ -9,7 +9,7 @@
 </section>
 <submitter>Jonathan Wakely</submitter>
 <date>19 Apr 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -17,6 +17,21 @@ During <paper num="P2300"/> review the suggestion was raised that it might
 be helpful to be able to talk about "an object that models `Concept`"
 instead of "an object whose type models `Concept`" or other more verbose forms.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"OK with finding a way to shorten this, but not as suggested above.
+Overloading the term "models Concept" for both objects and types would be
+confusing."
+</p>
+<p>
+"Just say 'a <em>`stoppable-source`</em> object',
+or 'a `stoppable_token` object'"
+</p>
+
 </discussion>
 
 <resolution>

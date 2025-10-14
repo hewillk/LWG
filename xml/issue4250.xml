@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4250" status="New">
+<issue num="4250" status="LEWG">
 <title>`swap` overloads for `indirect` and `polymorphic` only found by ADL</title>
 <section>
 <sref ref="[indirect.swap]"/>
@@ -9,7 +9,7 @@
 </section>
 <submitter>Jonathan Wakely</submitter>
 <date>01 May 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,24 @@ are defined as hidden friends, so are only available via ADL.
 This means that calling `std::swap(i1, i2)` will always use the generic
 `std::swap` instead of the custom overload for `std::indirect`.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 2 after reflector poll. Status New &rarr; LEWG.
+</p>
+<p>
+This is a broader issue than just `std::indirect` and `std::polymorphic`,
+it also affects `std::jthread`, `std::mdspan`, `move_only_function`, `copyable_function`, <em>`node-handle`</em>, `inplace_vector`,
+`flat_map` and co., and maybe more.
+</p>
+<p>
+Are we comfortable that defining `swap` as a hidden friend means that
+the generic `std::swap` might be suboptimal,
+and for allocator-aware types might even do something with different effects?
+e.g. if `propagate_on_container_swap` is true but
+`propagate_on_container_move_assignment` is false.
+</p>
+
 </discussion>
 
 <resolution>

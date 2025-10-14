@@ -6,7 +6,7 @@
 <section><sref ref="[allocator.requirements.general]"/></section>
 <submitter>Jiang An</submitter>
 <date>5 May 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -22,6 +22,23 @@ which is possibly not `size_t`, is required to be usable with the allocator.
 Do we want to change these constraints, or change the <i>Cpp17Allocator</i> requirements to 
 require accepting `size_t` values?
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"The wording technically allows you to write
+<code>allocate(same_as&lt;size_type&gt; auto)</code>
+and reject any other type."
+</p>
+<p>
+"I imagine lots of code relies on `std::size_t` being accepted.
+That's surely a general design issue that's much broader than just the
+<em>Cpp17Allocator</em> requirement,
+and making the requirement stricter seems evolutionary."
+</p>
+
 </discussion>
 
 <resolution>

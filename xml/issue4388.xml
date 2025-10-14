@@ -6,7 +6,7 @@
 <section><sref ref="[cstdarg.syn]"/></section>
 <submitter>Jakub Jelinek</submitter>
 <date>1 Oct 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -28,6 +28,12 @@ It also makes the following undefined:
 <pre><code>#define BAD ); format_disk(
 va_start(ap, BAD);
 </code></pre>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
 </discussion>
 
 <resolution>

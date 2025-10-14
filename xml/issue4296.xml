@@ -6,7 +6,7 @@
 <section><sref ref="[hash.requirements]"/></section>
 <submitter>Jonathan Wakely</submitter>
 <date>18 Jul 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -44,6 +44,18 @@ a value of type `const H` implies that calling `h(k)` doesn't change `h`.
 Maybe we want to clarify it in terms of equality-preserving
 <sref ref="[concepts.equality]"/>.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+Could say "Note: Thus<ins>, for a particular value `h`,</ins>
+all evaluations of the expression `h(k)` with the same value
+for `k` yield the same result for a given execution of the
+program."
+</p>
+
 </discussion>
 
 <resolution>

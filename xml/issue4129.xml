@@ -6,7 +6,7 @@
 <section><sref ref="[res.on.data.races]"/></section>
 <submitter>Jiang An</submitter>
 <date>30 Jul 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -20,6 +20,16 @@ accesses some object via a parameter.
 It might need to be considered whether we should use the more general term "range" instead of "container", 
 which will cover <tt>std::span</tt>, etc.
 </p>
+
+<note>2025-10-14; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"'non-const parameters' needs to be fixed, this isn't about
+top-level const, e.g. <code>std::string&amp;</code> is not a const type."
+</p>
+
 </discussion>
 
 <resolution>
