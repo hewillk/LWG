@@ -10,7 +10,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>06 Sep 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -40,6 +40,16 @@ It is reasonable to create objects that stick to <i>Mandates</i>. The same goes 
 <p/>
 This issue has considerable overlap with LWG <iref ref="4281"/>.
 </p>
+
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+This would need to use `val` instead of `**this` if LWG <iref ref="4015"/>
+is accepted.
+</p>
+
 </discussion>
 
 <resolution>

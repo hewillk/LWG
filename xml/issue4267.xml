@@ -29,9 +29,7 @@ Set priority to 3 after reflector poll.
 construction of references as equivalent to normal construction."
 </p>
 
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5008"/>.
 </p>
@@ -65,6 +63,48 @@ is `true` for at least one <tt>T<sub><i>i</i></sub></tt>.</ins>
 </li>
 
 </ol>
+
+</superseded>
+
+<note>2025-10-15; Jonathan provides new wording</note>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+<ol>
+
+<li><p>Modify <sref ref="[tuple.cnstr]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class Alloc&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a);
+[&hellip;]
+template&lt;class Alloc, tuple-like UTuple&gt;
+  constexpr explicit(<i>see below</i>)
+    tuple(allocator_arg_t, const Alloc&amp; a, UTuple&amp;&amp;);
+</pre>
+<blockquote>
+<p>
+-32- <i>Preconditions</i>: `Alloc` meets the <i>Cpp17Allocator</i> requirements (<sref ref="[allocator.requirements.general]"/>).
+<p/>
+-33- <i>Effects</i>:
+Equivalent to the preceding constructors except that each element
+<ins>of non-reference type</ins>
+is constructed with uses-allocator construction
+(<sref ref="[allocator.uses.construction]"/>).
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
 
 </resolution>
 

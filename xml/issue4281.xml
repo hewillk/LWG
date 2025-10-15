@@ -9,7 +9,7 @@
 </section>
 <submitter>Hiroaki Ando</submitter>
 <date>27 Jun 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -53,6 +53,12 @@ else
 </blockquote>
 
 <note>2025-10-15; would be resolved by LWG <iref ref="4406"/></note>
+
+
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
 
 </discussion>
 

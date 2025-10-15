@@ -8,7 +8,7 @@
 </section>
 <submitter>Jiang An</submitter>
 <date>06 Aug 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -25,6 +25,22 @@ As a result, it seems non-conforming to just use `uninitialized_construct_using_
 perhaps we can just respecify `polymorphic_allocator::construct` to use 
 `uninitialized_construct_using_allocator`.
 </p>
+
+<note>2025-10-15; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"What is the extent of the breakage?
+`pmr::polymorphic_allocator::new_object` uses `construct`,
+so does this break users of that function?"
+</p>
+<p>
+We could modify `new_object` to allocate and construct
+<code>remove_cv_t&lt;T&gt;</code> instead of `T`,
+so that it could still use `construct`.
+</p>
+
 </discussion>
 
 <resolution>

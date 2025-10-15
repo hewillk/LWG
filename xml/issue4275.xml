@@ -8,7 +8,7 @@
 </section>
 <submitter>Aiden Grossman</submitter>
 <date>06 Jun 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -46,6 +46,12 @@ namespace std {
 </superseded>
 
 <note>2025-06-10; Jonathan provides improved wording</note>
+
+
+<note>2025-10-15; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
 
 </discussion>
 
