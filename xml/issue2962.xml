@@ -163,6 +163,21 @@ that return prvalues that a prvalue is not bindable to a volatile reference.
 <note>2018-11 San Diego Thursday night issue processing</note>
 <p>Look at Ranges; EricWF to investigate. Status to Open</p>
 
+<note>2025-10-15; additional suggestion from Eric Niebler during 2018-04 discussion</note>
+<p>
+Regarding the issue of whether `int volatile*` is an iterator or not,
+I think the best way to solve the problem is with the `common_reference_t`
+type trait.
+The return type for `*a` could be
+"`reference`, where
+<code>common_reference_t&lt;reference&amp;&amp;, T&amp;&gt;</code>
+is well-formed"
+and for `*r++` could be:
+"A type `U`, where
+<code>common_reference_t&lt;U&amp;&amp;, T&amp;&gt;</code>
+is well-formed".
+</p>
+
 <p>
 <strong>Previous resolution [SUPERSEDED]:</strong>
 </p>
