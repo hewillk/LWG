@@ -40,6 +40,8 @@ inside file-scope declarations necessarily bans including one inside non-file-sc
 
 <note>Urbana 2014-11-07: Move to Ready</note>
 
+<note>2025-10-15; related to LWG <iref ref="657"/></note>
+
 </discussion>
 
 <resolution>

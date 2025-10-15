@@ -86,6 +86,15 @@ proposal (<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1691
 </pre></blockquote>
 </li>
 </ol>
+
+<note>2025-10-15; Jonathan adds additional rationale</note>
+<p>
+For the second point, LWG <iref ref="2428"/> removed "external"
+and LWG <iref ref="2225"/> added "no diagnostic is required".
+For the third point, <sref ref="[headers]"/> clearly defines "header"
+to mean only standard library headers; other `#include`d files are
+"source files" (<sref ref="[lex.separate]"/>).
+</p>
 </discussion>
 
 <resolution>
