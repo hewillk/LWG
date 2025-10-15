@@ -51,6 +51,9 @@ else
   return std::forward&lt;U&gt;(v);
 </code></pre>
 </blockquote>
+
+<note>2025-10-15; would be resolved by LWG <iref ref="4406"/></note>
+
 </discussion>
 
 <resolution>
