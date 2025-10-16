@@ -7,7 +7,7 @@
 <section><sref ref="[ostream.formatted.print]"/></section>
 <submitter>Jan Kokemüller</submitter>
 <date>13 Jan 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -37,9 +37,19 @@ of the actual output sequence integrity and is therefore set by the second phase
 Therefore mentioning <tt>ios_base::badbit</tt> in (3.2) doesn't really make sense, it could only meaningfully 
 refer to <tt>ios_base::failbit</tt> instead.
 </p>
-</discussion>
 
-<resolution>
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"NAD. The reason it talks about badbit is that exceptions set badbit in
+IOStreams but not failbit. If we don’t want to hook into the stream’s
+error handling mentioning badbit is correct."
+</p>
+
+
+<superseded>
 <p>
 This wording is relative to <paper num="N4971"/>.
 </p>
@@ -70,6 +80,47 @@ in the error state of <tt>os</tt>.</p></li>
 </blockquote>
 </li>
 </ol>
+</superseded>
+
+<note>2025-10-16; Daniel provides new wording</note>
+
+</discussion>
+
+<resolution>
+
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[ostream.formatted.print]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+void vprint_unicode(ostream&amp; os, string_view fmt, format_args args);
+void vprint_nonunicode(ostream&amp; os, string_view fmt, format_args args);
+</pre>
+<blockquote>
+<p>
+-3- <i>Effects</i>: Behaves as a formatted output function (<sref ref="[ostream.formatted.reqmts]"/>) 
+of <tt>os</tt>, except that:
+</p>
+<ol style="list-style-type: none">
+<li><p>(3.1) &mdash; failure to generate output is reported as specified below, and</p></li>
+<li><p>(3.2) &mdash; any exception thrown by the call to <tt>vformat</tt> is propagated without regard 
+to the value of <tt>os.exceptions()</tt> and without turning on
+<ins><tt>ios_base::failbit</tt> or</ins>
+<tt>ios_base::badbit</tt> 
+in the error state of <tt>os</tt>.</p></li>
+</ol>
+<p>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
