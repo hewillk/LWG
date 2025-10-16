@@ -204,6 +204,9 @@ addressing this.
 From <a href="https://github.com/cplusplus/papers/issues/337">Cologne 2019 paper discussion</a>:
 <a href="https://wg21.link/p1100">P1100</a> has been superseded by <a href="https://wg21.link/p1790">P1790</a>.
 </p>
+
+<note>2025-10-16 Status changed: LEWG &rarr; SG4.</note>
+<p>Discussed by LEWG in Wrocław, recommended to send to SG4.</p>
 </discussion>
 
 <resolution>

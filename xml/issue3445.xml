@@ -21,6 +21,9 @@ In addition to that, the <tt>basic_socket_iostream(Args&amp;&amp;...)</tt> const
 </p>
 
 <note>2020-07-17; Priority set to 3 in telecon</note>
+
+<note>2025-10-16 Status changed: LEWG &rarr; SG4.</note>
+<p>Discussed by LEWG in Wrocław, recommended to send to SG4.</p>
 </discussion>
 
 <resolution>

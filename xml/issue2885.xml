@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="2885" status="LEWG">
+<issue num="2885" status="NAD">
 <title>The relational operators of <tt>optional</tt> and <tt>variant</tt> completely reflect the semantics of the element 
 types &mdash; this is inconsistent with other types in the library</title>
 <section><sref ref="[containers]"/><sref ref="[utilities]"/></section>
@@ -20,6 +20,8 @@ containers of floating-point types and tuples/pairs etc. of floating point types
 
 <note>2017-07 Toronto Thurs Issue Prioritization</note>
 <p>Move to LEWG</p>
+<note>2025-10-16 Status changed: LEWG &rarr; NAD.</note>
+<p>No defect for LWG to address.</p>
 </discussion>
 
 <resolution>
