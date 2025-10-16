@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4299" status="New">
+<issue num="4299" status="Tentatively Ready">
 <title>Missing <i>Mandates:</i> part in <tt>optional&lt;T&amp;&gt;::transform</tt></title>
 <section><sref ref="[optional.ref.monadic]"/></section>
 <submitter>Giuseppe D'Angelo</submitter>
@@ -21,6 +21,19 @@ use this definition. The fact that the same wording has not been applied to
 <tt>optional&lt;T&amp;&gt;::transform</tt> as well looks like an oversight. I would
 suggest to apply it.
 </p>
+
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+<p>
+As
+<code>optional&lt;remove_cv_t&lt;invoke_result_t&lt;F, T&amp;&gt;&gt;&gt;</code>
+is part of the signature (return type), we never enter the body to trigger the
+<i>Mandates</i>, so it's already implicitly ill-formed if the result of `f`
+is not a valid contained type. It's worth clarifying that though."
+</p>
+
 </discussion>
 
 <resolution>
