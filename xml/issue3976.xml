@@ -6,7 +6,7 @@
 <section><sref ref="[container.alloc.reqmts]"/></section>
 <submitter>Alisdair Meredith</submitter>
 <date>14 Aug 2023</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -28,6 +28,19 @@ containers that are not otherwise allocator aware are are treated as-if they wer
 allocator-aware using <tt>std::allocator&lt;typename X::value_type&gt;</tt> (where <tt>value_type</tt>
 is already guaranteed to exist by the <i>container</i> requirements, <sref ref="[container.reqmts]"/> p1).
 </p>
+
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"NAD. 'If X is not allocator-aware' is equivalent to 'if X is not an allocate-aware container type'. Note that <sref ref="[container.alloc.reqmts]"/>/2
+is not defining the requirements on an allocator-aware container;
+it's defining the related <i>Cpp17Meow</i> requirements.
+The allocator-aware container requirements are defined in paragraphs 3
+and later, so this isn't a recursive definition."
+</p>
+
 </discussion>
 
 <resolution>

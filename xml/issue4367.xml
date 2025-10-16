@@ -8,7 +8,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>07 Sep 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -19,6 +19,16 @@ which calls the <code>optional(U&amp;&amp;)</code> constructor which in turn cal
 There's no reason to do that. It's much more efficient to call <code>optional&lt;T&amp;&gt;</code>'s 
 default copy constructor to just copy a pointer.
 </p>
+
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"NAD, no observable difference."
+"Still simpler to not have to reason about whether it matters, let's do it."
+</p>
+
 </discussion>
 
 <resolution>
