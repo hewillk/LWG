@@ -8,7 +8,7 @@
 </section>
 <submitter>Jiang An</submitter>
 <date>15 Mar 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -24,9 +24,133 @@ The specific `resize` exception guarantee for `std::vector` came from resolving 
 later effectively copied to `std::inplace_vector` because that container's specification should resemble 
 as much as possible that of `std::vector`.
 </p>
+
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
+<note>2025-10-16; Jonathan provides wording</note>
+<p>
+LWG <iref ref="4106"/> already fixed this for `std::forward_list`.
+For `std::list` the "If an exception is thrown, there are no effects" wording
+in <sref ref="[list.modifiers]"/> p2 doesn't apply to `std::list::resize`
+because it's in a different subclause (<sref ref="[list.capacity]"/>).
+We can fix that though.
+</p>
+
 </discussion>
 
 <resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[deque.capacity]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void resize(size_type sz);
+</pre>
+<blockquote>
+<p>
+-1- <em>Preconditions</em>:
+`T` is <em>Cpp17MoveInsertable</em> and <em>Cpp17DefaultInsertable</em>
+into `deque`.
+</p>
+<p>
+-2- <em>Effects</em>:
+If <code>sz &lt; size()</code> <ins>is `true`</ins>,
+erases the last `size() - sz` elements from the sequence.
+Otherwise, appends `sz - size()` default-inserted elements to the sequence.
+<ins>
+If an exception is thrown, there is no effect on the container.
+</ins>
+</p>
+</blockquote>
+
+<pre>
+constexpr void resize(size_type sz, const T&amp; c);
+</pre>
+<blockquote>
+<p>
+-3- <em>Preconditions</em>:
+`T` is <em>Cpp17CopyInsertable</em>
+into `deque`.
+</p>
+<p>
+-4- <em>Effects</em>:
+If <code>sz &lt; size()</code> <ins>is `true`</ins>,
+erases the last `size() - sz` elements from the sequence.
+Otherwise, appends `sz - size()` copies of `c` to the sequence.
+<ins>
+If an exception is thrown, there is no effect on the container.
+</ins>
+</p>
+</blockquote>
+
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[list.capacity]"/> as indicated:</p>
+
+<blockquote>
+
+<pre>
+constexpr void resize(size_type sz);
+</pre>
+<blockquote>
+<p>
+-1- <em>Preconditions</em>:
+`T` is  <em>Cpp17DefaultInsertable</em> into `list`.
+</p>
+<p>
+-2- <em>Effects</em>:
+If <code>size() &lt; sz</code> <ins>is `true`</ins>,
+appends `sz - size()` default-inserted elements to the sequence.
+If <code>sz &lt;= size()</code> <ins>is `true`</ins>,
+equivalent to:
+<blockquote><pre>list&lt;T&gt;::iterator it = begin();
+advance(it, sz);
+erase(it, end());
+</pre></blockquote>
+<ins>
+If an exception is thrown, there is no effect on the container.
+</ins>
+</p>
+</blockquote>
+
+<pre>
+constexpr void resize(size_type sz, const T&amp; c);
+</pre>
+<blockquote>
+<p>
+-3- <em>Preconditions</em>:
+`T` is <em>Cpp17CopyInsertable</em> into `list`.
+</p>
+<p>
+-4- <em>Effects</em>:
+<del>As if by</del> <ins>Equivalent to</ins>:
+<blockquote><pre>if (sz &lt; size()
+  insert(end(), sz-size(), c);
+else if (sz &lt; size()) {
+  iterator i = begin();
+  advance(it, sz);
+  erase(it, end());
+}
+else
+  ;           <i>// do nothing</i>
+</pre></blockquote>
+</p>
+</blockquote>
+
+</blockquote>
+</li>
+
+</ol>
+
 </resolution>
 
 </issue>
