@@ -40,6 +40,16 @@ int main() {
 <p>
 Set status to Tentatively Ready after seven votes in favour during reflector poll.
 </p>
+<p>
+"Alternatively could keep the conditional operator but cast one side to `bool`,
+but that would do an explicit conversion, which might not be what we want."
+</p>
+<p>
+"Should just require <i>boolean-testable</i>."
+</p>
+<p>
+Related to LWG <iref ref="4366"/>.
+</p>
 
 </discussion>
 
