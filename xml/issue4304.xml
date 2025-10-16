@@ -6,7 +6,7 @@
 <section><sref ref="[optional.ref.observe]"/></section>
 <submitter>Jiang An</submitter>
 <date>25 Jul 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -17,9 +17,18 @@ is still ill-formed, because the return type of its `value_or` member function i
 However, we don't exclude such <tt>T&amp;</tt> from valid contained types. Given only `value_or` is 
 problematic here, perhaps we can avoid providing it if `T` is not returnable.
 </p>
-</discussion>
 
-<resolution>
+<note>2025-10-16; Reflector poll</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+Why not just add <i>Constraints</i>: and use <code>decay_t&lt;T&gt;</code>
+for the return type, instead of "not always present" which is currently
+only used for member types, not member functions.
+</p>
+
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -68,6 +77,66 @@ return has_value() ? *<i>val</i> : static_cast&lt;X&gt;(std::forward&lt;U&gt;(u)
 </blockquote>
 </li>
 </ol>
+</superseded>
+
+<note>2025-10-16; Jonathan provides new wording</note>
+
+</discussion>
+
+<resolution>
+
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[optional.optional.ref.general]"/>, header <tt>&lt;iterator&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T&gt;
+  class optional&lt;T&amp;&gt; {
+    [&hellip;]
+    constexpr T&amp; value() const; // freestanding-deleted
+    template&lt;class U = remove_cv_t&lt;T&gt;&gt;
+      constexpr <ins>decay_t</ins><del>remove_cv_t</del>&lt;T&gt; value_or(U&amp;&amp; u) const;
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[optional.ref.observe]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U = remove_cv_t&lt;T&gt;&gt; constexpr <ins>decay_t</ins><del>remove_cv_t</del>&lt;T&gt; value_or(U&amp;&amp; u) const;
+</pre>
+<blockquote>
+<p>
+<ins>
+-?- <i>Constraints</i>:
+`T` is a non-array object type.
+</ins>
+</p>
+<p>
+-8- Let `X` be <tt>remove_cv_t&lt;T&gt;</tt>.
+<p/>
+-9- <i>Mandates</i>: <tt>is_constructible_v&lt;X, T&amp;&gt; &amp;&amp; is_convertible_v&lt;U, X&gt;</tt> is `true`.
+<p/>
+-10- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? *<i>val</i> : static_cast&lt;X&gt;(std::forward&lt;U&gt;(u));
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
