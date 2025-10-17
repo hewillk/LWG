@@ -57,7 +57,7 @@ int main(int argc, char const * argv[]) {
 //       bool trace_on{false};  // Will pick this up from the command line later
 
       if (argc != 3 && argc != 4) {
-         std::cerr << "Must specify exactly one issue, followed by its new status, followed by an optional comment.\n";
+         std::cerr << "Must specify exactly one issue, followed by its new status, followed by an optional description.\n";
 //         for (auto arg : argv) {
          for (int i{0}; argc != i;  ++i) {
             char const * arg = argv[i];
@@ -71,7 +71,7 @@ int main(int argc, char const * argv[]) {
       std::string new_status{argv[2]};
       std::replace(new_status.begin(), new_status.end(), '_', ' ');  // simplifies unix shell scripting
 
-      std::string const comment = argc == 4 ? argv[3] : std::string{};
+      std::string const descr = argc == 4 ? argv[3] : std::string{};
 
       fs::path path = fs::current_path();
 
@@ -121,9 +121,9 @@ int main(int argc, char const * argv[]) {
             throw std::logic_error("Datestamp size is borked");
          std::ostringstream note;
          note << "<note>" << date;
-         if (comment.size()) {
-            note << ' ' << comment;
-            if (comment.back() != '.')
+         if (descr.size()) {
+            note << ' ' << descr;
+            if (descr.back() != '.')
                note << '.';
          }
          note << " Status changed: " + old_status + " &rarr; " + new_status + ".</note>\n";
