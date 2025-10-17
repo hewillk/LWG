@@ -1,5 +1,9 @@
 #!/bin/sh
-# Add a <note> to an issue
+# Add notes to an issue.
+# Usage: add_note.sh ISSUE [NOTE] [-]
+# If NOTE is present, a <note>YYYY-MM-DD; NOTE</note> element will be added.
+# If - is present, text will be read from stdin and added, enclosed in <p>.
+# If neither is present, exit with an error (what are you trying to do?)
 
 issue=${1:?}
 
@@ -19,18 +23,27 @@ case "$2" in
 esac
 
 note=${2:?}
-if [[ ${note: -1} != . ]]
+if [[ $note = - ]]
 then
-  note="${note}."
+  note=''
+else
+  if [[ ${note: -1} != . ]]
+  then
+    note="${note}."
+  fi
+  note=$(printf "\\\n<note>%s%s; %s</note>" "$prefix" "$date" "$note")
+  shift
 fi
 
 text=''
-if [ "$3" = "-" ]
+if [ "$2" = "-" ]
 then
   if [ -t 0 ] # stdin is a terminal
   then
     echo "Enter additional discussion (followed by EOF, i.e. Ctrl-D)."
-    echo "This will be enclosed in <p> after the new <note>."
+    echo -n "This will be enclosed in <p>"
+    test -n "$note" && echo -n " after the new <note>"
+    echo .
   fi
   while read line
   do
@@ -38,14 +51,14 @@ then
   done
   if [ -n "$text" ]
   then
-    text=$(printf "\\\n<p>\\\n%s</p>" "$text")
+    if [ -n "$note" ]
+    then
+      note=$(printf "%s\\\n" "$note")
+    fi
+    text=$(printf "<p>\\\n%s</p>" "$text")
   fi
 fi
 
-date=$(date +%Y-%m-%d)
-note=$(printf "<note>%s%s; %s</note>" "$prefix" "$date" "$note")
-
 sed -i '/<\/discussion>$/i\
-\
 '"${note}${text}
 " $xml
