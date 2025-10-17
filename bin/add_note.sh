@@ -31,6 +31,7 @@ else
   then
     note="${note}."
   fi
+  date=$(date +%Y-%m-%d)
   note=$(printf "\\\n<note>%s%s; %s</note>" "$prefix" "$date" "$note")
   shift
 fi
@@ -40,8 +41,8 @@ if [ "$2" = "-" ]
 then
   if [ -t 0 ] # stdin is a terminal
   then
-    echo "Enter additional discussion (followed by EOF, i.e. Ctrl-D)."
-    echo -n "This will be enclosed in <p>"
+    echo "# Enter additional discussion (followed by EOF, i.e. Ctrl-D)."
+    echo -n "# This will be enclosed in <p>"
     test -n "$note" && echo -n " after the new <note>"
     echo .
   fi
