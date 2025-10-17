@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4342" status="New">
+<issue num="4342" status="Tentatively Ready">
 <title>Missing rvalue reference qualification for <code>task_scheduler::ts-sender::connect()</code></title>
 <section><sref ref="[exec.task.scheduler]"/></section>
 <submitter>Dietmar Kühl</submitter>
@@ -15,6 +15,11 @@ The result of <code>schedule(sched)</code> for a scheduler
 this type may need to be forwarded to an operation state constructor
 by <code>task_scheduler::<i>ts-sender</i>::connect</code>. Thus,
 this function should be qualified with an rvalue reference.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
 </p>
 </discussion>
 
