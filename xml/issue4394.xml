@@ -6,7 +6,7 @@
 <section><sref ref="[simd.loadstore]"/></section>
 <submitter>Hewill Kang</submitter>
 <date>30 Sep 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -61,6 +61,18 @@ We still attempt to construct the `span` by calling `span(first, last)`, which i
 but because the lvalue sentinel cannot be converted to `size_t`, the call of `span(first, n)`
 is also invalid. This makes the construction of the `span` ill-formed and leads to a hard error in
 the function body.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"`unchecked_load(first, last)` needs to be equivalent to `unchecked_load(span(first, last))`.
+If `span` converts `last` to `size_t` then simd should do the same, not `span(first, last-first)`.
+Should simd (first,last) overloads have the same
+<code>is_convertible_v&lt;End, size_t&gt;</code>
+is `false` constraint as `span`?"
 </p>
 </discussion>
 

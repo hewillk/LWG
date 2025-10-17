@@ -6,7 +6,7 @@
 <section><sref ref="[time.format]"/></section>
 <submitter>Jiang An</submitter>
 <date>08 Dec 2023</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -44,6 +44,15 @@ is considered as a single decimal digit, and there is implementation divergence
 <b>Daniel:</b>
 <p/>
 This issue is somewhat related to LWG <iref ref="3831"/>.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+Howard intended Option B, i.e. `"-09"`, but Option B could possibly be interpreted to mean `"0-9"`.
+"Maybe something like the 0 is inserted before the sole digit, or after the sign, if any."
 </p>
 </discussion>
 

@@ -6,7 +6,7 @@
 <section><sref ref="[meta.unary.prop]"/></section>
 <submitter>Jiang An</submitter>
 <date>04 Aug 2023</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -27,6 +27,14 @@ and <a href="https://quuxplusone.github.io/blog/2023/04/17/noexcept-false-equals
 <p/> 
 Perhaps we may need to clarify that the implementation divergence is permitted, or unambiguously specify these 
 traits to give results consistent with exception specifications.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"NAD, this was just a GCC bug."
 </p>
 </discussion>
 

@@ -8,7 +8,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>12 Oct 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -22,6 +22,17 @@ std::string_view sv(p, p); // <span style="color:red;font-weight:bolder">error: 
 <p>
 Because the constructor currently only requires that the value type of the contiguous iterator be 
 `char`, which does not reject `volatile char*`, which fires when further initializing `const char*`.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"NAD, don't care about volatile."
+"Maybe make it <i>Mandates</i>: instead of <i>Constraints</i>:."
+"We already reject <code>span&lt;const char&gt; s(p,p)</code>
+so should also reject `string_view sv(p,p)`."
 </p>
 </discussion>
 
