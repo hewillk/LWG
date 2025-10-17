@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4340" status="New">
+<issue num="4340" status="Tentatively Ready">
 <title><code>task::promise_type::unhandled_stopped()</code> should be <code>noexcept</code></title>
 <section><sref ref="[task.promise]"/></section>
 <submitter>Dietmar Kühl</submitter>
@@ -18,6 +18,11 @@ can't throw an exception and should be marked <code>noexcept</code>.
 All other declarations of <code>unhandled_stopped()</code> are
 already marked <code>noexcept</code> but
 <code>task::promise_type::unhandled_stopped()</code> isn't.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 </discussion>
 
