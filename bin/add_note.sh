@@ -63,3 +63,6 @@ fi
 sed -i '/<\/discussion>$/i\
 '"${note}${text}
 " $xml
+
+# Check that the XML is still valid
+bin/lint.sh
