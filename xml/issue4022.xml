@@ -54,9 +54,7 @@ Set priority to 3 after reflector poll.
 Howard intended Option B, i.e. `"-09"`, but Option B could possibly be interpreted to mean `"0-9"`.
 "Maybe something like the 0 is inserted before the sole digit, or after the sign, if any."
 </p>
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N4964"/>.
 </p>
@@ -139,6 +137,53 @@ representation of the century.</td>
 </blockquote>
 </li>
 </ol>
+</superseded>
+
+<note>2025-10-17; Jonathan provides new wording based on Option B</note>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[time.format]"/>, Table 133 [tab:time.format.spec], as indicated:</p>
+
+<blockquote>
+<table border="1">
+<caption>Table 133 &mdash; Meaning of conversion specifiers <sref ref="[tab:time.format.spec]"/></caption>
+<tr style="text-align:center">
+<th>Specifier</th>
+<th>Replacement</th>
+</tr>
+<tr>
+<td colspan="2" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+<tr>
+<td><tt>%C</tt></td>
+<td>The year divided by <tt>100</tt> using floored division. If the result is
+<del>a single decimal digit, it<br/>
+is prefixed with <tt>0</tt></del><br/>
+<ins>in the range <tt>[-9, 9]</tt> then <tt>0</tt> is inserted before
+the single digit (after the sign, if present)</ins>.<br/>
+The modified command <tt>%EC</tt> produces the locale's alternative<br/>
+representation of the century.</td>
+</tr>
+<tr>
+<td colspan="2" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+</table>
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 
 </issue>

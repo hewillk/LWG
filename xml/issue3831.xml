@@ -93,9 +93,7 @@ Set priority to 3 after reflector poll.
 </p>
 <p>A few votes for priority 2. Might need to go to LEWG.</p>
 
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N4917"/>.
 </p>
@@ -246,6 +244,92 @@ modified command <tt>%<i>N</i> y</tt> specifies the maximum number of characters
 not specified, the default is 2. Leading zeroes are permitted but not required. The<br/>
 modified commands <tt>%Ey</tt> and <tt>%Oy</tt> interpret the locale's alternative representation.<br/>
 <ins>[<i>Example ?:</i> <tt>year y; istringstream{"-20 76"} &gt;&gt; parse("%3C %y", y);</tt> results in<br/> 
+<tt>y == -1976y</tt>. &mdash; <i>end example</i>]</ins>
+</td>
+</tr>
+<tr>
+<td colspan="2" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+</table>
+
+</blockquote>
+</li>
+</ol>
+
+</superseded>
+
+<note>2025-10-17; Jonathan provides updated wording using Option B</note>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[time.format]"/>, Table [tab:time.format.spec] as indicated:</p>
+
+<blockquote>
+
+<table border="1">
+<caption>Table 133 &mdash; Meaning of conversion specifiers <sref ref="[tab:time.format.spec]"/></caption>
+<tr style="text-align:center">
+<th>Specifier</th>
+<th>Replacement</th>
+</tr>
+<tr>
+<td colspan="2" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+<tr>
+<td><tt>%y</tt></td>
+<td>The last two decimal digits of the year<ins>, regardless of the sign of the year</ins>.<br/>
+If the result is a single digit it is prefixed by <tt>0</tt>.<br/>
+The modified command <tt>%Oy</tt> produces the locale's alternative representation. The<br/>
+modified command <tt>%Ey</tt> produces the locale's alternative representation of offset from<br/>
+<tt>%EC</tt> (year only).<br/>
+<ins>[<i>Example ?:</i> <tt>cout &lt;&lt; format("{:%C %y}", -1976y);</tt> prints <tt>-20 76</tt>. &mdash; <i>end example</i>]</ins>
+</td>
+</tr>
+<tr>
+<td colspan="2" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+</table>
+
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[time.parse]"/>, Table [tab:time.parse.spec] as indicated:</p>
+
+<blockquote>
+
+<table border="1">
+<caption>Table 103 &mdash; Meaning of <tt>parse</tt> flags <sref ref="[tab:time.parse.spec]"/></caption>
+<tr style="text-align:center">
+<th>Flag</th>
+<th>Parsed value</th>
+</tr>
+<tr>
+<td colspan="2" align="center">
+<tt>[&hellip;]</tt>
+</td>
+</tr>
+<tr>
+<td><tt>%y</tt></td>
+<td>The last two decimal digits of the year<ins>, regardless of the sign of the year</ins>.<br/>
+If the century is not otherwise specified (e.g.<br/>
+with <tt>%C</tt>), values in the range [<tt>69</tt>, <tt>99</tt>] are presumed to refer to the years 1969 to 1999,<br/>
+and values in the range [<tt>00</tt>, <tt>68</tt>] are presumed to refer to the years 2000 to 2068. The<br/>
+modified command <tt>%<i>N</i> y</tt> specifies the maximum number of characters to read. If <i>N</i> is<br/>
+not specified, the default is 2. Leading zeroes are permitted but not required. The<br/>
+modified commands <tt>%Ey</tt> and <tt>%Oy</tt> interpret the locale's alternative representation.<br/>
+<ins>[<i>Example ?:</i> <tt>year y; istringstream{"-20 76"} &gt;&gt; parse("%3C %y", y);</tt> results in<br/>
 <tt>y == -1976y</tt>. &mdash; <i>end example</i>]</ins>
 </td>
 </tr>
