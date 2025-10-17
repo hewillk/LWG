@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4372" status="New">
+<issue num="4372" status="Tentatively Ready">
 <title>Weaken <i>Mandates:</i> for dynamic padding values in padded layouts</title>
 <section>
 <sref ref="[mdspan.layout.leftpad.overview]"/>
@@ -39,6 +39,14 @@ The proposed resolution states that the modified representability
 <i>Mandates:</i> element holds for <tt>rank &lt;= 1</tt>, even though in that case the 
 `PaddingValue` has no other effect. Hence, the <i>Mandates:</i> element could 
 be weakened further.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+<p>
+"This matches the wording in <sref ref="[mdspan.extents.overview]"/> 1.2"
 </p>
 </discussion>
 
