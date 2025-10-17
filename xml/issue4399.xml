@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4399" status="New">
+<issue num="4399" status="Tentatively Ready">
 <title>`enable_nonlocking_formatter_optimization` for `pair` and `tuple` needs `remove_cvref_t`</title>
 <section><sref ref="[format.tuple]"/></section>
 <submitter>Tomasz Kamiński</submitter>
@@ -27,6 +27,12 @@ will not use unbuffered prints.
 The proposed wording has recently been implemented in 
 <a href="https://gcc.gnu.org/pipermail/libstdc++/2025-October/063758.html">gcc's libstdc++</a>.
 </p>
+
+<note>2025-10-17; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after seven votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
