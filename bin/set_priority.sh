@@ -9,7 +9,7 @@ Usage: $0 ISSUE PRIORITY
     PRIORITY - a single digit from 1 to 4.
 Set priority of ISSUE to PRIORITY and add a <note>.
 
-Usage: $0 ISSUE 0 [VOTES [--commit]]
+Usage: $0 ISSUE 0 [VOTES] [--commit]
     ISSUE    - the number of the issue to change.
     VOTES    - number of P0 votes to record in the <note> (default: five).
 When PRIORITY is 0 change the <status> to Tentatively Ready instead.
@@ -20,7 +20,6 @@ fi
 
 issue=${1:?}
 priority=${2:?}
-votes=${3:-five}
 do_commit=no
 date=$(date +%Y-%m-%d)
 
@@ -37,10 +36,18 @@ grep -q -E '^<issue .* status="(New|Open)"' $xml || die "Status not New or Open"
 if [[ $priority = 0 ]]
 then
 
+  votes="$3"
+  if [ -n "$votes" ] && [ "${votes:0:1}" != "-" ]
+  then
+    shift # $3 looks like a valid string for number of votes
+  else
+    votes=five # minimum number of P0 votes needed for Tentatively Ready
+  fi
+
   sed -i -e '/^<issue /s/ status=".*">$/ status="Tentatively Ready">/' $xml
   bin/add_note.sh $issue "Reflector poll" - <<< "Set status to Tentatively Ready after $votes votes in favour during reflector poll."
 
-  do_commit=$([[ $4 == --commit ]] && echo yes)
+  do_commit=$([[ $3 == --commit ]] && echo yes)
 
 else
 
