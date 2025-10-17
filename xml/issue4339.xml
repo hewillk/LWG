@@ -6,7 +6,7 @@
 <section><sref ref="[exec.task]"/></section>
 <submitter>Dietmar Kühl</submitter>
 <date>31 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -39,6 +39,14 @@ is a <code>variant</code> which only ever stores an
 reported via the awaiter return from <code>yield_value</code>).
 Thus, the <code>variant</code> can be replaced with an
 <code>exception_ptr</code>.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"P/R is incomplete - also needs to update at least `promise_type::uncaught_exception()`."
 </p>
 </discussion>
 

@@ -6,7 +6,7 @@
 <section><sref ref="[task.promise]"/></section>
 <submitter>Dietmar Kühl</submitter>
 <date>01 Sep 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -29,6 +29,11 @@ stop source. The fix is to show the stop source as an optionally
 present member of of the operation state and it should be of type
 <code>std::optional&lt;stop_source_type&gt;</code> to imply that
 it is only created when accessed.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
 </p>
 </discussion>
 
