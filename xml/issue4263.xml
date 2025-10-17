@@ -6,7 +6,7 @@
 <section><sref ref="[format]"/></section>
 <submitter>Jiang An</submitter>
 <date>14 May 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -22,6 +22,14 @@ even if the implementation supports formatted contents whose lengths are greater
 `SIZE_MAX`, the length can't be correctly returned. Perhaps we need to either precisely 
 specify the return value as modulo arithmetic seems undesired, or specify that an 
 exception is thrown.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+Victor thinks it should be an exception.
 </p>
 </discussion>
 

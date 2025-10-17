@@ -6,7 +6,7 @@
 <section><sref ref="[string.find]"/></section>
 <submitter>Jiang An</submitter>
 <date>7 May 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -21,6 +21,14 @@ it is unclear whether such uses are intentionally rejected.
 <p/>
 Perhaps the requirements on `from_range_t` constructor, `insert_range` and `assign_range` should be made optional, 
 although these operations should have specified semantics whenever being well-formed in immediate contexts.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"We keep adding container requirements, cleaning up the adaptors might need a paper."
 </p>
 </discussion>
 
