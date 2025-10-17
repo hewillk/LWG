@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4362" status="New">
+<issue num="4362" status="Tentatively NAD">
 <title>Inconsistent usage of `constexpr` for `inplace_stop_token` and `inplace_stop_source`</title>
 <section>
 <sref ref="[stoptoken.inplace]"/>
@@ -32,6 +32,13 @@ synchronisation/atomic operations.
 Now that `std::atomic` operations are now `constexpr`, it may be possible/appropriate 
 for `stop_requested()` on both `inplace_stop_source` and `inplace_stop_token` to also 
 be declared `constexpr`.
+</p>
+<note>2025-10-17; Reflector poll. Status changed: New &rarr; Tentatively NAD.</note>
+<p>
+This allows constant-initializing a token, it's basically a constructor.
+Other member functions don't need to be constexpr,
+similar to how `std::mutex::lock()` doesn't need to be constexpr
+for constant-init of `std::mutex` to be useful.
 </p>
 </discussion>
 
