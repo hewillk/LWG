@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4398" status="New">
+<issue num="4398" status="Tentatively Ready">
 <title>`enable_nonlocking_formatter_optimization` should be disabled for container adaptors</title>
 <section><sref ref="[queue.syn]"/><sref ref="[stack.syn]"/></section>
 <submitter>Tomasz Kamiński</submitter>
@@ -43,6 +43,12 @@ Set priority to 2 after reflector poll.
 <p>
 This is a duplicate of LWG <iref ref="4146"/>,
 with a different proposed resolution.
+</p>
+
+
+<note>2025-10-17; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 
 </discussion>
