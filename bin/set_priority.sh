@@ -21,7 +21,7 @@ fi
 issue=${1:?}
 priority=${2:?}
 votes=${3:-five}
-do_commit=$([[ $4 == --commit ]] && echo yes)
+do_commit=no
 date=$(date +%Y-%m-%d)
 
 xml=xml/issue$issue.xml
@@ -40,10 +40,8 @@ then
   sed -i -e '/^<issue /s/ status=".*">$/ status="Tentatively Ready">/' $xml
   bin/add_note.sh $issue "Reflector poll" - <<< "Set status to Tentatively Ready after $votes votes in favour during reflector poll."
 
-  if [[ $do_commit == yes ]]
-  then
-    git commit -m "Set $issue to Tentatively Ready" $xml
-  fi
+  do_commit=$([[ $4 == --commit ]] && echo yes)
+
 else
 
   grep -q '<priority>99</priority>' $xml || die "Priority already set"
@@ -51,4 +49,15 @@ else
   sed -i -e '/^<priority>99</s/<priority>99</<priority>'$priority'</' $xml
   bin/add_note.sh $issue "Reflector poll" - <<< "Set priority to $priority after reflector poll."
 
+fi
+
+# A final "-" argument means read some more text from stdin:
+if [ "${!#}" = "-" ]
+then
+  bin/add_note.sh $issue -
+fi
+
+if [[ $priority = 0 ]] && [[ $do_commit == yes ]]
+then
+  git commit -m "Set $issue to Tentatively Ready" $xml
 fi
