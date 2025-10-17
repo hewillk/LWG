@@ -9,7 +9,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>24 Sep 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -45,6 +45,14 @@ int main() {
 <p>
 Since these pseudo-mutators have constraints, it is reasonable to further require constant
 expressions.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+`operator+=` changed between <paper num="P2781R4"/> and <paper num="P2781R5"/>, intent is unclear.
 </p>
 </discussion>
 

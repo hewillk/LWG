@@ -9,12 +9,24 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>26 Sep 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
 `std::simd::basic_vec` and `std::simd::basic_mask` are ranges since <paper num="P3480R6"/>, 
 it is reasonable to enable range access utilities when introducing <code>&lt;simd&gt;</code>.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"This will be the first time we add the free-function begn/end interface to support a type where `end` returns a sentinel.
+I would not want to set precedent here without at least taking the time to think about it, and acknowledge a deliberate intent."
+</p>
+<p>
+"The intent has been deliberate since <paper num="P0184R0"/>."
 </p>
 </discussion>
 

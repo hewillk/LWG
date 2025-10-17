@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4335" status="New">
+<issue num="4335" status="LEWG">
 <title><code>task</code> shadows the environment's allocator</title>
 <section><sref ref="[task.promise]"/></section>
 <submitter>Dietmar Kühl</submitter>
 <date>31 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -26,6 +26,11 @@ environment may provide an allocator which is incompatible with the
 allocator type used by the coroutine. It may be possible to use the
 receiver's allcoator if it is convertible to the allocator type
 used by the coroutine and to produce a compile-time error otherwise.
+</p>
+
+<note>2025-10-17; Reflector poll. Status changed: New &rarr; LEWG.</note>
+<p>
+Set priority to 2 after reflector poll. Send to LEWG.
 </p>
 </discussion>
 

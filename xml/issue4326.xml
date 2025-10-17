@@ -8,7 +8,7 @@
 </section>
 <submitter>Lewis Baker</submitter>
 <date>25 Aug 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -35,6 +35,14 @@ support for customizing `forwarding_query_t` by inheriting from it.
 Remove the rule that checks for inheritance from `forwarding_query_t`. Any query can already 
 customize `forwarding_query_t` by defining a `query(forwarding_query_t)` member function, so 
 there is no loss of functionality from doing this and it would simplify the design.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"The fact that we didn't use customization by derivation yet doesn't mean we should remove that customization mechanism."
 </p>
 </discussion>
 

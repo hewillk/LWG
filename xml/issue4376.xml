@@ -8,7 +8,7 @@
 </section>
 <submitter>Matthias Kretz</submitter>
 <date>15 Sep 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -51,6 +51,14 @@ is useful for different architectures. If we require
 any <tt>vec&lt;long long&gt;</tt> would ever be, that's just brittle and 
 unnecessary template bloat.</p></li>
 </ol>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"Should be addressed together with <iref ref="4238"/>."
+</p>
 </discussion>
 
 <resolution>
