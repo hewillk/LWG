@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4403" status="New">
+<issue num="4403" status="Tentatively Ready">
 <title>`simd::basic_vec` CTAD misses difference type casting</title>
 <section>
 <sref ref="[simd.ctor]"/>
@@ -21,6 +21,12 @@ be implicitly converted to <code><i>simd-size-type</i></code>, which is a signed
 It is necessary to perform difference type casting here, and the narrowing
 conversion will still correctly be rejected due to the constructor's constraints.
 </p>
+
+<note>2025-10-17; Reflector poll</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+
 </discussion>
 
 <resolution>
