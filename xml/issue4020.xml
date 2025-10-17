@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4020" status="New">
+<issue num="4020" status="Tentatively Ready">
 <title><tt>extents::<i>index-cast</i></tt> weirdness</title>
 <section><sref ref="[mdspan.extents.expo]"/></section>
 <submitter>Casey Carter</submitter>
@@ -39,6 +39,14 @@ This function returns <tt>T</tt> when passed an rvalue of <i>cv</i>-unqualified 
 but <tt>index_type</tt> when passed a <i>cv</i>-qualified and/or lvalue argument of any integral type. It 
 would seem more consistent and easier to reason about if 9.1 was instead conditional on 
 <tt>remove_cvref_t&lt;OtherIndexType&gt;</tt>.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after eight votes in favour during reflector poll.
+</p>
+<p>
+"Doesn't matter in this case, but logically `decay_t` seems like a better fit."
 </p>
 </discussion>
 
