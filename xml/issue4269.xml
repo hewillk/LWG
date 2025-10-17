@@ -72,6 +72,9 @@ Set status to Tentatively Ready after six votes in favour during reflector poll.
 Fixed misplaced `)` in the (6.1) change as pointed out on reflector,
 and rebased on <paper num="N5014"/>.
 </p>
+<p>
+"I remain inconvinced that this actually matters given the equivalence relation requirement."
+</p>
 </discussion>
 
 <resolution>
