@@ -37,14 +37,8 @@ grep -q -E '^<issue .* status="(New|Open)"' $xml || die "Status not New or Open"
 if [[ $priority = 0 ]]
 then
 
-  sed -i -e '/^<issue /s/ status=".*">$/ status="Tentatively Ready">/' \
-         -e '/<\/discussion>$/i\
-\
-<note>'$date'; Reflector poll</note>\
-<p>\
-Set status to Tentatively Ready after '$votes' votes in favour during reflector poll.\
-</p>\
-' $xml
+  sed -i -e '/^<issue /s/ status=".*">$/ status="Tentatively Ready">/' $xml
+  bin/add_note.sh $issue "Reflector poll" - <<< "Set status to Tentatively Ready after $votes votes in favour during reflector poll."
 
   if [[ $do_commit == yes ]]
   then
@@ -54,13 +48,7 @@ else
 
   grep -q '<priority>99</priority>' $xml || die "Priority already set"
 
-  sed -i -e '/^<priority>99</s/<priority>99</<priority>'$priority'</' \
-         -e '/<\/discussion>$/i\
-\
-<note>'$date'; Reflector poll</note>\
-<p>\
-Set priority to '$priority' after reflector poll.\
-</p>\
-' $xml
+  sed -i -e '/^<priority>99</s/<priority>99</<priority>'$priority'</' $xml
+  bin/add_note.sh $issue "Reflector poll" - <<< "Set priority to $priority after reflector poll."
 
 fi

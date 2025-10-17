@@ -27,8 +27,11 @@ fi
 text=''
 if [ "$3" = "-" ]
 then
-  echo "Enter additional discussion (followed by EOF, i.e. Ctrl-D)."
-  echo "This will be enclosed in <p> after the new <note>."
+  if [ -t 0 ] # stdin is a terminal
+  then
+    echo "Enter additional discussion (followed by EOF, i.e. Ctrl-D)."
+    echo "This will be enclosed in <p> after the new <note>."
+  fi
   while read line
   do
     text="$(printf "%s%s\\\n" "$text" "$line")"
@@ -42,6 +45,7 @@ fi
 date=$(date +%Y-%m-%d)
 note=$(printf "<note>%s%s; %s</note>" "$prefix" "$date" "$note")
 
-sed -i "/<\/discussion/i\
-${note}${text}
+sed -i '/<\/discussion>$/i\
+\
+'"${note}${text}
 " $xml
