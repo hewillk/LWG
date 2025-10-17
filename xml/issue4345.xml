@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4345" status="New">
+<issue num="4345" status="Tentatively Ready">
 <title><code>task::promise_type::return_value</code> default template parameter</title>
 <section><sref ref="[task.promise]"/></section>
 <submitter>Dietmar Kühl</submitter>
@@ -17,6 +17,11 @@ would enable use of <code>co_return { ... }</code> which would be
 consistent with normal <code>return</code> statements. This feature
 was not discussed in the design paper but based on the LEWG discussion
 on 2025-08-26 it is considered to be more a bug fix than a new feature.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 </discussion>
 
