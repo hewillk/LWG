@@ -39,6 +39,10 @@ because it's in a different subclause (<sref ref="[list.capacity]"/>).
 We can fix that though.
 </p>
 
+<note>2025-10-17; Comment from Nevin.</note>
+<p>
+`deque::resize` invalidates all iterators if it causes a map reallocation.
+</p>
 </discussion>
 
 <resolution>
