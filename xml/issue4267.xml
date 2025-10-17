@@ -68,6 +68,13 @@ is `true` for at least one <tt>T<sub><i>i</i></sub></tt>.</ins>
 
 <note>2025-10-15; Jonathan provides new wording</note>
 
+<p>
+I don't think we care about uses-allocator construction of references in general.
+You can't construct a reference using `allocator_traits::construct` nor put references in containers.
+For a `std::pair` containing a reference, I think `make_obj_using_allocator` and `uses_allocator_construction_args` work fine.
+The problem only exists in the `std::tuple` wording where we say that the elements are constructed using uses-allocator construction.
+So let's just fix that.
+</p>
 </discussion>
 
 <resolution>
