@@ -13,7 +13,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <ctime>
+#include <chrono>
+#include <format>
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -114,13 +115,8 @@ int main(int argc, char const * argv[]) {
          if(eod == std::string::npos) {
              throw bad_issue_file{filename, "Unable to find end of discussion"};
          }
-         std::time_t t{ std::time(nullptr) };
-         std::tm utc = *std::gmtime(&t);
-         char date[11]; // YYYY-mm-dd + null
-         if(std::strftime(&date[0], sizeof date, "%Y-%m-%d", &utc) != (sizeof date - 1))
-            throw std::logic_error("Datestamp size is borked");
          std::ostringstream note;
-         note << "<note>" << date;
+         note << "<note>" << std::format("{:%Y-%m-%d}", std::chrono::system_clock::now());
          if (descr.size()) {
             note << ' ' << descr;
             if (descr.back() != '.')
