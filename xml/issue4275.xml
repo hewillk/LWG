@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4275" status="New">
+<issue num="4275" status="Tentatively Ready">
 <title>`std::dynamic_extent` should also be defined in <tt>&lt;mdspan&gt;</tt></title>
 <section>
 <sref ref="[mdspan.syn]"/>
@@ -53,6 +53,11 @@ namespace std {
 Set priority to 3 after reflector poll.
 </p>
 
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after eight votes in favour during reflector poll.
+</p>
 </discussion>
 
 <resolution>
