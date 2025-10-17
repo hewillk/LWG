@@ -8,7 +8,7 @@
 </section>
 <submitter>S. B. Tam</submitter>
 <date>18 Jun 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -22,6 +22,14 @@ The specification of `codecvt::do_in` and `codecvt::do_out` is unclear, and poss
 <li><p>the specification talks about "the input sequence [from, from_next)", but `from_next` is supposed to be an out parameter. 
 I think it should say "[from, from_end)" instead.</p></li>
 </ol>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"first element of the input that was not converted" doesn't make sense if there is no such element; similarly for the "first unchanged element".
+</p>
 </discussion>
 
 <resolution>

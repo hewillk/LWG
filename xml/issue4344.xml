@@ -6,7 +6,7 @@
 <section><sref ref="[exec.affine.on]"/></section>
 <submitter>Dietmar Kühl</submitter>
 <date>01 Sep 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -21,6 +21,11 @@ if the implementation can determine if a sender completed already
 on the correct execution agent it should be allowed to avoid
 scheduling. A specification should provide enough lattitude to
 allow that.
+</p>
+
+<note>2025-10-17; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
 </p>
 </discussion>
 
