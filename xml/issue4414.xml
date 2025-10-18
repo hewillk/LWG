@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4414" status="New">
+<title>&sect;[simd.traits] `rebind` and `resize` reference a `type` member that doesn't exist</title>
+<section><sref ref="[simd.traits]"/></section>
+<submitter>Matthias Kretz</submitter>
+<date>15 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+In <sref ref="[simd.traits]"/> `rebind` and `resize` say "<tt><i>deduce-abi-t</i>&lt;T, V::size()&gt;</tt> 
+has a member type `type`". But <tt><i>deduce-abi-t</i></tt> is specified in 
+<sref ref="[simd.expos.abi]"/> p4-5 as an alias that is either defined or not.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[simd.syn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class V&gt; struct rebind { using type = <i>see below</i>; };
+</pre>
+<blockquote>
+<p>
+-4- The member `type` is present if and only if
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(4.1) &mdash; `V` is a data-parallel type,
+</p></li>
+<li><p>
+(4.2) &mdash; `T` is a vectorizable type, and
+</p></li>
+<li><p>
+(4.3) &mdash; <tt><i>deduce-abi-t</i>&lt;T, V::size()&gt;</tt> <del>has a member type `type`</del>
+<ins>is defined</ins>.
+</p></li>
+</ol>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;<i>simd-size-type</i> N, class V&gt; struct resize { using type = <i>see below</i>; };
+</pre>
+<blockquote>
+<p>
+-7- Let `T` denote [&hellip;]
+<p/>
+-8- The member `type` is present if and only if
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(8.1) &mdash; `V` is a data-parallel type, and
+</p></li>
+<li><p>
+(8.2) &mdash; <tt><i>deduce-abi-t</i>&lt;T, N&gt;</tt> <del>has a member type `type`</del>
+<ins>is defined</ins>.
+</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
