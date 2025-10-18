@@ -15,7 +15,7 @@ proposed resolution did not include a change to `__cpp_lib_ranges_indices`,
 which was added in Sofia by <paper num="P3060R3"/>
 (which was after the issue was opened).
 
-It also doesn't change `__cpp_lib_constexpr_utility, and probably should do.
+It also doesn't change `__cpp_lib_constexpr_utility`, and probably should do.
 
 It doesn't change `__cpp_lib_tuple_like`,
 but that's less clear whether it should do.
