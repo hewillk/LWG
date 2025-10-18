@@ -36,9 +36,55 @@ Set priority to 3 after reflector poll.
 <p>
 "NAD, this was just a GCC bug."
 </p>
+
+<note>2025-10-18; Arthur provides wording</note>
+
 </discussion>
 
 <resolution>
+
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>
+Modify <sref ref="[tab:meta.unary.prop]"/>, Table 54 Type property predicates,
+as indicated:
+</p>
+
+<table style="border-spacing: 4em; border-style: none; text-align: center">
+<tr>
+<th>Template</th><th>Condition</th><th>Preconditions</th>
+</tr>
+<tr><td>...</td><td>...</td><td>...</td></tr>
+<tr style="text-align: left; vertical-align: top">
+<td>
+<pre>
+template&lt;class T, class... Args&gt;
+struct is_nothrow_constructible;
+</pre>
+</td>
+<td>
+<code>is_constructible_v&lt;T, Args...&gt;</code> is `true` and
+the variable definition for `is_constructible`, as defined below,
+<ins>
+contains no potentially-throwing expression (<sref ref="[except.spec]"/>)
+</ins>
+<del>is known not to throw any exceptions
+(<sref ref="[expr.unary.noexcept]"/>)</del>.
+</td>
+<td>
+`T` and all types in the template parameter pack `Args` shall be complete types,
+<i>cv</i> `void`, or arrays of unknown bound.
+</td>
+</tr>
+<tr><td>...</td><td>...</td><td>...</td></tr>
+</table>
+</li>
+</ol>
+
 </resolution>
 
 </issue>
