@@ -57,7 +57,9 @@ auto parse_date(std::istream & temp) -> std::chrono::year_month_day {
 auto report_date_file_last_modified(std::filesystem::path const & filename, lwg::metadata const& meta) -> std::chrono::year_month_day {
    using namespace std::chrono;
    system_clock::time_point t;
-   int id = lwg::stoi(filename.filename().stem().native().substr(5));
+   // NB: Cannot use `native()` instead of `string()`, because on Windows that
+   // would result in std::wstring:
+   int id = lwg::stoi(filename.filename().stem().string().substr(5));
    // Use the Git commit date of the file if available.
    if (auto it = meta.git_commit_times.find(id); it !=  meta.git_commit_times.end())
       t = system_clock::from_time_t(it->second);
