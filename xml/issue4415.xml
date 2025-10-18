@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4415" status="New">
+<title>`task::promise_type::uncaught_exception` seems to be misnamed</title>
+<section><sref ref="[task.promise]"/></section>
+<submitter>Jiang An</submitter>
+<date>17 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+According to <sref ref="[dcl.fct.def.coroutine]"/>, a function of name `unhandled_exception` 
+may be called by the language mechanisms. However, 
+<tt>std::execution::task&lt;T, Environment&gt;::promise_type</tt> has an 
+`uncaught_exception function` instead, which won't be implicitly called.
+<p/>
+In <paper num="P3552R3"/>, `unhandled_exception` was discussed, but the wording specified 
+`uncaught_exception`, which looks like a mistake. Moreover, the paper didn't talk about 
+the status of `uncaught_exception` in the zombie name list ([tab:zombie.names.std]). 
+Perhaps `unhandled_exception` is the correct function name.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[task.promise]"/> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std::execution {
+  template&lt;class T, class Environment&gt;
+  class task&lt;T, Environment&gt;::promise_type {
+  public:
+    [&hellip;]
+    void <del>uncaught</del><ins>unhandled</ins>_exception();
+    coroutine_handle&lt;&gt; unhandled_stopped();    
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+void <del>uncaught</del><ins>unhandled</ins>_exception();
+</pre>
+<blockquote>
+<p>
+-12- <i>Effects</i>: If the signature `set_error_t(exception_ptr)` is not an element of `error_types`, calls
+`terminate()` (<sref ref="[except.terminate]"/>). Otherwise, stores `current_exception()` into <tt><i>errors</i></tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
