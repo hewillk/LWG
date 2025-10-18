@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4349" status="New">
+<issue num="4349" status="Tentatively Ready">
 <title><code>task</code> is not actually started lazily</title>
 <section><sref ref="[task.promise]"/></section>
 <submitter>Dietmar Kühl</submitter>
@@ -26,6 +26,11 @@ the <code>task</code> gets <code>start()</code>ed from the correct
 execution context. This approach has the advantage of avoiding
 unnecessary scheduling operations for the likely common case when
 <code>task</code>s are started from the correct context.
+</p>
+
+<note>2025-10-18; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 </discussion>
 
