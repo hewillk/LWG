@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4413" status="New">
+<title>Unused/left-over `simd::alignment` specialization for `basic_mask`</title>
+<section><sref ref="[simd.traits]"/></section>
+<submitter>Matthias Kretz</submitter>
+<date>15 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[simd.traits]"/> describes a `value` member for 
+<tt>simd::alignment&lt;basic_mask&lt;&hellip;&gt;, bool&gt;</tt>. 
+This was used for loads and stores for masks from/to arrays of `bool`. 
+However, these load/store functions were removed after `bitset`/`unsigned_integral` 
+conversions were introduced. This left-over TS wording should be removed.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[simd.syn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class U = typename T::value_type&gt; struct alignment { <i>see below</i> };
+</pre>
+<blockquote>
+<p>
+-1- <tt>alignment&lt;T, U&gt;</tt> has a member `value` if and only if
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<del>(1.1) &mdash; `T` is a specialization of `basic_mask` and `U` is `bool`, or</del>
+</p></li>
+<li><p>
+<del>(1.2) &mdash;</del> `T` is a specialization of `basic_vec` and `U` is a vectorizable type.
+</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
