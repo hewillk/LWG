@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4420" status="New">
+<title>Stores in [simd.loadstore] are overconstrained</title>
+<section><sref ref="[simd.loadstore]"/></section>
+<submitter>Matthias Kretz</submitter>
+<date>15 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+This is related to <a href="https://github.com/cplusplus/nbballot/issues/860">https://github.com/cplusplus/nbballot/issues/860</a>.
+<p/>
+<sref ref="[simd.loadstore]"/> constrains `unchecked_store` and `partial_store` with
+<tt>indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</tt> / 
+<tt>indirectly_writable&lt;I, T&gt;</tt>.
+<p/>
+This is false for iterators of ranges of `float16_t` and a `value_type T = float`.
+Consequently, even with `flag_convert` the following is ill-formed:
+</p>
+<blockquote><pre>
+void f(std::span&lt;std::float16_t&gt; data, std::simd::vec&lt;float&gt; v) {
+  unchecked_store(v, data, std::simd::flag_convert);
+}
+</pre></blockquote>
+<p>
+However, the intent was for `flag_convert` to opt into lossy conversions. This
+works for every other vectorizable type, except for `float16_t`.
+<p/>
+This issue is related to LWG <iref ref="4393"/>. Maybe it would be useful to introduce an
+exposition-only concept that stores and scatters can then use.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>In <sref ref="[simd.syn]"/> and <sref ref="[simd.loadstore]"/> replace all occurrences of</p>
+<blockquote><pre>
+indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;
+</pre></blockquote>
+<p>
+with
+</p>
+<blockquote><pre>
+indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, <del>T</del><ins>ranges::range_value_t&lt;R&gt;</ins>&gt;
+</pre></blockquote>
+<p>
+and all occurrences of
+</p>
+<blockquote><pre>
+indirectly_writable&lt;I, T&gt;
+</pre></blockquote>
+<p>
+with
+</p>
+<blockquote><pre>
+indirectly_writable&lt;I, <del>T</del><ins>iter_value_t&lt;I&gt;</ins>&gt;
+</pre></blockquote>
+
+</li>
+
+<li><p>Modify <sref ref="[simd.loadstore]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; &amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r, flags&lt;Flags...&gt; f = {});
+[&hellip;]
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  requires indirectly_writable&lt;I, T&gt;
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-11- Let [&hellip;]
+<p/>
+<ins>-?- <i>Constraints</i>: The expression <tt>static_cast&lt;ranges::range_value_t&lt;R&gt;&gt;(x)</tt>
+where `x` is an object of type `T` is well-formed.</ins>
+<p/>
+-12- <i>Mandates</i>: If `ranges::size(r)` is a constant expression then 
+<tt>ranges::size(r) &ge; <i>simd-size-v</i>&lt;T, Abi&gt;</tt>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; &amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r, flags&lt;Flags...&gt; f = {});
+[&hellip;]
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  requires indirectly_writable&lt;I, T&gt;
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-15- Let [&hellip;]
+<p/>
+<ins>-?- <i>Constraints</i>: The expression <tt>static_cast&lt;iter_value_t&lt;I&gt;&gt;(x)</tt>
+where `x` is an object of type `T` is well-formed.</ins>
+<p/>
+-16- <i>Mandates</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
