@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4416" status="New">
+<title><tt>&lt;meta&gt;</tt> should include <tt>&lt;compare&gt;</tt></title>
+<section><sref ref="[meta.syn]"/></section>
+<submitter>Jiang An</submitter>
+<date>15 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Some inclusions from <tt>&lt;meta&gt;</tt> were removed between <paper num="P2996R7"/> and <paper num="P2996R8"/>. 
+However, given `std::meta::member_offsets` has <tt>operator&lt;=&gt;</tt>, perhaps we should still include 
+<tt>&lt;compare&gt;</tt> in <tt>&lt;meta&gt;</tt>. 
+This is also noticed in <paper num="P3429R1"/>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[meta.syn]"/>, header <tt>&lt;meta&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+<ins>#include &lt;compare&gt; // <i>see <sref ref="[compare.syn]"/></i></ins>
+#include &lt;initializer_list&gt; // <i>see <sref ref="[initializer.list.syn]"/></i>
+
+namespace std {
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
