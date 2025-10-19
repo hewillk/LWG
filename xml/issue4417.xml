@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4417" status="New">
+<title>`views::indices` is underconstrained</title>
+<section><sref ref="[range.iota.overview]"/></section>
+<submitter>Hewill Kang</submitter>
+<date>15 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Whether an integer-class type satisfies `weakly_incrementable` is unspecified according to
+<sref ref="[range.iota.view]"/>. For example, the library may provide a member
+type alias `difference_type` for the integer-class type to make it `weakly_incrementable`, or not.
+<p/>
+If the latter, then <code>views::iota(<i>integer-class-type</i>(0))</code> is always ill-formed because
+<code>iota_view&lt;W, Bound&gt;</code> requires `W` to be `weakly_incrementable`.
+<p/>
+However, unlike `views::iota`, `views::indices` unconditionally accepts integer-class types,
+which will lead to a hard error in the function body if the integer-class type is not 
+`weakly_incrementable`, which is true for both libstdc++ and MSVC-STL.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[range.iota.overview]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-4- The name `views::indices` denotes a customization point object (<sref ref="[customization.point.object]"/>).
+Given subexpression `E`, let `T` be <code>remove_cvref_t&lt;decltype((E))&gt;</code>.
+`views::indices(E)` is expression-equivalent to `views::iota(T(0), E)` if
+<code><i>is-integer-like</i>&lt;T&gt;</code> is `true` <ins>and `T` models `weakly_incrementable`</ins>,
+and ill-formed otherwise.
+</p>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
