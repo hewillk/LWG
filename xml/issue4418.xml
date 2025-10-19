@@ -28,8 +28,8 @@ std::generator&lt;int&gt; f()
 </blockquote>
 <p>
 This doesn't compile because the overload listed in <sref ref="[coro.generator.promise]"/> p13 
-requires <tt>convertible_to&lt;ranges::range_reference_t&lt;R&gt;, yielded&gt;</tt> or 
-<tt>convertible_to&lt;int&amp;, int&amp;&amp;&gt;</tt> which isn't satisfied.
+requires <tt>convertible_to&lt;ranges::range_reference_t&lt;R&gt;, yielded&gt;</tt> (i.e.  
+<tt>convertible_to&lt;int&amp;, int&amp;&amp;&gt;</tt>) which isn't satisfied.
 <p/>
 So it seems clear enough that something got lost in the translation from the design intent to 
 wording. My understanding of the intent is that `co_yield elements_of(rng)` should be 
