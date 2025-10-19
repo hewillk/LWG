@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4421" status="New">
+<title>Clarify the output encoding of `to_chars` for integers</title>
+<section><sref ref="[charconv.to.chars]"/></section>
+<submitter>Jan Schultke</submitter>
+<date>17 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The integer overload of `to_chars` is specified "manually" rather than in terms of `printf`, 
+and it is not clearly stated what encoding the output characters have. Given the existing 
+use of the character literal `'-'` in the <i>Effects</i> element, the intent is presumably 
+to output in the ordinary literal encoding.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[charconv.to.chars]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr to_chars_result to_chars(char* first, char* last, <i>integer-type</i> value, int base = 10);
+</pre>
+<blockquote>
+<p>
+-4- <i>Preconditions</i>: `base` has a value between 2 and 36 (inclusive).
+<p/>
+-5- <i>Effects</i>: The value of `value` is converted to a string of digits in the given base (with no redundant
+leading zeroes) <ins>in the ordinary literal encoding (<sref ref="[lex.charset]"/>)</ins>. Digits in the range 
+10..35 (inclusive) are represented as lowercase characters <tt><ins>'</ins>a<ins>'</ins>..<ins>'</ins>z<ins>'</ins></tt>. If
+`value` is less than zero, the representation starts with `'-'`.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
