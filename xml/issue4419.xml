@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4419" status="New">
+<title>`let_value/error/stopped` should specify the attributes of their senders</title>
+<section><sref ref="[exec.let]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>16 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/346">https://github.com/cplusplus/sender-receiver/issues/346</a>.
+<p/>
+`let_value(sndr, fn)` returns <tt><i>make-sender</i>(<i>let-tag</i>, fn, sndr)</tt>, 
+which means that the `let_value` sender has one child. <sref ref="[exec.adapt.general]"/> bullet (3.2) says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+A parent sender with a single child sender `sndr` has an associated attribute object equal to <tt><i>FWD-ENV</i>(get_env(sndr))</tt>.
+</p>
+</blockquote>
+<p>
+However, `let_value(sndr, fn)` does not know where it will be started or where it will complete in the general case. 
+The function `fn` could return <tt>schedule(<i>some-scheduler</i>)</tt>, making the `let_value` operation complete 
+on <tt><i>some-scheduler</i></tt>. It would be wrong for the `let_value(sndr, fn)` sender to have `sndr`'s completion 
+schedulers or domains.
+<p/>
+`let_value/error/stopped` must define <tt><i>impls-for</i>&lt;let_xxx_t&gt;::<i>get-attrs</i></tt> to return 
+<tt><i>FWD-ENV</i>(get_env(sndr))</tt> except that it handles the <tt>get_completion_scheduler_t&lt;Tag&gt;</tt> 
+(for any completion tag `Tag`) and `get_domain_t` queries specially.</p>
+</discussion>
+
+<resolution>
+
+</resolution>
+
+</issue>
