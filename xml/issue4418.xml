@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4418" status="New">
+<title><tt>co_yield elements_of(vector&lt;int&gt;())</tt> does not compile</title>
+<section><sref ref="[coro.generator.promise]"/></section>
+<submitter>Mathias Stearn</submitter>
+<date>16 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The std::generator proposal (<paper num="P2502"/>) explicitly says that the following example is supposed to work, 
+but it does not compile:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+For convenience, we further propose that `co_yield elements_of(x)` be extended to support yielding the values 
+of arbitrary ranges beyond generators, ie
+</p>
+<blockquote><pre>
+std::generator&lt;int&gt; f()
+{
+  std::vector&lt;int&gt; v = /*... */;
+  co_yield std::ranges::elements_of(v);
+}
+</pre></blockquote>
+</blockquote>
+<p>
+This doesn't compile because the overload listed in <sref ref="[coro.generator.promise]"/> p13 
+requires <tt>convertible_to&lt;ranges::range_reference_t&lt;R&gt;, yielded&gt;</tt> or 
+<tt>convertible_to&lt;int&amp;, int&amp;&amp;&gt;</tt> which isn't satisfied.
+<p/>
+So it seems clear enough that something got lost in the translation from the design intent to 
+wording. My understanding of the intent is that `co_yield elements_of(rng)` should be 
+<em>semantically</em> similar to the following code, but require a specific optimization in the
+case where `rng` is the same type of generator as the current coroutine:
+</p>
+<blockquote><pre>
+for (auto&amp;&amp; x : rng) {
+  co_yield std::forward&lt;decltype(x)&gt;(x);
+}
+</pre></blockquote>
+<p>
+Note that that code <b>does</b> compile correctly where `rng` is a <tt>vector&lt;int&gt;</tt>, so 
+I think the original code should as well.
+<p/>
+Speculation on how this happened: Prior to <paper num="P2529"/>, the <tt>generator&lt;T&gt;</tt> 
+in <paper num="P2502R0"/> was basically the same as <tt>generator&lt;const T&amp;&gt;</tt> where 
+<tt>co_yield elements_of(vector&lt;int&gt;())</tt> <i>does</i> work. After P2529 (which was a 
+design paper w/o wording) was approved by LEWG, <paper num="P2502R1"/> was updated to change the 
+reference type to <tt>T&amp;&amp;</tt>. However, when making the change, I assume that the impact 
+it had on the `elements_of`-non-generator overload of `yield_value` was not considered, so it was 
+unmodified. 
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[coro.generator.promise]"/> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> The following changes would check that `co_yield *i` would match 
+one of the overloads of `yield_value()` described in paragraphs 4 or 6. Alternatively 
+this could be expressed more directly as a helper comment or in prose in a <i>Mandates:</i> 
+element.
+</p>
+</blockquote>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class Ref, class Val, class Allocator&gt;
+  class generator&lt;Ref, Val, Allocator&gt;::promise_type {
+  public:
+    [&hellip;]
+    template&lt;ranges::input_range R, class Alloc&gt;
+      requires convertible_to&lt;ranges::range_reference_t&lt;R&gt;, yielded&gt; <ins>|| 
+               (is_rvalue_reference_v&lt;yielded&gt; &amp;&amp; constructible_from&lt;remove_cvref_t&lt;yielded&gt;, 
+               const remove_reference_t&lt;yielded&gt;&amp;&gt;)</ins>
+        auto yield_value(ranges::elements_of&lt;R, Alloc&gt; r);
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+template&lt;ranges::input_range R, class Alloc&gt;
+  requires convertible_to&lt;ranges::range_reference_t&lt;R&gt;, yielded&gt; <ins>|| 
+           (is_rvalue_reference_v&lt;yielded&gt; &amp;&amp; constructible_from&lt;remove_cvref_t&lt;yielded&gt;, 
+           const remove_reference_t&lt;yielded&gt;&amp;&gt;)</ins>
+  auto yield_value(ranges::elements_of&lt;R, Alloc&gt; r);
+</pre>
+<blockquote>
+<p>
+-13- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+auto nested = [](allocator_arg_t, Alloc, ranges::iterator_t&lt;R&gt; i, ranges::sentinel_t&lt;R&gt; s)
+  -&gt; generator&lt;yielded, void, Alloc&gt; {
+    for (; i != s; ++i) {
+      co_yield <del>static_cast&lt;yielded&gt;(</del>*i<del>)</del>;
+    }
+  };
+return yield_value(ranges::elements_of(nested(
+  allocator_arg, r.allocator, ranges::begin(r.range), ranges::end(r.range))));
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
