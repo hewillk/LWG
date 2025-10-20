@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4416" status="New">
+<issue num="4416" status="Tentatively Ready">
 <title><tt>&lt;meta&gt;</tt> should include <tt>&lt;compare&gt;</tt></title>
 <section><sref ref="[meta.syn]"/></section>
 <submitter>Jiang An</submitter>
@@ -14,6 +14,11 @@ Some inclusions from <tt>&lt;meta&gt;</tt> were removed between <paper num="P299
 However, given `std::meta::member_offsets` has <tt>operator&lt;=&gt;</tt>, perhaps we should still include 
 <tt>&lt;compare&gt;</tt> in <tt>&lt;meta&gt;</tt>. 
 This is also noticed in <paper num="P3429R1"/>.
+</p>
+
+<note>2025-10-20; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
 </p>
 </discussion>
 
