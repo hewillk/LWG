@@ -6,7 +6,7 @@
 <section><sref ref="[pointer.traits]"/></section>
 <submitter>Alisdair Meredith</submitter>
 <date>21 Jun 2020</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -42,6 +42,8 @@ nodes, and stored as <tt>end</tt> sentinel directly in the <tt>list</tt> object)
 Should there be an Annex C entry noting that program-defined specializations
 need to add `constexpr` to be conforming?
 </p>
+
+<note>2025-10-20; Set priority to 4 based on age of issue and lack of recent interest.</note>
 </discussion>
 
 <resolution>

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4050" status="New">
+<issue num="4050" status="Tentatively NAD">
 <title>Should <tt>views::iota(0) | views::take(5)</tt> be <tt>views::iota(0, 5)</tt>?</title>
 <section><sref ref="[range.take.overview]"/><sref ref="[range.take.overview]"/></section>
 <submitter>Hewill Kang</submitter>
@@ -44,6 +44,24 @@ std::ranges::sized_range auto repeat = std::views::repeat(0) | take_and_drop; //
 <p>
 If we do account for the infinity of <tt>repeat_view</tt>, then I see no reason not to do it for <tt>iota_view</tt>, 
 as this is obviously intuitive and can indeed be considered an enhancement.
+</p>
+
+<note>2025-10-20; Reflector poll; Status changed: New &rarr; Tentatively NAD.</note>
+<p>
+"This changes meaning of existing C++20 for unclear benefit.
+This would need a paper."
+</p>
+<p>
+"Why does `iota(0, 10) | take(5)` give you `iota(0, 5)` but `iota(0) | take(5)` doesn't?"
+</p>
+<p>
+"IIRC there was opposition to <paper num="P1739"/> introducing any kind of
+special cases in the adaptor objects. What got consensus was only the
+'specialisations' that preserve the exact type of the underlying range.
+Thus `iota(0, 10)` &rarr; `iota(0, 5)` was fine, but `iota(0)` &rarr; `iota(0, 5)`
+would not have been.
+I still think that all changes that simplify the return types are helpful,
+but it would certainly be a breaking change now."
 </p>
 </discussion>
 
