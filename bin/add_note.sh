@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Add notes to an issue.
 # Usage: add_note.sh ISSUE [NOTE] [-]
 # If NOTE is present, a <note>YYYY-MM-DD; NOTE</note> element will be added.
