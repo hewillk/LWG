@@ -9,7 +9,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>27 Sep 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -26,6 +26,8 @@ Thus, it's worth making the corresponding free functions available when introduc
 Approved as Tentatively Ready, but this is a duplicate of <iref ref="3625"/>
 which will be resolved by <paper num="P3016R6"/>. So move Status New &rarr; Open.
 </p>
+
+<note>2025-10-20; Set to same priority as <iref ref="3625"/> (i.e. P3).</note>
 
 </discussion>
 
