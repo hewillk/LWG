@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4354" status="New">
+<issue num="4354" status="SG1">
 <title>Reconsider `weakly_parallel` as the default `forward_progress_guarantee`</title>
 <section>
 <sref ref="[exec.get.fwd.progress]"/>
 </section>
 <submitter>Lewis Baker</submitter>
 <date>25 Aug 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -44,6 +44,37 @@ Schedulers that provide `weakly_parallel` (or in future, `concurrent`) forward p
 implementations to be much more aware of the fact that these are the guarantees they are providing and 
 thus could be more expected to customize the `get_forward_progress_guarantee` query to return the 
 respective values.
+</p>
+
+<note>2025-10-20; Reflector poll. Status changed: New &rarr; SG1</note>
+<p>
+Set priority to 1 after reflector poll. Send to SG1 and LEWG.
+</p>
+<p>
+"If there is a default, it should be the weakest possible one.
+If that is an unfortunate choice I’d rather prefer no default and mandate
+that the query gets implemented. Providing a default which is stronger than
+the weakest possible creates logic errors. Accidentally claiming weaker
+than the actual value is only a performance error."
+</p>
+<p>
+"This is tension between the default being promising the least and
+the default being the most likely thing a user wants to do.
+Assuming the least powerful guarantees unless the user has opted in is safer.
+Changing this choice requires going back to LEWG or SG1."
+</p>
+<p>
+"Plenty of reasonable schedulers are weakly parallel at best.
+It's the right default. If your scheduler offers better than
+that, you would naturally remember to customize it."
+</p>
+<p>
+"It seems that the authors of `run_loop::scheduler` did not naturally remember to customize it.
+It's possible the intent was that `run_loop::scheduler` should not offer better
+than `weakly_parallel` forward progress, but it was not discussed in P2300.
+The absence of an explicit implementation of the query could either be
+intentional or an accidental omission.
+Perhaps this is an indication that there should not be a default forward-progress guarantee for schedulers?"
 </p>
 </discussion>
 
