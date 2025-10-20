@@ -6,7 +6,7 @@
 <section><sref ref="[range.utility.conv.to]"/></section>
 <submitter>Hewill Kang</submitter>
 <date>13 Apr 2024</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -25,6 +25,26 @@ was approved in Hagenberg.
 It also conflicts with LWG <iref ref="3722"/>.
 </p>
 
+
+<note>2025-10-20; Reflector poll.</note>
+<p>
+Set priority to 4 after reflector poll. Most votes were "P4 or NAD".
+</p>
+<p>
+"I do not see a motivating example of `input_range` that would produce
+`sized_sentinel_for` for `begin`/`end` but would not be sized itself.
+However, the fix seems correct.
+Would prefer if would check if produced `subrange` is sized,
+instead of using a requires expression."
+</p>
+<p>
+"Might as well do it, even though a `sized_sentinel_for`-but-not-sized
+input range feels like an extreme corner case."
+</p>
+<p>
+"This is just applying the contrived case mentioned in LWG <iref ref="3737"/>
+to `ranges::to`."
+</p>
 </discussion>
 
 <resolution>

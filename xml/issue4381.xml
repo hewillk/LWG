@@ -9,7 +9,7 @@
 </section>
 <submitter>Jens Maurer</submitter>
 <date>23 Sep 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -23,6 +23,14 @@ clarify the core wording accordingly.
 <p/>
 Suggested resolution: Remove <sref ref="[range.utility.conv.to]"/> p3, p4, p5 
 and the respective entry in the synopsis as unimplementable.
+</p>
+
+<note>2025-10-20; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+The core language needs to be fixed so this works.
 </p>
 </discussion>
 

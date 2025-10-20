@@ -6,7 +6,7 @@
 <section><sref ref="[range.prim.empty]"/></section>
 <submitter>Hewill Kang</submitter>
 <date>30 Mar 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -34,6 +34,19 @@ inconsistent with the current wording as no other CPOs have.
 Alternatively, maybe we could move bullets targeting <tt>forward_range</tt>s to the very beginning so that
 <tt>ranges::empty</tt> always has correct semantics with <tt>bool(ranges::begin(t) == ranges::end(t))</tt> when
 applied to <tt>forward_range</tt>s.
+</p>
+
+<note>2025-10-20; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"This is the part of <paper num="P3156"/> that is actually a defect.
+We need to require ranges::empty to actually mean what we think it means.
+Would be reasonable to add a sematic requirement to the `range` concept
+that if `ranges::empty(r)` is well-formed then it does what it should do
+(equal to `bool(begin == end)`, has amortized constant complexity,
+does not modify `r`, is not required to be valid after `begin` for non-forward)."
 </p>
 </discussion>
 

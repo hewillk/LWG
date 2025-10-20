@@ -6,7 +6,7 @@
 <section><sref ref="[projected]"/></section>
 <submitter>Jiang An</submitter>
 <date>30 May 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,14 @@ It seems better to diagnose such misuse, as we are already diagnosing misuse of 
 (<sref ref="[declval]"/>/2). Implementation used to perform such misuse via `std::ranges::iter_move`, 
 but libc++ and libstdc++ have already switched not to do this (see 
 <a href="https://github.com/microsoft/STL/issues/5555">microsoft/STL#5555</a>).
+</p>
+
+<note>2025-10-20; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"NAD, the standard is clear that it can't be used."
 </p>
 </discussion>
 
