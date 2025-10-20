@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4377" status="New">
+<issue num="4377" status="Tentatively Ready">
 <title>Misleading note about lock-free property of `std::atomic_ref`</title>
 <section>
 <sref ref="[atomics.ref.ops]"/>
@@ -43,6 +43,12 @@ In conclusion, this note appears to be a convoluted way of saying that, in order
 that operations on <tt>atomic_ref&lt;T&gt;</tt> are lock-free, the implementation may 
 define `required_alignment` to a value greater than `alignof(T)`. The note should be 
 modified to say this much more clearly.
+</p>
+
+<note>2025-10-20; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after five votes in favour during reflector poll.
+Also ask SG1 to take a look.
 </p>
 </discussion>
 
