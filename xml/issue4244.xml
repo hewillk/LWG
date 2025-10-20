@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4244" status="New">
+<issue num="4244" status="Tentatively NAD">
 <title>Whether the spuriously failed comparison applies to `compare_exchange_strong` is unclear</title>
 <section>
 <sref ref="[atomics.ref.ops]"/><sref ref="[atomics.types.operations]"/>
@@ -41,6 +41,16 @@ strong version should have a stronger guarantee than the weak version.
 <b>Suggested resolution:</b>
 <p/>
 Explicitly specify whether `compare_exchange_strong` can have the spurious failed comparison.
+</p>
+
+<note>2025-10-20; Reflector poll. Status changed: New &rarr; Tentatively NAD.</note>
+<p>
+"The <i>Effects</i>: explain the behaviour, and don't allow for spurious failures."
+</p>
+<p>
+"The <i>Remarks</i>: are normative and are explicitly adding permission to fail
+spuriously. Absent such permission, the specification for strong operations
+is clear and has no spurious failures."
 </p>
 </discussion>
 
