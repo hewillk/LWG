@@ -6,7 +6,7 @@
 <section><sref ref="[futures.unique.future]"/></section>
 <submitter>Agust&iacute;n K-ballo Berg&eacute;</submitter>
 <date>3 Sep 2015</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p><b>Addresses: concurr.ts</b></p>
@@ -61,6 +61,11 @@ For the default behaviour:
 <p/>
 The actual conclusion was to allow either (1) or (4) for now, since they are quite close, but present a very different
 programming mode from (2).
+</p>
+
+<note>2025-10-20; Reflector poll.</note>
+<p>
+Set priority to 4 based on age of issue and apparent lack of interest.
 </p>
 </discussion>
 
