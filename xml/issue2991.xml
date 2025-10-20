@@ -38,9 +38,7 @@ in the synopsis, but not the detailed description. This was pointed out
 during LWG review in Jacksonville.
 The approved paper, <paper num="P008R3"/>, doesn't have it in either place.
 </p>
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <a href="https://wg21.link/n4659">N4659</a>.
 </p>
@@ -82,5 +80,56 @@ variant(const variant&amp; w) <ins>noexcept(<i>see below</i>)</ins>;
 </blockquote>
 </li>
 </ol>
+</superseded>
+
+<note>2025-10-20; Jonathan provides updated wording</note>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="P5014"/>.
+</p>
+
+<ol>
+<li><p>Edit <sref ref="[variant.variant]"/>, class template <tt>variant</tt> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+template &lt;class... Types&gt;
+  class variant {
+  public:
+    // 23.7.3.1, constructors
+    constexpr variant() noexcept(<i>see below</i>);
+    variant(const variant&amp;) <ins>noexcept(<i>see below</i>)</ins>;
+    variant(variant&amp;&amp;) noexcept(<i>see below</i>);
+    [&hellip;]
+  };
+</pre>
+</blockquote>
+</li>
+
+<li><p>Edit <sref ref="[variant.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+variant(const variant&amp; w) <ins>noexcept(<i>see below</i>)</ins>;
+</pre>
+<blockquote>
+<p>
+[&hellip;]
+<p/>
+-8- <i>Remarks:</i> This function is defined as deleted unless
+<tt>is_copy_constructible_v&lt;T<sub><i>i</i></sub>&gt;</tt> is <tt>true</tt> for all <tt><i>i</i></tt>.
+<ins>The exception specification is equivalent to the logical
+<span style="font-variant: small-caps">and</span> of
+<tt>is_nothrow_copy_constructible_v&lt;T<sub><i>i</i></sub>&gt;</tt>
+for all <tt><i>i</i></tt>.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
 </resolution>
 </issue>
