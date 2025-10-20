@@ -6,6 +6,7 @@
 <section><sref ref="[atomics.syn]"/> <sref ref="[atomics.order]"/></section>
 <submitter>Daniel Kr&uuml;gler</submitter>
 <date>19 Jan 2013</date>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -133,6 +134,8 @@ int lookup(class D* p)
 <p>
 Handed over to SG1.
 </p>
+
+<note>2025-10-20; `kill_dependency` is deprecated so set to priority 4</note>
 
 </discussion>
 
