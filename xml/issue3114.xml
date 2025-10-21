@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3114" status="LEWG">
+<issue num="3114" status="SG4">
 <title>[networking.ts] Permit efficient composition when using <tt>DynamicBuffer</tt></title>
 <section><sref ref="[buffer]"/><sref ref="[buffer.stream]"/></section>
 <submitter>Vinnie Falco</submitter>
 <date>18 May 2018</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <b>Addresses: networking.ts</b>
