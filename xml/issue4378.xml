@@ -8,7 +8,7 @@
 </section>
 <submitter>Peter Bindels</submitter>
 <date>16 Sep 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -47,6 +47,29 @@ This moves it inline with the `data()` specification. Given the hardened precond
 <tt>pos &lt;= size()</tt> this does not change behavior for any in-contract access, and we do 
 not define what the feature does when called with broken preconditions. I have been looking at 
 the latter but that will be an EWG paper instead.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"NAD. `begin() + size()` is not dereferenceable and should remain that way."
+</p>
+<p>
+"Saying "if <code>pos &lt;= size()</code> is redundant given the precondition above."
+</p>
+<p>
+"The resolution removes any guarantee that the value at `str[str.size()]`
+is `charT()`. Furthermore, the premise of the issue is incorrect,
+returning the address of a different null terminator not belonging to the
+string would make traversing it with other string operations UB, so it
+has to return a reference to a terminator that's within the same array."
+</p>
+<p>
+"`*(begin() = size())` is UB, but could use `*(data() + size())` instead.
+Personally I'd like `*end()` to be valid, but that's certainly LEWG business
+requiring a paper."
 </p>
 </discussion>
 

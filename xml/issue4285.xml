@@ -8,7 +8,7 @@
 </section>
 <submitter>S. B. Tam</submitter>
 <date>27 Jun 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -34,6 +34,25 @@ to accept additional formats, ambiguity could arise if the locale's format disag
 <p>
 On POSIX systems, it is possible to query the locale's date format using `nl_langinfo(D_FMT)`. 
 Maybe an implementation should be allowed to use that format <b>instead</b> of the one indicated by `date_order()`.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"The current wording of `do_date_order()` suggests it should return one of the
+`dmy`, `mdy`, `ymd`, `ymd`, or `ydm` enumerators as long as the date format
+specified by `%x` has no components except day, month, and year.
+But that fails to consider alternative separators between the components. 
+The `kok_IN` locale uses `"%d-%m-%y" which does not contain
+"other variable components" but still doesn't match any of the fixed formats
+in Table 102.
+We need normative wording allowing `no_order`, instead of just a footnoote,
+and we need to say `do_get_date` only has to use the formats in the table
+when `do_date_order() != no_order`. It should not default to the `mdy` format
+when `do_date_order()` returns `no_order`, because if the `mdy` format is
+correct then it should have returned `mdy`!"
 </p>
 </discussion>
 

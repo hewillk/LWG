@@ -6,7 +6,7 @@
 <section><sref ref="[alg.copy]"/><sref ref="[alg.remove]"/><sref ref="[alg.unique]"/></section>
 <submitter>Alex Guteniev</submitter>
 <date>12 May 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -38,6 +38,28 @@ I think there should be a weaker precondition, like <sref ref="[alg.copy]"/>/2:
 <i>Preconditions</i>: `result` is not in the range `[first, last)`.
 </p>
 </blockquote>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"The proposed resolution is incorrect, because the output iterator could ‘enter’
+the range [first, last) via being incremented. If the output iterator is a
+reverse iterator, it starts writing to the end of [first,last) before we
+need to read from there."
+</p>
+<p>
+"NAD - nothing is broken with the existing constraint. Relaxing it is a design change."
+</p>
+<p>
+"NAD.  The right behavior, if the algorithm runs out of output space,
+is to return the last processed input iterator and the "next spot"
+output iterator.  This is what <paper num="P3179"/>  (parallel ranges algorithms) does
+with its range-as-output algorithms.  I would not want the proposed
+resolution without this change.  Otherwise, we would be introducing
+new UB unnecessarily."
+</p>
 </discussion>
 
 <resolution>

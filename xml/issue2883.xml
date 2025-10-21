@@ -7,7 +7,7 @@
 <section><sref ref="[string.view]"/></section>
 <submitter>Switzerland</submitter>
 <date>3 Feb 2017</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <b>Addresses CH 9</b>
@@ -32,6 +32,9 @@ it is usable to have <tt>string_view</tt> overloads and there might be many plac
 
 <note>2017-07 Toronto Thurs Issue Prioritization</note>
 <p>Status LEWG - they're already looking at this.</p>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
+
 </discussion>
 
 <resolution>

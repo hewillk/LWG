@@ -6,7 +6,7 @@
 <section><sref ref="[alg.merge]"/></section>
 <submitter>Billy Robert O'Neal III</submitter>
 <date>8 Jun 2017</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -21,6 +21,9 @@ compares like this, given that users must be prepared for the fallback "not enou
 
 <note>2017-07 Toronto Monday issue prioritization</note>
 <p>Status to LEWG</p>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
+
 </discussion>
 
 <resolution>

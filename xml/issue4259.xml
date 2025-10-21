@@ -6,7 +6,7 @@
 <section><sref ref="[string.find]"/></section>
 <submitter>Jiang An</submitter>
 <date>5 May 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -63,6 +63,11 @@ else
 <p>
 During reflector discussion of this issue there was a preference to adjust the
 proposed wording to use `s.npos` instead of `size_t(-1)`. 
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
 </p>
 </discussion>
 
