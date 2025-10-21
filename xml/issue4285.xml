@@ -54,9 +54,128 @@ when `do_date_order() != no_order`. It should not default to the `mdy` format
 when `do_date_order()` returns `no_order`, because if the `mdy` format is
 correct then it should have returned `mdy`!"
 </p>
+
+<note>2025-10-21; Jonathan adds wording</note>
+<p>
+This restores the slashes lost by LWG <iref ref="461"/>
+and attempts to make the use and effects of `no_order` more useful.
+It does not attempt to address the problem that `do_date_order()`
+has no access to an `ios_base` object.
+</p>
 </discussion>
 
 <resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[locale.time.get.virtuals]"/> as indicated:</p>
+
+<blockquote>
+<pre>dateorder do_date_order() const;</pre>
+<blockquote>
+<p>-1- <i>Returns</i>:
+An enumeration value indicating the preferred order of components for
+those date formats that are composed of day, month, and year.<del><sup>228</sup></del>
+Returns `no_order` if the date format specified by `'x'`
+<del>
+contains other variable components (e.g., Julian day, week number, week day)
+</del>
+<ins>
+does not match one of the formats in Table [tab:locale.time.get.dogetdate]
+</ins>
+.
+</p>
+<blockquote>
+<del>
+228) This function is intended as a convenience only, for common formats,
+and can return `no_order` in valid locales.
+</del>
+</blockquote>
+</blockquote>
+
+<pre>
+iter_type do_get_time(iter_type s, iter_type end, ios_base&amp; str,
+                      ios_base::iostate&amp; err, tm* t) const;
+</pre>
+<blockquote>[...]</blockquote>
+
+<pre>
+iter_type do_get_date(iter_type s, iter_type end, ios_base&amp; str,
+                      ios_base::iostate&amp; err, tm* t) const;
+</pre>
+<blockquote>
+<p>
+<i>-4- Effects</i>:
+Reads characters starting at s until it has extracted those `tm`
+members and remaining format characters used by
+<code>time_put&lt;&gt;::put</code>
+to produce one of the following formats, or until it encounters an error.
+The format depends on the value returned by `date_order()` as shown in
+Table 102.
+<ins>
+When `do_date_order()` returns `no_order`, it is unspecified whether
+the format shown in the table is used, or whether additional
+implementation-defined formats are accepted.
+</ins>
+</p>
+<p><ins>[<i>Note ?</i>:
+For example, an implementation can accept dates in the format specified by
+`'x'` as well as, or instead of, the format `"%m/%d/%y"`.
+&mdash; <i>end note</i></ins>
+</p>
+<p><del>-5-
+An implementation may also accept additional implementation-defined formats.
+</del>
+</p>
+<p>-6- <i>Returns</i>:
+An iterator pointing immediately beyond the last character recognized as
+possibly part of a valid date.
+</p>
+</blockquote>
+
+<p>Table 102 &mdash; `do_get_date` effects [tab:locale.time.get.dogetdate]</p>
+
+<style>
+table { border-collapse: separate; border-spacing: 0 6px; width: auto; }
+thead, tbody { box-shadow: 0 0 0 1px black; border-spacing: 1em; }
+th, td { padding-left: 0.5em; padding-right: 0.5em; }
+</style>
+
+<table>
+<thead>
+<tr> <th>`date_order()`</th><th>Format</th> </tr>
+</thead>
+<tbody>
+<tr>
+<td>`no_order`</td>
+<td><code>"%m<ins>/</ins>%d<ins>/</ins>%y"</code></td></tr>
+<tr>
+<td>`dmy`</td>
+<td><code>"%d<ins>/</ins>%m<ins>/</ins>%y"</code></td>
+</tr>
+<tr>
+<td>`mdy`</td>
+<td><code>"%m<ins>/</ins>%d<ins>/</ins>%y"</code></td>
+</tr>
+<tr>
+<td>`ymd`</td>
+<td><code>"%y<ins>/</ins>%m<ins>/</ins>%d"</code></td>
+</tr>
+<tr>
+<td>`ydm`</td>
+<td><code>"%y<ins>/</ins>%d<ins>/</ins>%m"</code></td>
+</tr>
+</tbody>
+</table>
+
+</blockquote>
+
+</li>
+</ol>
+
 </resolution>
 
 </issue>
