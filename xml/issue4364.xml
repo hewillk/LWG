@@ -8,7 +8,7 @@
 </section>
 <submitter>Jiang An</submitter>
 <date>05 Sep 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -34,6 +34,21 @@ It seems better to eliminate such implementation divergence. Perhaps it's also b
 require them to be SFINAE-friendly to reduce potential conflicts with user-provided operators.
 <p/>
 If it's intended to allow implementation divergence, perhaps we should clarify the intent.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"Does it matter in practice? If the type is unspecified, it's fine for misuse to be non-portable."
+</p>
+<p>
+"Would like a diagnostic, don't care about SFINAE. Not clear to me that the current
+`setfill` wording disallows the mixed-character-type case at all ..."
+</p>
+<p>
+"NAD, not been a problem for a quarter of a century."
 </p>
 </discussion>
 

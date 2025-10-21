@@ -6,7 +6,7 @@
 <section><sref ref="[range.stride.iterator]"/></section>
 <submitter>Hewill Kang</submitter>
 <date>01 May 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -20,6 +20,11 @@ It turns out this is also true for <code>stride_view::<i>iterator</i></code>, su
 <p/>
 There is no reason to give up this convenience because <code>stride_view::<i>iterator</i></code> is intended 
 to preserve the nature of the underlying iterator.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
 </p>
 </discussion>
 

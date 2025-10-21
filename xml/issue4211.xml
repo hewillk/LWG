@@ -8,7 +8,7 @@
 </section>
 <submitter>Jonathan Wakely</submitter>
 <date>22 Feb 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -44,6 +44,28 @@ The standard could be adjusted to support chains of links by allowing
 `time_zone_link::target()` to refer to another link, and then altering the
 algorithm used by `tzdb::locate_zone(string_view)` to find a `time_zone` from
 a name that might be a zone or a link.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+Add Jonathan's comments on the resolution:
+</p>
+<p>
+The goal of the resolution is to permit `time_zone_link::target` to name
+another link, and not overspecify `tzdb::locate_zone` to require that
+`tz_l.target()` names a valid zone `tz`. Considered normatively saying what
+happens if a link chain doesn't terminate in a zone (like the zic(8) man page
+does), but that seemed like overspecification. We don't currently say what
+happens if a non-chained link has an invalid target, it's just covered by
+`locate_zone` failing to find anything.
+So just added a note saying bad chains are bad.
+</p>
+<p>
+Not urgent, as Libstdc++ and libc++ already handle this in some form.
+Links that use the same name as zones are unlikely to be a problem with the
+official IANA database, probably only relevant for manually edited data.
+Likewise for cycles in link chains. Maybe just leave to QoI.
 </p>
 </discussion>
 

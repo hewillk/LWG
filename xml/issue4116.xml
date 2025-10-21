@@ -7,12 +7,20 @@
 <section><sref ref="[range.enumerate.iterator]"/><sref ref="[range.cartesian.iterator]"/></section>
 <submitter>Hewill Kang</submitter>
 <date>07 Jul 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
 These two iterators do not support <tt>*r++</tt> for non-forward iterators,
 so we should not provide <tt>iterator_category</tt> as they are not C++17 iterators.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+Six votes for Tentatively Ready, but not unanimous.
 </p>
 </discussion>
 

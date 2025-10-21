@@ -8,7 +8,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>15 Feb 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -87,6 +87,16 @@ and <code>F</code> are indeterminately sequenced.
 <p>
 Upon reflector discussion many preferred to use instead the new <i>Hardened preconditions:</i> element which 
 have been introduced by the recently voted in <paper num="P3471R4"/>.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"Disagreement on whether to introduce <i>Hardened preconditions</i> in this Clause.
+Some discomfort with adding the element as a bullet point inside a list,
+no better suggestions though.
 </p>
 </discussion>
 

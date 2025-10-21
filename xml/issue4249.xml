@@ -8,7 +8,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>26 Apr 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -67,6 +67,22 @@ when `_ITERATOR_DEBUG_LEVEL` is turned on.
 <p>
 It seems that extra flags are needed to fix this issue because `output_it` should not 
 be considered to reach the end when we back to the outer loop.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"This is unfortunate. `lazy_split` is probably not very commonly used,
+but handling input ranges was half the reason why we kept it around.
+Can we reuse `trailing_empty_` for this instead of adding a new flag?
+Both flags have the same meaning, and the two cases where they are true
+are disjoint: we need `has_next_` when iterating through the inner range
+exhausted the source range; we need `trailing_empty_` when we find a delimiter
+at the end of the source range when incrementing the outer iterator,
+which by definition means that iterating through the inner range
+<i>didn't</i> exhaust it."
 </p>
 </discussion>
 
