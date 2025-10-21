@@ -6,7 +6,7 @@
 <section><sref ref="[meta.unary.prop]"/></section>
 <submitter>Jonathan Wakely</submitter>
 <date>01 Oct 2020</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -80,6 +80,8 @@ and <tt>is_constructible&lt;T[1], T&gt;</tt> are false?
 <p>
 There may be some interaction with LWG <iref ref="3436"/>.
 </p>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
 </discussion>
 
 <resolution>

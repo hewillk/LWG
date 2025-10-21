@@ -6,7 +6,7 @@
 <section><sref ref="[containers]"/><sref ref="[utilities]"/></section>
 <submitter>Finland</submitter>
 <date>3 Feb 2017</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <b>Addresses FI 16</b>
@@ -19,6 +19,8 @@ element types.</p>
 <note>
 2017-06-27 Moved to LEWG after 5 positive votes on c++std-lib.
 </note>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
 </discussion>
 
 <resolution>
