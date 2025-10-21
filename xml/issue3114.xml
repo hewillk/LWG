@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="3114" status="SG4">
+<issue num="3114" status="LEWG">
 <title>[networking.ts] Permit efficient composition when using <tt>DynamicBuffer</tt></title>
 <section><sref ref="[buffer]"/><sref ref="[buffer.stream]"/></section>
 <submitter>Vinnie Falco</submitter>
@@ -205,8 +205,12 @@ From <a href="https://github.com/cplusplus/papers/issues/337">Cologne 2019 paper
 <a href="https://wg21.link/p1100">P1100</a> has been superseded by <a href="https://wg21.link/p1790">P1790</a>.
 </p>
 
-<note>2025-10-16 Status changed: LEWG &rarr; SG4.</note>
+<note>2025-10-16; Updated with LEWG position.</note>
 <p>Discussed by LEWG in Wrocław, recommended to send to SG4.</p>
+<p>
+There's no 'SG4' status in the LWG issues lists,
+so it remains 'LEWG' but SG4 have been made aware.
+</p>
 </discussion>
 
 <resolution>
