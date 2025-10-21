@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4265" status="New">
+<issue num="4265" status="Tentatively Ready">
 <title>`std::midpoint` should not accept `const bool`</title>
 <section><sref ref="[numeric.ops.midpoint]"/></section>
 <submitter>Jan Schultke</submitter>
@@ -34,6 +34,25 @@ for these other functions seems evolutionary, not like fixing an obvious oversig
 and so it likely requires a separate issue.
 </p>
 
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after seven votes in favour during reflector poll.
+</p>
+<p>
+This requires template argument to be explicty specified, i.e.
+<code>midpoint&lt;const bool&gt;</code>.
+I would prefer to address all cv-qualified types at once, e.g.
+<i>Constraints</i>:
+<code>remove_cv_t&lt;T&gt;</code> is an arithmetic type other than `bool`."
+</p>
+<p>
+"This is locally consistent with `gcd` and `lcm` which only exclude <i>cv</i> `bool`.
+<sref ref="[algorithms.requirements"/> p15 makes it unspecified to use an explicit
+template argument list here, so <code>midpoint&lt;const bool&gt;</code>
+and <code>midpoint&lt;const int&gt;</code> are already unspecified,
+this issue just ensures that `const bool` is explicitly rejected, like `bool`."
+</p>
 </discussion>
 
 <resolution>
