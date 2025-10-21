@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4426" status="New">
+<title>Clarify what `meta::reflect_constant_string` considers a string literal</title>
+<section><sref ref="[meta.reflection.array]"/></section>
+<submitter>Jakub Jelinek</submitter>
+<date>21 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+`meta::reflect_constant_string` says:
+<blockquote>
+Let <i>V</i> be the pack of values of type `CharT` whose elements are
+the corresponding elements of `r`,
+except that if `r` refers to a string literal object,
+then <i>V</i> does not include the trailing null terminator of `r`.
+</blockquote>
+It's unclear how the implementation should decide whether `r` refers to
+a string literal. If `R` models `contiguous_iterator`, should it use
+`meta::is_string_literal(ranges::data(r))`?
+Should it omit the `'\0'` from `string_view("abc", 3)`?
+</p>
+<p>
+Also, "null terminator" is only defined in <sref ref="[basic.string.general]"/>
+and not used for string literal objects (<sref ref="[lex.string]"/>).
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[meta.reflection.array]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;ranges::input_range R&gt;
+  consteval info reflect_constant_string(R&amp;&amp; r);
+</pre>
+<blockquote>
+<p>-2-
+Let `CharT` be <code>ranges::range_value_t&lt;R&gt;</code>.
+</p>
+<p>-3- <i>Mandates</i>:
+`CharT` is one of `char`, `wchar_t`, `char8_t`, `char16_t`, `char32_t`.
+</p>
+<p>
+Let <i>V</i> be the pack of values of type `CharT` whose elements are
+the corresponding elements of `r`,
+except that if `r` <del>refers</del> <ins>is a reference</ins>
+to a string literal object,
+then <i>V</i> does not include the <del>trailing null terminator</del>
+<ins>terminating <span style="font-variant: small-caps">u+0000 null</span>
+character</ins>
+of `r`.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
