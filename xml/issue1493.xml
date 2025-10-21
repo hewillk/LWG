@@ -6,6 +6,7 @@
 <section><sref ref="[thread.mutex.requirements]"/></section>
 <submitter>INCITS</submitter>
 <date>25 Aug 2010</date>
+<priority>4</priority>
 
 <discussion>
 <p><b>Addresses US-189</b></p>
@@ -51,6 +52,8 @@ Several participants voiced strong objections, based on either memory model issu
 already possible to write a wrapper that explicitly tracks ownership for testing in the owning thread, which may have 
 been part of the intent here.
 </p>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
 </discussion>
 
 <resolution>

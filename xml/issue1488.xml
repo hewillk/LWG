@@ -6,6 +6,7 @@
 <section><sref ref="[thread.mutex]"/></section>
 <submitter>INCITS</submitter>
 <date>25 Aug 2010</date>
+<priority>4</priority>
 
 <discussion>
 <p><b>Addresses US-185</b></p>
@@ -47,6 +48,8 @@ SG1 recommends: Close as NAD
 Papers about C compatibility are welcome, but there may be more pressing issues. C threads are not consistently available 
 at this point, so there seems to be little demand to fix this particular problem.
 </p>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
 </discussion>
 
 <resolution>

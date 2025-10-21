@@ -6,6 +6,7 @@
 <section><sref ref="[thread.mutex.requirements]"/></section>
 <submitter>Pete Becker</submitter>
 <date>7 Jan 2009</date>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -42,6 +43,8 @@ Mark as NAD Future.
 <p>
 SG1: Agreement that we need a paper.
 </p>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
 </discussion>
 
 <resolution>

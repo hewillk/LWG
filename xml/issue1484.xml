@@ -6,6 +6,7 @@
 <section><sref ref="[thread.thread.class]"/></section>
 <submitter>INCITS</submitter>
 <date>25 Aug 2010</date>
+<priority>4</priority>
 
 <discussion>
 <p><b>Addresses US-183</b></p>
@@ -39,6 +40,8 @@ There has not been much demand for it, and it would usually be difficult to deal
 It can be approximated with a condition variable wait followed by an unconditional <tt>join</tt>. Adding it would create 
 implementation issues on Posix. As always, this may be revisited if we have a paper exploring the issues in detail.
 </p>
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
 </discussion>
 
 <resolution>

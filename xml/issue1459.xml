@@ -8,6 +8,7 @@
 <section><sref ref="[atomics.order]"/></section>
 <submitter>Canada</submitter>
 <date>25 Aug 2010</date>
+<priority>4</priority>
 
 <discussion>
 <p><b>Addresses CA-21, GB-131</b></p>
@@ -124,6 +125,8 @@ a resolution at this stage.
 Moved to NAD Future
 </p>
 
+
+<note>2025-10-21; Priority set to 4 based on age of issue and lack of activity.</note>
 </discussion>
 
 <resolution>
