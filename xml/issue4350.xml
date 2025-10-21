@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4350" status="New">
+<issue num="4350" status="LEWG">
 <title>Should flat adaptors use `insert_range` when available?</title>
 <section>
 <sref ref="[flat.map]"/>
@@ -29,12 +29,12 @@ with those names must behave as expected, but we already require that for
 `std::queue`.
 </p>
 
-<note>2025-10-21; Reflector poll.</note>
+<note>2025-10-21; Reflector poll. Status changed: New &rarr; LEWG.</note>
 <p>
 Set priority to 2 after reflector poll.
 </p>
 <p>
-Use <tt>append_range</tt> to be consitient with other adapters.
+Use <tt>append_range</tt> to be consistent with other adapters.
 Send to LEWG for confirmation.
 </p>
 </discussion>

@@ -8,7 +8,7 @@
 </section>
 <submitter>Jiang An</submitter>
 <date>03 Jun 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,22 @@ which possibly enables more desired usages.
 <p/>
 Currently, libc++ makes these types non-movable, which is arguable undesired per the decision made in 
 <paper num="P3136R1"/>.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"Not seeing the point of this change. For code dealing with generic policies,
+it shouldn't be constructing new objects of the policy type (there could be
+implementation-defined policies, or ones added in future standards, which
+are not default-constructible). For code using a specific policy, just using
+the named variable is strictly less typing than constructing the type.
+Maybe NAD or LEWG."
+"Making them tag types helps e.g. <paper num="P3481"/> where we have to
+store execution policies, and in <paper num="P2500"/>."
+"Don't you want copy constructible, not default constructible?"
 </p>
 </discussion>
 

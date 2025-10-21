@@ -6,7 +6,7 @@
 <section><sref ref="[rand.req.genl]"/></section>
 <submitter>Peter Dimov</submitter>
 <date>25 May 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -59,6 +59,31 @@ Given that I also think that we should consider to either normatively extend all
 and (1.6) to corresponding <i>extended floating point</i> types and <i>extended (unsigned) integer types</i>, 
 or to the minimum make these extended types conditionally-supported with implementation-defined 
 semantics (A word of power that is used at several places).
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"The only benefit of making it UB is allowing it as an extension."
+</p>
+<p>
+"Does anybody actually want to support a BigInt as an extension?
+If not, non-integral types should be ill-formed and integral types
+not in the list should be conditionally-supported."
+</p>
+<p>
+"I'd like extended arithmetic types to work in general,
+it's useful for writing generic math libraries to be able to
+generate random numbers of any arithmetic type that the implementation
+provides, including short integers and all floating-point types."
+</p>
+<p>
+"Can have overflows here, differences between whether `char` is signed or
+unsigned lead to subtle bugs. Most users are better off picking `int` or
+`unsigned int` (which is what they get from integral promotions anyway)
+and just using values that are in range for their intended destination type."
 </p>
 </discussion>
 

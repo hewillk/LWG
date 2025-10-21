@@ -8,7 +8,7 @@
 </section>
 <submitter>Jan Schultke</submitter>
 <date>08 Jun 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -28,6 +28,18 @@ function templates such as `std::gcd` which do not accept iterators.
 The <i>Remarks</i> specifications in <sref ref="[alg.min.max]"/> providing exemptions from 
 <sref ref="[algorithms.requirements]"/> paragraph 15 suggest that even function templates not 
 accepting iterators are considered algorithms.
+</p>
+
+<note>2025-10-21; Reflector poll.</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"NAD, I don't think people are confused about what an algorithm is."
+</p>
+<p>
+"I'd rather the fix would define 'algorithm', as even the Note below
+the change uses that term."
 </p>
 </discussion>
 
