@@ -2,7 +2,7 @@
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
 <issue num="3681" status="New">
-<title>Further considerations on LWG 3679</title>
+<title>Further considerations on LWG 3679 (using `pmr::vector` without including <code>&lt;memory_resource&gt;</code>)</title>
 <section><sref ref="[mem.res.syn]"/><sref ref="[memory.syn]"/></section>
 <submitter>Jiang An</submitter>
 <date>28 Feb 2022</date>
@@ -50,6 +50,11 @@ using their own allocators.
 Set priority to 4 after reflector poll.
 </p>
 
+<note>2025-10-22; Jonathan comments after reflector discussion.</note>
+<p>
+"We could use the 'In addition to being available via inclusion of ...' form,
+see also LWG <iref ref="3623"/>."
+</p>
 </discussion>
 
 <resolution>
