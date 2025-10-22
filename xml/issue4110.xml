@@ -6,7 +6,7 @@
 <section><sref ref="[util.smartptr.shared.const]"/></section>
 <submitter>Louis Dionne</submitter>
 <date>11 Jun 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -26,6 +26,38 @@ which leads to a hard error inside the lambda since it is called with a
 `nullptr_t`. This seems unintended.
 </p><p>
 See <a href="https://github.com/llvm/llvm-project/pull/93071#issuecomment-2158494851">LLVM issue 93071 comment</a> for additional context.
+</p>
+
+<note>2025-10-22; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"I don't agree with the proposed resolution. As a general principle,
+<code>shared_ptr&lt;T&gt;(p, d)</code> always calls `d(p)` and never
+<code>d(static_cast&lt;T*&gt;(p))</code>.
+<br/>
+If we really want to make this work, which is not unreasonable, even though
+the fix on the user side is trivial, we should make the `nullptr_t` constructor
+templated on <code>same_as&lt;nullptr_t&gt;</code>
+(or <code>convertible_to&lt;nullptr_t&gt;</code>?)."
+</p>
+<p>
+"That would break passing `NULL`, only `nullptr` would work.
+It can be made to work by checking that `d(p)` is well-formed in a
+function parameter with a default argument,
+instead of as a template parameter:"
+<pre>struct shared_ptr {
+  template&lt;class Y, class D&gt;
+  shared_ptr(Y* p, D d, std::void_t&lt;decltype(d(p))&gt;* = nullptr) {}
+  template&lt;class D&gt;
+  shared_ptr(std::nullptr_t p, D d, std::void_t&lt;decltype(d(p))&gt;* = nullptr) {}
+};
+shared_ptr s(new int, [](auto p) {delete p;});
+</pre>
+</p>
+<p>
+"Ugh. We don't have to use it everywhere, only these two specific constructors."
 </p>
 </discussion>
 
