@@ -73,7 +73,6 @@ It was pointed out that similar issues happen for <tt>complex&lt;float16_t&gt;</
 There seem to be mismatch between language initialization rules and the intended
 usage based on library API.
 </p>
-</discussion>
 
 <superseded>
 <p>
