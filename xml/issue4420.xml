@@ -2,38 +2,65 @@
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
 <issue num="4420" status="New">
-<title>Stores in [simd.loadstore] are overconstrained</title>
-<section><sref ref="[simd.loadstore]"/></section>
+<title>&sect;[simd] conversions (constructor, load, stores, gather, and scatter) are
+incorrectly constrained for <tt>&lt;stdfloat&gt;</tt> types</title>
+<section><sref ref="[simd]"/></section>
 <submitter>Matthias Kretz</submitter>
 <date>15 Oct 2025</date>
 <priority>99</priority>
 
 <discussion>
 <p>
-This is related to <a href="https://github.com/cplusplus/nbballot/issues/860">https://github.com/cplusplus/nbballot/issues/860</a>.
+<b>Addresses DE-288 and DE-285</b>
 <p/>
-<sref ref="[simd.loadstore]"/> constrains `unchecked_store` and `partial_store` with
-<tt>indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</tt> / 
-<tt>indirectly_writable&lt;I, T&gt;</tt>.
+<sref ref="[simd.loadstore]"/> `unchecked_store` and `partial_store` are constrained with
+`indirectly_writable` in such a way that `basic_vec`'s `value_type` must satisfy
+<tt>convertible_to&lt;<i>range value-type</i>&gt;</tt>. But that is not the case, 
+e.g. for <tt>float &rarr; float16_t</tt> or <tt>double &rarr; float32_t</tt>. However, 
+if `simd::flag_convert` is passed, these conversions were intended to work. The 
+implementation thus must `static_cast` the `basic_vec` values to the range's value-type 
+before storing to the range.
 <p/>
-This is false for iterators of ranges of `float16_t` and a `value_type T = float`.
-Consequently, even with `flag_convert` the following is ill-formed:
+<tt>unchecked_store(vec&lt;float&gt;, span&lt;complex&lt;float16_t&gt;&gt;, flag_convert)</tt> 
+does not work for a different reason. The <tt>complex(const float16_t&amp;, const float16_t&amp;)</tt>
+constructor simply does not allow construction from `float`, irrespective of
+using implicit or explicit conversion. The only valid conversion from <tt>float &rarr;
+complex&lt;float16_t&gt;</tt> is via an extra step through <tt>complex&lt;float16_t&gt;::value_type</tt>. 
+This issue considers it a defect of `complex` that an explicit conversion from 
+<tt>float &rarr; complex&lt;float16_t&gt;</tt> is ill-formed and therefore no workaround/special 
+case is introduced.
+<p/>
+Conversely, the conversion constructor in <sref ref="[simd.ctor]"/> does not reject
+conversion from <tt>vec&lt;complex&lt;float&gt;, 4&gt;</tt> to <tt>vec&lt;float, 4&gt;</tt>. 
+I.e. <tt>convertible_to&lt;vec&lt;complex&lt;float&gt;, 4&gt;, vec&lt;float, 4&gt;&gt;</tt> 
+is `true`, which is a lie. This is NB comment DE-288. However, the NB comment's proposed 
+resolution is too strict, in that it would disallow conversion from `float` to `float16_t`.
+<p/>
+The conversion/load from static-sized range constructor in <sref ref="[simd.ctor]"/> has a
+similar problem:
+</p>
+<blockquote><p>
+<tt>convertible_to&lt;array&lt;std::string, 4&gt;, vec&lt;int, 4&gt;&gt;</tt> is `true`
+</p></blockquote>
+<p>
+but when fixing this
 </p>
 <blockquote><pre>
-void f(std::span&lt;std::float16_t&gt; data, std::simd::vec&lt;float&gt; v) {
-  unchecked_store(v, data, std::simd::flag_convert);
-}
+vec&lt;float16_t, 4&gt;(array&lt;float, 4&gt;, flag_convert)
 </pre></blockquote>
 <p>
-However, the intent was for `flag_convert` to opt into lossy conversions. This
-works for every other vectorizable type, except for `float16_t`.
+must continue to be valid.
 <p/>
-This issue is related to LWG <iref ref="4393"/>. Maybe it would be useful to introduce an
-exposition-only concept that stores and scatters can then use.
+`unchecked_load` and `partial_load` in <sref ref="[simd.loadstore]"/> currently <i>Mandate</i> 
+the range's value-type to be vectorizable, but converting loads from <tt>complex&lt;float&gt;</tt> 
+to `float` are not covered. It is unclear what a conversion from <tt>complex&lt;float&gt;</tt> 
+to `float` should do, so it needs to be added (again without breaking <tt>float &rarr; float16_t</tt>).
+<p/>
+<sref ref="[simd.permute.memory]"/> is analogous to <sref ref="[simd.loadstore]"/> and needs 
+equivalent constraints.
 </p>
-</discussion>
 
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -109,6 +136,359 @@ where `x` is an object of type `T` is well-formed.</ins>
 <p/>
 -16- <i>Mandates</i>: [&hellip;]
 </p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</superseded>
+
+<note>2025-10-22; Matthias Kretz improves discussion and provides new wording</note>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[simd.expos]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+
+template&lt;class T&gt;
+  concept <i>constexpr-wrapper-like</i> =                   <i>// exposition only</i>
+    [&hellip;]
+    bool_constant&lt;static_cast&lt;decltype(T::value)&gt;(T()) == T::value&gt;::value;
+    
+<ins>template&lt;class From, class To&gt;
+  concept <i>explicitly-convertible-to</i> =                <i>// exposition-only</i>
+    requires {
+      static_cast&lt;To&gt;(declval&lt;From&gt;());
+    };</ins>
+
+template&lt;class T&gt; using <i>deduced-vec-t</i> = <i>see below</i>; <i>// exposition only</i>
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.syn]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U, class UAbi&gt;
+  constexpr explicit(<i>see below</i>) basic_vec(const basic_vec&lt;U, UAbi&gt;&amp; x) noexcept;
+</pre>
+<blockquote>
+<p>
+-5- <i>Constraints</i>: 
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<ins>(5.1) &mdash;</ins> <tt><i>simd-size-v</i>&lt;U, UAbi&gt; == size()</tt> is `true`<ins>, and</ins>
+</p></li>
+<li><p>
+<ins>(5.2) &mdash; `U` satisfies <tt><i>explicitly-convertible-to</i>&lt;T&gt;</tt></ins>.
+</p></li>
+</ol>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, flags&lt;Flags...&gt; = {});
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, const mask_type&amp; mask, flags&lt;Flags...&gt; = {});
+</pre>
+<blockquote>
+<p>
+-12- Let `mask` be `mask_type(true)` for the overload with no `mask` parameter.
+<p/>
+-13- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(13.1) &mdash; `R` models `ranges::contiguous_range` and `ranges::sized_range`,
+</p></li>
+<li><p>
+(13.2) &mdash; `ranges::size(r)` is a constant expression, <del>and</del>
+</p></li>
+<li><p>
+(13.3) &mdash; `ranges::size(r)` is equal to `size()`<ins>, and</ins>
+</p></li>
+<li><p>
+<ins>(13.?) &mdash; <tt>ranges::range_value_t&lt;R&gt;</tt> is a vectorizable type and satisfies
+<tt><i>explicitly-convertible-to</i>&lt;T&gt;</tt></ins>.
+</p></li>
+</ol>
+<p>
+-14- <i>Mandates</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<del>(14.1) &mdash; <tt>ranges::range_value_t&lt;R&gt;</tt> is a vectorizable type, and</del>
+</p></li>
+<li><p>
+<del>(14.2) &mdash; if</del><ins>If</ins> the template parameter pack `Flags` does not contain 
+<tt><i>convert-flag</i></tt>, then the conversion from <tt>ranges::range_value_t&lt;R&gt;</tt> 
+to `value_type` is value-preserving.
+</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.loadstore]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class V = see below , ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_load(R&amp;&amp; r, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_load(R&amp;&amp; r, const typename V::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, class... Flags&gt;
+  constexpr V partial_load(I first, iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, class... Flags&gt;
+  constexpr V partial_load(I first, iter_difference_t&lt;I&gt; n, const typename V::mask_type&amp; mask,
+                           flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  constexpr V partial_load(I first, S last, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  constexpr V partial_load(I first, S last, const typename V::mask_type&amp; mask,
+                           flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-6- Let [&hellip;]
+<p/>
+[&hellip;]
+<p/>
+-7- <i>Mandates</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(7.1) &mdash; <tt>ranges::range_value_t&lt;R&gt;</tt> is a vectorizable type <ins>and satisfies
+<tt><i>explicitly-convertible-to</i>&lt;T&gt;</tt></ins>,
+</p></li>
+<li><p>
+(7.2) &mdash; <tt>same_as&lt;remove_cvref_t&lt;V&gt;, V&gt;</tt> is `true`,
+</p></li>
+<li><p>
+(7.3) &mdash; `V` is an enabled specialization of `basic_vec`, and
+</p></li>
+<li><p>
+(7.4) &mdash; if the template parameter pack `Flags` does not contain <tt><i>convert-flag</i></tt>, 
+then the conversion from <tt>ranges::range_value_t&lt;R&gt;</tt> to `V::value_type` is value-preserving.
+</p></li>
+</ol>
+</blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-11- Let [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-15- Let [&hellip;]
+<p/>
+<ins>-?- <i>Constraints</i>:</ins>
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<ins>(?.1) &mdash; <tt>ranges::iterator_t&lt;R&gt;</tt> satisfies
+<tt>indirectly_writable&lt;ranges::range_value_t&lt;R&gt;&gt;</tt>, and</ins>
+</p></li>
+<li><p>
+<ins>(?.2) &mdash; `T` satisfies <tt><i>explicitly-convertible-to</i>&lt;ranges::range_value_t&lt;R&gt;&gt;</tt></ins>
+</p></li>
+</ol>
+<p>
+-16- <i>Mandates</i>: [&hellip;]
+<p/>
+-17- <i>Preconditions</i>: [&hellip;]
+<p/>
+-18- <i>Effects</i>: For all <tt><i>i</i></tt> in the range of <tt>[0, basic_vec&lt;T, Abi&gt;::size())</tt>, 
+if <tt>mask[<i>i</i>] &amp;&amp; <i>i</i> &lt; ranges::size(r)</tt> is `true`, evaluates 
+<tt>ranges::data(r)[<i>i</i>] = <ins>static_cast&lt;ranges::range_value_t&lt;R&gt;&gt;(</ins>v[<i>i</i>]<ins>)</ins></tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.permute.memory]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class V = <i>see below</i>, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_gather_from(R&amp;&amp; in, const I&amp; indices, flags&lt;Flags...&gt; f = {});
+template&lt;class V = <i>see below</i>, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_gather_from(R&amp;&amp; in, const typename I::mask_type&amp; mask,
+                                  const I&amp; indices, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-5- Let: [&hellip;] 
+<p/>
+<ins>-?- <i>Constraints:</i> <tt>ranges::range_value_t&lt;R&gt;</tt> is a vectorizable type and
+satisfies <tt><i>explicitly-convertible-to</i>&lt;T&gt;</tt>.</ins>
+</p>
+<p>
+-6- <i>Mandates</i>: [&hellip;] 
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr void
+  partial_scatter_to(const V&amp; v, R&amp;&amp; out, const I&amp; indices, flags&lt;Flags...&gt; f = {});
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr void partial_scatter_to(const V&amp; v, R&amp;&amp; out, const typename I::mask_type&amp; mask,
+                                    const I&amp; indices, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-13- Let `mask` be `I::mask_type(true)` for the overload with no `mask` parameter.
+<p/>
+-14- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<ins>(14.1) &mdash;</ins> `V::size() == I::size()` is `true`<ins>,</ins>
+</p></li>
+<li><p>
+<ins>(14.2) &mdash; <tt>ranges::iterator_t&lt;R&gt;</tt> satisfies
+<tt>indirectly_writable&lt;ranges::range_value_t&lt;R&gt;&gt;</tt>, and</ins> 
+</p></li>
+<li><p>
+<ins>(14.3) &mdash; `typename V::value_type` satisfies 
+<tt><i>explicitly-convertible-to</i>&lt;ranges::range_value_t&lt;R&gt;&gt;</tt></ins>.
+</p></li>
+</ol>
 </blockquote>
 </blockquote>
 </li>
