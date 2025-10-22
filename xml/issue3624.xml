@@ -48,6 +48,8 @@ This issue is related to and depending on LWG <iref ref="3625"/>.
 Set priority to 3 after reflector poll.
 </p>
 
+
+<note>2025-10-22; Expected to be resolved by <paper num="P3016R6"/>.</note>
 </discussion>
 
 <resolution>
