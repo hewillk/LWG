@@ -8,7 +8,7 @@
 </section>
 <submitter>Hewill Kang</submitter>
 <date>24 Aug 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -81,6 +81,11 @@ decltype(*declval&lt;pointer&gt;())&gt;</tt> is `false`.
 <p>
 During reflector triaging it had been pointed out that a better solution would be to constrain the 
 `operator*` directly. The proposed wording has been updated to that effect.
+</p>
+
+<note>2025-10-22; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
 </p>
 </discussion>
 

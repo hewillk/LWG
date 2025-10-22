@@ -8,7 +8,7 @@
 </section>
 <submitter>Giuseppe D'Angelo</submitter>
 <date>23 Jun 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -41,6 +41,17 @@ construction we end up in this possibility during constant evaluation).
 Given the rationale brought forward for `std::relocate` in <paper num="P2786"/> 
 is to be always a nofail operation, I'm proposing a resolution that goes in
 that direction.
+</p>
+
+<note>2025-10-22; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"PR is incomplete, needs to be 'and <ins>either <code>is_move_constructible_v&lt;T&gt;</code> is false or</ins> an exception is thrown...'"
+</p>
+<p>
+"I think we should use <i>Constant when</i>:."
 </p>
 </discussion>
 

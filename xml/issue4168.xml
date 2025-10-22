@@ -6,7 +6,7 @@
 <section><sref ref="[obj.lifetime]"/></section>
 <submitter>Jan Schultke</submitter>
 <date>23 Oct 2024</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -34,6 +34,20 @@ obtained from `myMalloc`. Such a call to `std::bit_cast` has undefined behavior 
 does not tolerate the creation of an `int` where bits in the value representation are indeterminate 
 (<sref ref="[bit.cast]"/> paragraph 2), and such an `int` is the smallest enclosing object of some of the 
 indeterminate bits.
+</p>
+
+<note>2025-10-22; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+<p>
+"NAD, it says the storage is not accessed, so no UB from reading indeterminate bits."
+</p>
+<p>
+"The UB comes from `bit_cast`'s <i>Preconditions</i>, not from reading an indeterminate value."
+</p>
+<p>
+Core should review any change here.
 </p>
 </discussion>
 

@@ -8,7 +8,7 @@
 </section>
 <submitter>Matthias Wippich</submitter>
 <date>15 Aug 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -34,6 +34,11 @@ currently ill-formed. We cannot use the given syntax to splice an arbitrary choi
 types and templates anymore.
 <p/>
 While the intent seems clear, this should be rephrased to be more technically correct.
+</p>
+
+<note>2025-10-22; Reflector poll.</note>
+<p>
+Set priority to 1 after reflector poll.
 </p>
 </discussion>
 
