@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4363" status="New">
+<issue num="4363" status="Tentatively NAD">
 <title>`transform_sender` comparing types ignoring <i>cv</i>-qualifiers doesn't take into account differences in value category</title>
 <section>
 <sref ref="[exec.snd.transform]"/>
@@ -56,6 +56,11 @@ implementation</a> in NVIDIA's stdexec repository uses <tt>same_as&lt;decay_t&lt
 for this check.
 <p/>
 The wording should be modified to use a phrase that removes both reference and cv-qualifiers when comparing types.
+</p>
+
+<note>2025-10-23; Reflector poll. Status &rarr; Tentatively NAD .</note>
+<p>
+"NAD, expressions never have reference type."
 </p>
 </discussion>
 
