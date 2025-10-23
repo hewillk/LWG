@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4328" status="New">
+<issue num="4328" status="Tentatively Ready">
 <title>Remove note in &sect;[exec.sched] regarding waiting for completion of scheduled operations</title>
 <section>
 <sref ref="[exec.sched]"/>
@@ -29,6 +29,15 @@ way of waiting for tasks that use a resource (including execution resources) to 
 <p/>
 The note as it stands represents bad guidance and should either be removed or updated to refer to 
 `counting_scope` and `simple_counting_scope` (<sref ref="[exec.counting.scopes]"/>).
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set status to Tentatively Ready after six votes in favour during reflector poll.
+</p>
+<p>
+"What is this telling me as a user? That a custom execution resource can add
+a non-standard 'wait for completion' facility?"
 </p>
 </discussion>
 
