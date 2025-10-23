@@ -8,7 +8,7 @@
 </section>
 <submitter>Lewis Baker</submitter>
 <date>27 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -41,6 +41,17 @@ However, I think there is a more direct way to express the intent here, by inste
 This checks whether `expr` would be a valid type to return from a `Promise::await_transform()` function.
 </p>
 
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"Intent of the original wording seems to be that GET-AWAITER(expr) should
+be the same as GET-AWAITER(expr, p) and this rewording loses that.
+Don't understand the rationale for the new wording either."
+(More details in the reflector thread in Sept. 2025)
+</p>
 </discussion>
 
 <resolution>

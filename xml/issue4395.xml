@@ -6,7 +6,7 @@
 <section><sref ref="[exec.write.env]"/></section>
 <submitter>Robert A.H. Leahy</submitter>
 <date>29 Sep 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -29,6 +29,11 @@ The fix is to explicitly provide a return type for the lambda which computes the
 <p/>
 Note: This issue may indicate that the use of automatic return type deduction in the specification of
 sender algorithms more generally ought to be reconsidered/-examined.
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
 </p>
 </discussion>
 

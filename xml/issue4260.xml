@@ -6,7 +6,7 @@
 <section><sref ref="[exec.queryable.general]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>7 May 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -18,6 +18,17 @@ does not require default constructability. Much of `std::execution` assumes quer
 to be default constructible.
 <p/>
 I propose adding a (nothrow) default-constructibility requirement.
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"The discussion is wrong, `semiregular` requires `default_initializable`.
+If we want to mandate nothrow construction
+(a.k.a the implementation isn't out to get you),
+I'd rather we do it for all CPOs."
 </p>
 </discussion>
 

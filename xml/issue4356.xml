@@ -9,7 +9,7 @@
 </section>
 <submitter>Lewis Baker</submitter>
 <date>27 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -25,6 +25,15 @@ It seems desirable for this facility to use the allocator obtained from the rece
 `get_allocator(get_env(rcvr))`, in order to allocate storage for the coroutine-state instead of always 
 using global operator `new`. This would give the user at least some level of control over how this 
 allocation is performed.
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"The `get_allocator` query doesn't have a default and I think that isn't
+covered in the proposed resolution."
 </p>
 </discussion>
 

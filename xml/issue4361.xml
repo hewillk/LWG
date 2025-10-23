@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4361" status="New">
+<issue num="4361" status="LEWG">
 <title><tt><i>awaitable-receiver</i>::set_value</tt> should use <i>Mandates</i> instead of constraints</title>
 <section>
 <sref ref="[exec.as.awaitable]"/>
 </section>
 <submitter>Lewis Baker</submitter>
 <date>28 Aug 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -61,6 +61,15 @@ just making them all mandates. This would tend to make uses of the `receiver_of`
 less useful as satisfying <tt>receiver_of&lt;R, Sig&gt;</tt> would not necessarily 
 guarantee that actually trying to call each of `R`'s corresponding completion functions 
 will result in a well-formed program. It is arguable that this is already the status-quo, however.
+</p>
+
+<note>2025-10-23; Reflector poll. Status changed: New &rarr; LEWG</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"Send to LEWG if we want to go this way, which makes `receiver_of` mostly meaningless
+and calls into question why we even have the concept."
 </p>
 </discussion>
 

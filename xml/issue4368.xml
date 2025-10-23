@@ -8,7 +8,7 @@
 </section>
 <submitter>Eric Niebler</submitter>
 <date>31 Aug 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -51,6 +51,23 @@ its implementation of `default_domain::transform_sender` does not conform to the
 it returns an rvalue sender as a prvalue instead of an xvalue as the spec requires.
 <p/>
 The fix is for the spec to follow suit and return prvalues when an xvalue would otherwise be returned.
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"There's an NB comment to remove `transform_sender` entirely."
+"Nothing seems to prevent `Sndr` from being a reference type, so I would
+expect `decay_t` or `remove_cvref_t` (or <i>`decayed-typeof`</i>) instead
+of the `static_cast`."
+</p>
+<p>
+"I think that's intentional. The dangling happens if `transform_sender` is
+invoked with an xvalue (where `Sndr` is deduced as a type). When invoked with
+and lvalue (where `Sndr` is deduced as an lvalue reference) we don't want to
+make a copy. So the `static_cast` makes a copy of an xvalue and not of an lvalue."
 </p>
 </discussion>
 

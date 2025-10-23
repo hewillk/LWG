@@ -6,7 +6,7 @@
 <section><sref ref="[exec.let]"/></section>
 <submitter>Eric Niebler</submitter>
 <date>16 Oct 2025</date>
-<priority>99</priority>
+<priority>1</priority>
 
 <discussion>
 <p>
@@ -29,6 +29,14 @@ schedulers or domains.
 `let_value/error/stopped` must define <tt><i>impls-for</i>&lt;let_xxx_t&gt;::<i>get-attrs</i></tt> to return 
 <tt><i>FWD-ENV</i>(get_env(sndr))</tt> except that it handles the <tt>get_completion_scheduler_t&lt;Tag&gt;</tt> 
 (for any completion tag `Tag`) and `get_domain_t` queries specially.</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"Looks like a special case of the problem that <paper num="P3826"/> addresses."
+</p>
 </discussion>
 
 <resolution>

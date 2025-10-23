@@ -8,7 +8,7 @@
 </section>
 <submitter>Lewis Baker</submitter>
 <date>27 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -31,6 +31,14 @@ The mention of the type <tt><i>awaitable-receiver</i></tt> here does not refer t
 defined at namespace-scope. It seems to, instead, be referring to the nested member-type 
 <tt><i>sender-awaitable</i>&lt;Sndr, Promise&gt;::<i>awaitable-receiver</i></tt> and so should be 
 qualified as such.
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"We should move the declaration of <i>`sender-awaitable`</i> before the concept."
 </p>
 </discussion>
 

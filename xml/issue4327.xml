@@ -8,7 +8,7 @@
 </section>
 <submitter>Lewis Baker</submitter>
 <date>25 Aug 2025</date>
-<priority>99</priority>
+<priority>3</priority>
 
 <discussion>
 <p>
@@ -58,6 +58,28 @@ of the `bulk()` algorithm?
 <p/>
 Alternatively, we could talk about two schedulers being equal if and only if they can be used 
 interchangeably throughout the program.
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 3 after reflector poll.
+</p>
+
+<note>2025-10-23; .</note>
+<p>
+"Would prefer if 'the same scheduling behavior' was added,
+instead of replacing existing wording."
+</p>
+<p>
+"`scheduler` requires `equality_comparable`, so equality of schedulers must be
+equality preserving, so equality already implies scheduler interchangeability.
+Any additional specification is redundant and should be struck."
+</p>
+<p>
+"I think `task_scheduler(parallel_scheduler) == parallel_scheduler` currently
+(and possibly incorrectly) says true, because they share the same execution
+resource. But the behaviour is dramatically different: when using `bulk`
+the first will execute sequentially and the second will execute in parallel."
 </p>
 </discussion>
 

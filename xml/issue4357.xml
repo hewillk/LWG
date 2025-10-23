@@ -9,7 +9,7 @@
 </section>
 <submitter>Lewis Baker</submitter>
 <date>27 Aug 2025</date>
-<priority>99</priority>
+<priority>4</priority>
 
 <discussion>
 <p>
@@ -37,6 +37,18 @@ result of the `co_await` expression has type <i>cv</i> `void`. It should use <tt
 instead to allow it to match all `void` types, not just unqualified `void`.
 </p>
 
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 4 after reflector poll.
+</p>
+<p>
+"NAD, `V` is <code><i>await-result-type</i>&lt;...&gt;</code> which is `decltype(...)`
+and you never get <i>cv</i> void from `decltype` (<sref ref="[expr.type]"/> p2)."
+</p>
+<p>
+"But using `is_void_v` more clearly expresses the intent."
+</p>
 </discussion>
 
 <resolution>

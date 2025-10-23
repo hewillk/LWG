@@ -8,7 +8,7 @@
 </section>
 <submitter>Lewis Baker</submitter>
 <date>27 Aug 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -37,6 +37,15 @@ The constraint on <tt><i>connect-awaitable</i></tt> should either be removed or 
 <i>Mandates</i> element. As <tt><i>connect-awaitable</i></tt> is only used within the definition of 
 <tt>connect()</tt> and as <tt>connect()</tt> already mandates that `receiver_of` is satisfied, 
 it seems sufficient to just remove this constraint from <tt><i>connect-awaitable</i></tt>.
+</p>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"Is this actually redundant? Where is `Sigs` required to match (or at least be a subset of)
+<code>completion_signatures_of&lt;Sndr, env_of_t&lt;Recvr&gt;&gt;</code>?"
 </p>
 </discussion>
 

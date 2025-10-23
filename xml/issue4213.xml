@@ -8,7 +8,7 @@
 </section>
 <submitter>Frank Birbacher</submitter>
 <date>14 Feb 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
@@ -37,6 +37,27 @@ Repetitions are at least in:
 <li><p><sref ref="[exec.stopped.err]"/> p2</p></li>
 <li><p><sref ref="[exec.sync.wait.var]"/> p1</p></li>
 </ol>
+
+<note>2025-10-23; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+"Don't want to have to consider whether you can call `get_env` on a moved-from sender.
+If the domain is a stateless tag type, then <i>get-domain-early</i>'s return value
+can't depend on the actual value of the sender, just its type.
+If that's correct, we can just spell this `decltype(get-domain-early(sndr)){}`.
+We already do this for <i>get-domain-late</i>."
+</p>
+<p>
+"The point of all these exposition-only things was to make the wording more compact and readable.
+Adding `decltype` and parens everywhere wouldn't help that.
+Maybe change <i>get-domain-early</i> and <i>get-domain-late</i> from function templates
+to all-caps wording macros, e.g. <i>`GET-DOMAIN-EARLY`</i>`(sndr)`?"
+</p>
+<p>
+"NAD, I think the issue is covered by “except sndr is evaluated just once.”"
+</p>
 </discussion>
 
 <resolution>
