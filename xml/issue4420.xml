@@ -58,6 +58,10 @@ to `float` should do, so it needs to be added (again without breaking <tt>float 
 <p/>
 <sref ref="[simd.permute.memory]"/> is analogous to <sref ref="[simd.loadstore]"/> and needs 
 equivalent constraints.
+<p/>
+<sref ref="[simd.ctor]"/> p2 requires <tt>constructible_from&lt;U&gt;</tt>, which makes explicit
+construction of <tt>vec&lt;float16_t&gt;</tt> from `float` ill-formed. For consistency this
+should also be constrained with <tt><i>explicitly-convertible-to</i></tt>.
 </p>
 
 <note>2025-10-22; Reflector poll.</note>
@@ -252,6 +256,18 @@ template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&g
 <li><p>Modify <sref ref="[simd.ctor]"/> as indicated:</p>
 
 <blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) basic_vec(U&amp;&amp; value) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- Let `From` denote the type <tt>remove_cvref_t&lt;U&gt;</tt>.
+<p/>
+-2- <i>Constraints</i>: <tt><del>value_type</del><ins>U</ins></tt> satisfies 
+<tt><del>constructible_from&lt;U&gt;</del><ins><i>explicitly-convertible-to</i>&lt;value_type&gt;</ins></tt>.
+</p>
+[&hellip;]
+</blockquote>
 <pre>
 template&lt;class U, class UAbi&gt;
   constexpr explicit(<i>see below</i>) basic_vec(const basic_vec&lt;U, UAbi&gt;&amp; x) noexcept;
