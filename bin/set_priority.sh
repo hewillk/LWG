@@ -33,7 +33,7 @@ die()
 
 grep -q -E '^<issue .* status="(New|Open)"' $xml || die "Status not New or Open"
 
-if [[ $priority = 0 ]]
+if [[ $priority = 0 ]] || [[ $priority = "Ready" ]]
 then
 
   votes="$3"
