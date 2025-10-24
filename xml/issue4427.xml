@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4427" status="New">
+<title>`meta::dealias` needs to work with things that aren't entities</title>
+<section><sref ref="[meta.reflection.queries]"/></section>
+<submitter>Jonathan Wakely</submitter>
+<date>24 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<b>Addresses US 99-205</b>
+<p>
+Several uses of `dealias` assume that it can be used with reflections that
+represent direct base class relationships, which are not entities.
+The spec for `dealias` says that such uses should fail with an exception.
+</p>
+<p>
+In the 2025-10-24 LWG telecon it was agreed that `dealias` should just
+be the identity function for non-entities.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[meta.reflection.queries]"/> as indicated:</p>
+
+<blockquote>
+<pre>consteval info dealias(info r);</pre>
+<blockquote>
+<p>-49- <i>Returns</i>:
+<ins>If `r` represents an entity, then a</ins>
+<del>A</del>
+reflection representing the underlying entity of what `r` represents.
+<ins>Otherwise, `r`.</ins>
+</p>
+<p>[<i>Example 5</i>: <br/>
+... <br/>
+<i>&mdash; end example</i>]
+</p>
+<p><del>-50- <i>Throws</i>:
+`meta::exception` unless `r` represents an entity.
+</del>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
