@@ -22,9 +22,7 @@ And what happens if you try to define a cv-qualified type:
 <pre>struct S; meta::define_aggregate(^^const S, {});</pre>
 Should this be an error, or inject a definition of the unqualified type?
 </p>
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -49,6 +47,48 @@ be the corresponding data member description represented by
 <ul>
 <li><ins>(8.?) &mdash;
 `dealias(class_type)` represents a class type;
+</ins>
+</li>
+<li>(8.1) &mdash;
+<i>C</i> is incomplete from every point in the evaluation context;
+</li>
+</ul>
+</p>
+</blockquote>
+</li>
+</ol>
+</superseded>
+
+<note>2025-10-24; LWG telecon. Jonathan updates wording</note>
+<p>Make a minimal change for now, can add support for aliases later.</p>
+
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[meta.reflection.define.aggregate]"/> as indicated:</p>
+
+<blockquote>
+<p>-7-
+Let <i>C</i> be the <del>class</del> <ins>type</ins> represented by
+<code>class_type</code>
+and <i>r<sub>K</sub></i> be the <i>K</i><sup>th</sup> reflection value
+in `mdescrs`.
+For every <i>r<sub>K</sub></i> in `mdescrs`,
+let (<i>T<sub>K</sub></i>, <i>N<sub>K</sub></i>, <i>A<sub>K</sub></i>,
+<i>W<sub>K</sub></i>, <i>NUA<sub>K</sub></i>)
+be the corresponding data member description represented by
+<i>r<sub>K</sub></i>.
+</p>
+<p>-8- <i>Constant when</i>:
+<ul>
+<li><ins>(8.?) &mdash;
+`class_type` represents a cv-unqualified class type;
 </ins>
 </li>
 <li>(8.1) &mdash;
