@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4428" status="New">
+<title>Metafunctions should not be defined in terms of constant subexpressions</title>
+<section>
+<sref ref="[meta.reflection.access.queries]"/>
+<sref ref="[meta.reflection.annotation]"/>
+<sref ref="[meta.reflection.array]"/>
+</section>
+<submitter>Jonathan Wakely</submitter>
+<date>24 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<b>Addresses US 102-209</b>
+<p>
+"is a constant (sub)expression" is incorrect now that errors are reported
+via exceptions.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[meta.reflection.access.queries]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+consteval bool has_inaccessible_nonstatic_data_members(info r, access_context ctx);
+</pre>
+<blockquote>
+<p>-5- <i>Returns</i>:
+`true` if `is_accessible(`<i>R</i>`, ctx)` is `false` for any <i>R</i>
+in `nonstatic_data_members_of(r, access_context::unchecked())`.
+Otherwise, `false`.
+</p>
+<p>-6- <i>Throws</i>:
+`meta::exception` unless
+<ul>
+<li>(6.1) &mdash;
+<ins>The evaluation of</ins>
+`nonstatic_data_members_of(r, access_context::unchecked())`
+<del>
+is a constant subexpression
+</del>
+<ins>
+would not exit via an exception
+</ins>
+and
+</li>
+<li>(6.2) &mdash;
+`r` does not represent a closure type.
+</li>
+</ul>
+</p>
+</blockquote>
+<pre>
+consteval bool has_inaccessible_bases(info r, access_context ctx);
+</pre>
+<blockquote>
+<p>-5- <i>Returns</i>:
+`true` if `is_accessible(`<i>R</i>`, ctx)` is `false` for any <i>R</i>
+in `bases_of(r, access_context::unchecked())`.
+Otherwise, `false`.
+</p>
+<p>-6- <i>Throws</i>:
+`meta::exception` unless
+<ins>The evaluation of</ins>
+`bases_of(r, access_context::unchecked())`
+<del>is a constant subexpression</del>
+<ins>would not exit via an exception</ins>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[meta.reflection.annotation]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+consteval vector&lt;info&gt; annotations_of_with_type(info item, info type);
+</pre>
+<blockquote>
+<p>-4- <i>Returns</i>:
+A `vector` containing each element `e` of `annotations_of(item)`
+where `remove_const(type_of(e)) == remove_const(type)`
+is `true`, preserving their order.
+</p>
+<p>-5- <i>Throws</i>:
+`meta::exception` unless
+<ul>
+<li>(5.1) &mdash;
+<ins>The evaluation of</ins>
+`annotations_of(item)`
+<del>
+is a constant subexpression
+</del>
+<ins>
+would not exit via an exception
+</ins>
+and
+</li>
+<li>(5.2) &mdash;
+`dealias(type)` represents a type that is complete
+from some point in the evaluation context.
+</li>
+</ul>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[meta.reflection.annotation]"/> as indicated:</p>
+<blockquote>
+<pre>
+template&lt;ranges::input_range R&gt;
+  consteval info reflect_constant_array(R&amp;&amp; r);
+</pre>
+<blockquote>
+<p>-8-
+Let `T` be <code>ranges::range_value_t&lt;R&gt;</code>.
+</p>
+<p>-9- <i>Mandates</i>:
+`T` is a structural type (<sref ref="[temp.param]"/>),
+<code>is_constructible_v&lt;T, ranges::range_reference_t&lt;R&gt;&gt;</code>
+is `true`, and
+<code>is_copy_constructible_v&lt;T&gt;</code>
+is `true`.
+</p>
+<p>-10-
+Let <i>V</i> be the pack of values of type `info` of the same size as `r`,
+where the <i>i</i><sup>th</sup> element is
+<code>reflect_constant(e<sub><i>i</i></sub>)</code>,
+where <code>e<sub><i>i</i></sub></code> is
+the <i>i</i><sup>th</sup> element of `r`.
+</p>
+<p>-11-
+Let <i>P</i> be
+<ul>
+<li>(11.1) &mdash;
+If `sizeof...(`<i>V</i>`) > 0` is `true`,
+then the template parameter object (<sref ref="[temp.param]"/>)
+of type `const T[sizeof...(`<i>V</i>`)]` initialized with `{[:V:]...}`.
+</li>
+<li>(11.2) &mdash;
+Otherwise, the template parameter object of type <code>array&lt;T, 0&gt;</code>
+initialized with `{}`.
+</li>
+</ul>
+</p>
+<p>-12- <i>Returns</i>: `^^`<i>P</i>.
+</p>
+<p>-13- <i>Throws</i>:
+`meta::exception` unless
+<ins>The evaluation of</ins>
+`reflect_constant(e)`
+<del>is a constant subexpression</del>
+<ins>would not exit via an exception</ins>
+for every element `e` of `r`.
+</p>
+
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
