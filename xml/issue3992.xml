@@ -31,7 +31,7 @@ Unfortunately, we cannot say
 as a postcondition due to SSO. Maybe a note could be added to eliminate the confusion.
 </p>
 
-<note>2025-10-23; Reflector poll; Status changed: New &rarr; LEWG and P3.</note>
+<note>2025-10-23; Reflector poll; Status changed: New &rarr; Tentatively NAD.</note>
 <p>
 The requirements are already implied, and proposed wording has no effect.
 </p>
