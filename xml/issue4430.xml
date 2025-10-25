@@ -38,7 +38,7 @@ constexpr from_chars_result from_chars(const char* first, const char* last,
 <p/>
 -3- <i>Effects</i>: The pattern is the expected form of the subject sequence in the "C" locale for 
 the given nonzero base, as described for `strtol`, except that no <ins>`"0b"` or `"0B"` prefix 
-shall appear if the value is `base` 2, no</ins> `"0x"` or `"0X"` prefix shall appear if the value 
+shall appear if the value of `base` is 2, no</ins> `"0x"` or `"0X"` prefix shall appear if the value 
 of `base` is 16, and except that `'-'` is the only sign that may appear, and only if `value` has 
 a signed type. 
 <p/>
