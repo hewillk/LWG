@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4431" status="New">
+<title>Parallel `std::ranges::destroy` should allow exceptions</title>
+<section>
+<sref ref="[memory.syn]"/>
+</section>
+<submitter>Ruslan Arutyunyan</submitter>
+<date>24 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The serial `std::ranges::destroy` algorithm is marked as `noexcept`. However, the parallel 
+counterpart should not be marked `noexcept`.
+<p/>
+While we generally don't expect any exceptions from the `destroy` algorithm when called 
+with the standard execution policies (`seq`, `unseq`, `par`, `par_unseq`), the 
+implementation-defined policies for parallel algorithms are allowed by the C++ standard, 
+and it is up to the particular execution policy to decide which exceptions can be thrown 
+from parallel algorithms.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[memory.syn]"/>, header <tt>&lt;memory&gt;</tt> synopsis, as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: There are no further prototype definitions for the affected
+<tt><i>execution-policy</i></tt> overloads in <sref ref="[specialized.destroy]"/>.]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+[&hellip;]
+<i>// 26.11.9, <sref ref="[specialized.destroy]"/></i>
+template&lt;class T&gt;
+  constexpr void destroy_at(T* location);                                  <i>// freestanding</i>
+template&lt;class NoThrowForwardIterator&gt;
+  constexpr void destroy(NoThrowForwardIterator first,                     <i>// freestanding</i>
+                         NoThrowForwardIterator last);
+template&lt;class ExecutionPolicy, class NoThrowForwardIterator&gt;
+  void destroy(ExecutionPolicy&amp;&amp; exec,                                     <i>// freestanding-deleted,</i>
+               NoThrowForwardIterator first,                               <i>// see <sref ref="[algorithms.parallel.overloads]"/></i>
+               NoThrowForwardIterator last);
+template&lt;class NoThrowForwardIterator, class Size&gt;
+  constexpr NoThrowForwardIterator destroy_n(NoThrowForwardIterator first, <i>// freestanding</i>
+                                             Size n);
+template&lt;class ExecutionPolicy, class NoThrowForwardIterator, class Size&gt;
+  NoThrowForwardIterator destroy_n(ExecutionPolicy&amp;&amp; exec,                 <i>// freestanding-deleted,</i>
+                                   NoThrowForwardIterator first, Size n);  <i>// see <sref ref="[algorithms.parallel.overloads]"/></i>
+namespace ranges {
+  template&lt;destructible T&gt;
+    constexpr void destroy_at(T* location) noexcept;                       <i>// freestanding</i>
+    
+  template&lt;<i>nothrow-input-iterator</i> I, <i>nothrow-sentinel-for</i> &lt;I&gt; S&gt;
+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;
+      constexpr I destroy(I first, S last) noexcept;                       <i>// freestanding</i>     
+  template&lt;<i>nothrow-input-range</i> R&gt;
+    requires destructible&lt;range_value_t&lt;R&gt;&gt;
+      constexpr borrowed_iterator_t&lt;R&gt; destroy(R&amp;&amp; r) noexcept;            <i>// freestanding</i>
+      
+  template&lt;<i>nothrow-input-iterator</i> I&gt;
+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;
+    constexpr I destroy_n(I first, iter_difference_t&lt;I&gt; n) noexcept;       <i>// freestanding</i>
+    
+  template&lt;<i>execution-policy</i> Ep, <i>nothrow-random-access-iterator</i> I,
+           <i>nothrow-sized-sentinel-for</i> &lt;I&gt; S&gt;
+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;
+      I destroy(Ep&amp;&amp; exec, I first, S last) <del>noexcept</del>;                       <i>// freestanding-deleted,</i>
+                                                                            <i>// see <sref ref="[algorithms.parallel.overloads]"/></i>
+  template&lt;<i>execution-policy</i> Ep, <i>nothrow-sized-random-access-range</i> R&gt;
+    requires destructible&lt;range_value_t&lt;R&gt;&gt;
+      borrowed_iterator_t&lt;R&gt; destroy(Ep&amp;&amp; exec, R&amp;&amp; r) <del>noexcept</del>;            <i>// freestanding-deleted,</i>
+                                                                            <i>// see <sref ref="[algorithms.parallel.overloads]"/></i>
+  template&lt;<i>execution-policy</i> Ep, <i>nothrow-random-access-iterator</i> I&gt;
+    requires destructible&lt;iter_value_t&lt;I&gt;&gt;
+      I destroy_n(Ep&amp;&amp; exec, I first, iter_difference_t&lt;I&gt; n) <del>noexcept</del>;     <i>// freestanding-deleted,</i>
+                                                                            <i>// see <sref ref="[algorithms.parallel.overloads]"/></i>
+}
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+</ol>
+
+</resolution>
+
+</issue>
