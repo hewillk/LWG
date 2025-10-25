@@ -2,21 +2,38 @@
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
 <issue num="4414" status="New">
-<title>&sect;[simd.traits] `rebind` and `resize` reference a `type` member that doesn't exist</title>
-<section><sref ref="[simd.traits]"/></section>
+<title>&sect;[simd.expos.abi] <tt><i>deduce-abi-t</i></tt> is underspecified and incorrectly referenced
+from `rebind` and `resize`</title>
+<section><sref ref="[simd.expos.abi]"/><sref ref="[simd.traits]"/></section>
 <submitter>Matthias Kretz</submitter>
 <date>15 Oct 2025</date>
 <priority>99</priority>
 
 <discussion>
 <p>
-In <sref ref="[simd.traits]"/> `rebind` and `resize` say "<tt><i>deduce-abi-t</i>&lt;T, V::size()&gt;</tt> 
-has a member type `type`". But <tt><i>deduce-abi-t</i></tt> is specified in 
-<sref ref="[simd.expos.abi]"/> p4-5 as an alias that is either defined or not.
+In <sref ref="[simd.expos.abi]"/>, <tt><i>deduce-abi-t</i></tt> is specified to be defined for some
+arguments. For all remaining arguments, nothing is specified. This could be interpreted to make 
+such specializations ill-formed. But that does not match the intent of making
 </p>
-</discussion>
-
-<resolution>
+<blockquote><pre>
+simd::vec&lt;std::string&gt;
+</pre></blockquote>
+<p>
+and
+</p>
+<blockquote><pre>
+simd::vec&lt;int, INT_MAX&gt;
+</pre></blockquote>
+<p>
+disabled specializations of `basic_vec`. (If `INT_MAX` is not supported by the
+implementation.)
+<p/>
+The wording needs to clarify what happens in those cases.
+<p/>
+In <sref ref="[simd.traits]"/>, `rebind` and `resize` say "<tt><i>deduce-abi-t</i>&lt;T, V::size()&gt;</tt> 
+has a member type `type`". But that's not how <tt><i>deduce-abi-t</i></tt> is specified.
+</p>
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -62,6 +79,119 @@ template&lt;<i>simd-size-type</i> N, class V&gt; struct resize { using type = <i
 <li><p>
 (8.2) &mdash; <tt><i>deduce-abi-t</i>&lt;T, N&gt;</tt> <del>has a member type `type`</del>
 <ins>is defined</ins>.
+</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</superseded>
+
+<note>2025-10-21; Matthias Kretz improves discussion and proposed wording</note>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+<li><p>Modify <sref ref="[simd.expos.abi]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T&gt; using <i>native-abi</i> = <i>see below</i>;
+template&lt;class T, <i>simd-size-type</i> N&gt; using <i>deduce-abi-t</i> = <i>see below</i>;
+</pre>
+<blockquote>
+<p>
+-1- An <i>ABI tag</i> is a type that indicates a choice of size and binary representation for objects of data-parallel
+type.
+<p/>
+[&hellip;]
+<p/>
+-3- An implementation defines ABI tag types as necessary for the following aliases.
+<p/>
+-4- <tt><i>deduce-abi-t</i>&lt;T, N&gt;</tt> <del>is defined</del><ins>names an ABI tag type if and
+only</ins> if
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(4.1) &mdash; `T` is a vectorizable type,
+</p></li>
+<li><p>
+(4.2) &mdash; `N` is greater than zero, and
+</p></li>
+<li><p>
+(4.3) &mdash; `N` is not larger than an implementation-defined maximum.
+</p></li>
+</ol>
+<p>
+<ins>Otherwise, <tt><i>deduce-abi-t</i>&lt;T, N&gt;</tt> names an unspecified type.</ins>
+<p/>
+The implementation-defined maximum for `N` is not smaller than 64 and can differ depending on `T`.
+[&hellip;]
+<p/>
+-5- <del>Where present,</del><ins>If</ins> <tt><i>deduce-abi-t</i>&lt;T, N&gt;</tt> names an ABI 
+tag type <del>such that</del><ins>, the following is `true`:</ins>
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(5.1) &mdash; <tt><i>simd-size-v</i>&lt;T, <i>deduce-abi-t</i>&lt;T, N&gt;&gt;</tt> equals `N`,
+</p></li>
+<li><p>
+(5.2) &mdash; <tt>basic_vec&lt;T, <i>deduce-abi-t</i>&lt;T, N&gt;&gt;</tt> is enabled 
+(<sref ref="[simd.overview]"/>), and
+</p></li>
+<li><p>
+(5.3) &mdash; <tt>basic_mask&lt;sizeof(T), <i>deduce-abi-t</i>&lt;<i>integer-from</i>&lt;sizeof(T)&gt;, N&gt;&gt;</tt> 
+is enabled.
+</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify <sref ref="[simd.traits]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class V&gt; struct rebind { using type = <i>see below</i>; };
+</pre>
+<blockquote>
+<p>
+-4- The member `type` is present if and only if
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(4.1) &mdash; `V` is a data-parallel type,
+</p></li>
+<li><p>
+(4.2) &mdash; `T` is a vectorizable type, and
+</p></li>
+<li><p>
+(4.3) &mdash; <tt><i>deduce-abi-t</i>&lt;T, V::size()&gt;</tt> <del>has a member type `type`</del>
+<ins>names an ABI tag type</ins>.
+</p></li>
+</ol>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;<i>simd-size-type</i> N, class V&gt; struct resize { using type = <i>see below</i>; };
+</pre>
+<blockquote>
+<p>
+-7- Let `T` denote [&hellip;]
+<p/>
+-8- The member `type` is present if and only if
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(8.1) &mdash; `V` is a data-parallel type, and
+</p></li>
+<li><p>
+(8.2) &mdash; <tt><i>deduce-abi-t</i>&lt;T, N&gt;</tt> <del>has a member type `type`</del>
+<ins>names an ABI tag type</ins>.
 </p></li>
 </ol>
 </blockquote>
