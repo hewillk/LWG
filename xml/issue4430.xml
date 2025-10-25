@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4430" status="New">
+<title>`from_chars` should not parse `"0b"` base prefixes</title>
+<section>
+<sref ref="[charconv.from.chars]"/>
+</section>
+<submitter>Jan Schultke</submitter>
+<date>20 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+C23 added support for the `"0b"` and `"0B"` base prefix to `strtol`, and since the wording of 
+`from_chars` for integers is based on `strol`, this inadvertently added support for parsing 
+`"0b"` prefixes to `from_chars`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[charconv.from.chars]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr from_chars_result from_chars(const char* first, const char* last,
+                                       <i>integer-type</i>&amp; value, int base = 10);
+</pre>
+<blockquote>
+<p>
+-2- <i>Preconditions</i>: `base` has a value between 2 and 36 (inclusive).
+<p/>
+-3- <i>Effects</i>: The pattern is the expected form of the subject sequence in the "C" locale for 
+the given nonzero base, as described for `strtol`, except that no <ins>`"0b"` or `"0B"` prefix 
+shall appear if the value is `base` 2, no</ins> `"0x"` or `"0X"` prefix shall appear if the value 
+of `base` is 16, and except that `'-'` is the only sign that may appear, and only if `value` has 
+a signed type. 
+<p/>
+-4- <i>Throws</i>: Nothing.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
