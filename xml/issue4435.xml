@@ -3,7 +3,7 @@
 
 <issue num="4435" status="New">
 <title>`meta::has_identifier` doesn't handle all types</title>
-<section><sref ref="[meta.reflection.access.queries]"/></section>
+<section><sref ref="[meta.reflection.names]"/></section>
 <submitter>Jakub Jelinek</submitter>
 <date>27 Oct 2025</date>
 <priority>99</priority>
@@ -22,7 +22,7 @@ This wording is relative to <paper num="N5014"/>.
 
 <ol>
 
-<li><p>Modify <sref ref="[meta.reflection.access.queries]"/> as indicated:</p>
+<li><p>Modify <sref ref="[meta.reflection.names]"/> as indicated:</p>
 
 <blockquote>
 <pre>consteval bool has_identifier(info r);</pre>
