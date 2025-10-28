@@ -43,7 +43,7 @@ Otherwise, `false`.
 `meta::exception` unless
 <ul>
 <li>(6.1) &mdash;
-<ins>The evaluation of</ins>
+<ins>the evaluation of</ins>
 `nonstatic_data_members_of(r, access_context::unchecked())`
 <del>
 is a constant subexpression
@@ -70,7 +70,7 @@ Otherwise, `false`.
 </p>
 <p>-6- <i>Throws</i>:
 `meta::exception` unless
-<ins>The evaluation of</ins>
+<ins>the evaluation of</ins>
 `bases_of(r, access_context::unchecked())`
 <del>is a constant subexpression</del>
 <ins>would not exit via an exception</ins>.
@@ -95,7 +95,7 @@ is `true`, preserving their order.
 `meta::exception` unless
 <ul>
 <li>(5.1) &mdash;
-<ins>The evaluation of</ins>
+<ins>the evaluation of</ins>
 `annotations_of(item)`
 <del>
 is a constant subexpression
@@ -157,7 +157,7 @@ initialized with `{}`.
 </p>
 <p>-13- <i>Throws</i>:
 `meta::exception` unless
-<ins>The evaluation of</ins>
+<ins>the evaluation of</ins>
 `reflect_constant(e)`
 <del>is a constant subexpression</del>
 <ins>would not exit via an exception</ins>
