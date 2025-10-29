@@ -6,12 +6,23 @@
 <section><sref ref="[meta.reflection.names]"/></section>
 <submitter>Jakub Jelinek</submitter>
 <date>27 Oct 2025</date>
-<priority>99</priority>
+<priority>2</priority>
 
 <discussion>
 <p>
 The wording for `meta::has_identifier` doesn't specify what it returns for
 `^^int` or `^^void` or `^^Enum`.
+</p>
+
+<note>2025-10-29; Reflector poll.</note>
+<p>
+Set priority to 2 after reflector poll.
+</p>
+<p>
+Move bullet point for aliases before bullet for types.
+Add "cv-unqualified" to class type and enumeration type.
+Simplify "`!has_template_arguments() is `true`" to
+"`has_template_arguments()` is `false`".
 </p>
 </discussion>
 
@@ -36,23 +47,28 @@ If `r` represents an entity that has a typedef name for linkage purposes
 <li>(1.2) &mdash;
 Otherwise, if `r` represents an unnamed entity, then `false`.
 </li>
+<li><ins>(1.?) &mdash;
+Otherwise, if `r` represents a type alias, then `!has_template_arguments(r)`.
+</ins>
+</li>
 <li>(1.3) &mdash;
 Otherwise, if `r` represents a <ins>type, then `true` if</ins>
 <del>class type, then `!has_template_arguments(r)`.</del>
 <ul>
 <li><ins>(1.3.1) &mdash;
-`r` represents a class type and `!has_template_arguments(r)` is `true`, or
+`r` represents a cv-unqualified class type
+and `has_template_arguments(r)` is `false`, or
 </ins>
 </li>
 <li><ins>(1.3.2) &mdash;
-`r` represents an enumeration type.
+`r` represents a cv-unqualified enumeration type.
 </ins>
 </li>
 </ul>
 <ins>Otherwise, `false`.</ins>
 </li>
 <li>(1.4) &mdash;
-Otherwise, if `r` represents a function, then `true` if `has_template_arguments(r)` is false and the function is not a constructor, destructor, operator function, or conversion function.
+Otherwise, if `r` represents a function, then `true` if `has_template_arguments(r)` is `false` and the function is not a constructor, destructor, operator function, or conversion function.
 Otherwise, `false`.
 </li>
 <li>(1.5) &mdash;
@@ -85,8 +101,9 @@ then `false` if the declaration of that structured binding was instantiated
 from a structured binding pack.
 Otherwise, `true`.
 </li>
-<li>(1.10) &mdash;
+<li><del>(1.10) &mdash;
 Otherwise, if `r` represents a type alias, then `!has_template_arguments(r)`.
+</del>
 </li>
 <li>(1.11) &mdash;
 Otherwise, if `r` represents an enumerator, non-static-data member,
