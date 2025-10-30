@@ -65,6 +65,16 @@ history: bin/lists
 mailing:
 	mkdir $@
 
+LISTREV := $(shell xpath -q -e 'substring(issueslist/@revision,2)' xml/lwg-issues.xml)
+
+zip-file: lwg$(LISTREV).zip
+
+lwg$(LISTREV).zip: lists
+	@cd mailing && zip ../$@ \
+		lwg-active.html lwg-closed.html lwg-defects.html \
+		lwg-index.html lwg-index-open.html lwg-status.html lwg-toc.html
+	@echo Created $@
+
 lists: mailing bin/lists dates meta-data/paper_titles.txt
 	bin/lists
 
@@ -115,7 +125,7 @@ meta-data/section.data: meta-data/annex-f meta-data/networking-section.data bin/
 	cat meta-data/lfts-v3-section.data >> $@.tmp
 	$(call update,$@)
 
-.PHONY: all pgms clean distclean lists history
+.PHONY: all pgms clean distclean lists history zip-file
 
 dates: meta-data/dates
 
