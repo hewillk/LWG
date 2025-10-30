@@ -80,7 +80,7 @@ fi
 # Find list of issue numbers for each status
 for st in "${statuses[@]}"
 do
-  issues[$st]=$(bin/list_issues "$st" | grep -v "Reading section-tag index" | sort -n)
+  issues[$st]=$(bin/list_issues "$st" | sort -n)
   anchors[$st]=$(echo $st | LANG=C tr 'A-Z ' 'a-z_')
 done
 

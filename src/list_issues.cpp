@@ -107,7 +107,7 @@ int main(int argc, char const* argv[]) {
 
       check_is_directory(path);
 
-      auto metadata = lwg::metadata::read_from_path(path);
+      auto metadata = lwg::metadata::read_from_path(path, /*verbose=*/ false);
 
       filter_issues(path / "xml/", metadata, [status](lwg::issue const & iss) { return status == iss.stat; });
    }
