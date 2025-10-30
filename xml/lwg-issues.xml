@@ -9,7 +9,7 @@
 
 <intros>
 <intro list="Active">
-  <p>Reference ISO/IEC IS 14882:2020(E)</p>
+  <p>Reference ISO/IEC IS 14882:2024(E)</p>
   <p>Also see:</p>
   <ul>
       <li><a href="lwg-toc.html">Table of Contents</a> for all library issues.</li>
@@ -21,7 +21,7 @@
   <p>The purpose of this document is to record the status of issues
   which have come before the Library Working Group (LWG) of the INCITS PL22.16
   and ISO WG21 C++ Standards Committee. Issues represent
-  potential defects in the ISO/IEC IS 14882:2020(E) document.
+  potential defects in the ISO/IEC IS 14882:2024(E) document.
   </p>
 
   <p>This document contains only library issues which are actively being
@@ -48,16 +48,13 @@
   resolution can quickly change if new viewpoints or killer examples are
   presented in subsequent discussions.</p>
 
-  <p>For the most current official version of this document see
-  <a href="http://www.open-std.org/jtc1/sc22/wg21/">http://www.open-std.org/jtc1/sc22/wg21/</a>.
-  Requests for further information about this document should include
-  the document number above, reference ISO/IEC 14882:2020(E), and be
-  submitted to Information Technology Industry Council (ITI), 1250 Eye
-  Street NW, Washington, DC 20005.</p>
+  <p>For the most current <i>official</i> version of this document see
+  <a href="https://www.open-std.org/jtc1/sc22/wg21/">http://www.open-std.org/jtc1/sc22/wg21/</a>.
+  </p>
 
   <p>Public information as to how to obtain a copy of the C++ Standard,
   join the standards committee, submit an issue, or comment on an issue
-  can be found in the comp.std.c++ FAQ.
+  can be found at <a href="https://isocpp.org/">isocpp.org</a>.
   </p>
 
 <p><a name="submit_issue"></a><b>How to submit an issue</b></p>
@@ -125,7 +122,7 @@ ownership of it.
 </intro>
 
 <intro list="Defects">
-  <p>Reference ISO/IEC IS 14882:2020(E)</p>
+  <p>Reference ISO/IEC IS 14882:2024(E)</p>
   <p>Also see:</p>
     <ul>
       <li><a href="lwg-toc.html">Table of Contents</a> for all library issues.</li>
@@ -146,7 +143,7 @@ ownership of it.
 </intro>
 
 <intro list="Closed">
-  <p>Reference ISO/IEC IS 14882:2020(E)</p>
+  <p>Reference ISO/IEC IS 14882:2024(E)</p>
   <p>Also see:</p>
     <ul>
       <li><a href="lwg-toc.html">Table of Contents</a> for all library issues.</li>
@@ -166,7 +163,7 @@ ownership of it.
 </intro>
 
 <intro list="TOC">
-  <p>Reference ISO/IEC IS 14882:2020(E)</p>
+  <p>Reference ISO/IEC IS 14882:2024(E)</p>
 
   <p>This document is the Table of Contents for the <a href="lwg-active.html">Library Active Issues List</a>,
   <a href="lwg-defects.html">Library Defect Reports and Accepted Issues</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.</p>
@@ -179,7 +176,7 @@ ownership of it.
 </intro>
 
 <intro list="Section">
-  <p>Reference ISO/IEC IS 14882:2020(E)</p>
+  <p>Reference ISO/IEC IS 14882:2024(E)</p>
 
   <p>This document is the Index by Section for the <a href="lwg-active.html">Library Active Issues List</a>,
   <a href="lwg-defects.html">Library Defect Reports and Accepted Issues</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.</p>
@@ -192,7 +189,7 @@ ownership of it.
 </intro>
 
 <intro list="Status">
-  <p>Reference ISO/IEC IS 14882:2020(E)</p>
+  <p>Reference ISO/IEC IS 14882:2024(E)</p>
 
   <p>This document is the Index by Status for the <a href="lwg-active.html">Library Active Issues List</a>,
   <a href="lwg-defects.html">Library Defect Reports and Accepted Issues</a>, and <a href="lwg-closed.html">Library Closed Issues List</a>.</p>
@@ -1345,6 +1342,10 @@ ownership of it.
   <p><b><a name="WP">WP</a></b> - (Working Paper) - The proposed resolution has not been
   accepted as a Technical Corrigendum, but the full WG21/PL22.16 committee has voted to
   apply the Defect Report's Proposed Resolution to the working paper.</p>
+
+  <p><b><a name="C++23">C++23</a></b> - (C++ Standard, as revised for 2023) - The full
+  WG21/PL22.16 committee has voted to accept the Defect Report's Proposed Resolution into
+  the published 2023 revision to the C++ standard, ISO/IEC IS 14882:2024(E).</p>
 
   <p><b><a name="C++20">C++20</a></b> - (C++ Standard, as revised for 2020) - The full
   WG21/PL22.16 committee has voted to accept the Defect Report's Proposed Resolution into
