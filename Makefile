@@ -76,7 +76,7 @@ lwg$(LISTREV).zip: lists
 	@echo Created $@
 
 lists: mailing bin/lists dates meta-data/paper_titles.txt
-	bin/lists
+	@bin/lists
 
 define update
   if diff -N -u $(1) $(1).tmp ; then rm $(1).tmp ; else mv $(1).tmp $(1) ; fi ; touch $(1)
