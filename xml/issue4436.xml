@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4436" status="New">
+<title>`simd` broadcast is overconstrained &mdash; <tt>std::cw&lt;0.f&gt;</tt> is not convertible to <tt>simd::vec&lt;float16_t&gt;</tt></title>
+<section><sref ref="[simd.ctor]"/></section>
+<submitter>Matthias Kretz</submitter>
+<date>28 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[simd.ctor]"/> p4 requires all implicit conversions via broadcast
+constructor to satisfy <tt>convertible_to&lt;value_type&gt;</tt>. However, 
+<tt>std::cw&lt;0.f&gt;</tt> is not convertible to `float16_t` because `float` 
+does not satisfy <tt>convertible_to&lt;float16_t&gt;</tt>. Consequently, with 
+the current wording we don't arrive at bullet (4.3) which allows 
+not-value-preserving conversions if the value is known to not change on conversion. 
+The `convertible_to` constraint is implicit in bullet (4.2), not needed/wrong for 
+bullet (4.3) and thus needs to be moved into bullet (4.1).
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[simd.ctor]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) basic_vec(U&amp;&amp; value) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- Let `From` denote the type <tt>remove_cvref_t&lt;U&gt;</tt>.
+<p/>
+-2- <i>Constraints</i>: `value_type` satisfies <tt>constructible_from&lt;U&gt;</tt>.
+<p/>
+-3- <i>Effects</i>: Initializes each element to the value of the argument after conversion to `value_type`.
+<p/>
+-4- <i>Remarks</i>: The expression inside explicit evaluates to `false` if and only if <del>`U` satisfies 
+<tt>convertible_to&lt;value_type&gt;</tt>, and</del> either
+</p>
+<ul style="list-style-type: none">
+<li>(4.1) &mdash;
+<ins>`U` satisfies <tt>convertible_to&lt;value_type&gt;</tt> and</ins> `From` is not an arithmetic type 
+and does not satisfy <tt><i>constexpr-wrapper-like</i></tt>,
+</li>
+<li>(4.2) &mdash;
+`From` is an arithmetic type and the conversion from `From` to `value_type` is value-preserving
+(<sref ref="[simd.general]"/>), or
+</li>
+<li>(4.3) &mdash;
+`From` satisfies <tt><i>constexpr-wrapper-like</i></tt>, <tt>remove_const_t&lt;decltype(From::value)&gt;</tt> 
+is an arithmetic type, and `From::value` is representable by `value_type`.
+</li>
+</ul>
+
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
