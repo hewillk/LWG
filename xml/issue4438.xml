@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4438" status="New">
+<title>Bad expression in [exec.when.all]</title>
+<section><sref ref="[exec.when.all]"/></section>
+<submitter>Eric Niebler</submitter>
+<date>30 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+<sref ref="[exec.when.all]"/> p5 reads as follows:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+-5- Let <tt><i>make-when-all-env</i></tt> be the following exposition-only function template:
+</p>
+<blockquote>
+<pre>
+template&lt;class Env&gt;
+  constexpr auto <i>make-when-all-env</i>(inplace_stop_source&amp; stop_src,        <i>// exposition only</i>
+                                   Env&amp;&amp; env) noexcept {
+  return <i>see below</i>;
+}
+</pre>
+</blockquote>
+<p>
+Returns an object `e` such that
+</p>
+<ul style="list-style-type: none">
+<li>(5.1) &mdash; `decltype(e)` models <tt><i>queryable</i></tt>, and
+</li>
+<li>(5.2) &mdash; `e.query(get_stop_token)` is expression-equivalent to <tt>state.<i>stop-src</i>.get_token()</tt>, 
+and
+</li>
+<li>(5.3) &mdash; given a query object `q` with type other than <i>cv</i> `stop_token_t` and whose type 
+satisfies <tt><i>forwarding-query</i></tt>, `e.query(q)` is expression-equivalent to `get_env(rcvr).query(q)`.
+</li>
+</ul>
+
+</blockquote>
+<p>
+The problem is with "<tt>state.<i>stop-src</i>.get_token()</tt>" in bullet (5.2). There is no `state` 
+object here. This expression should be `stop_src.get_token()`.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[exec.when.all]"/> as indicated:</p>
+
+<blockquote>
+<p>
+-5- Let <tt><i>make-when-all-env</i></tt> be the following exposition-only function template:
+</p>
+<blockquote>
+<pre>
+template&lt;class Env&gt;
+  constexpr auto <i>make-when-all-env</i>(inplace_stop_source&amp; stop_src,        <i>// exposition only</i>
+                                   Env&amp;&amp; env) noexcept {
+  return <i>see below</i>;
+}
+</pre>
+</blockquote>
+<p>
+Returns an object `e` such that
+</p>
+<ul style="list-style-type: none">
+<li>(5.1) &mdash; `decltype(e)` models <tt><i>queryable</i></tt>, and
+</li>
+<li>(5.2) &mdash; `e.query(get_stop_token)` is expression-equivalent to <tt><del>state.<i>stop-src</i></del><ins>stop_src</ins>.get_token()</tt>, 
+and
+</li>
+<li>(5.3) &mdash; given a query object `q` with type other than <i>cv</i> `stop_token_t` and whose type 
+satisfies <tt><i>forwarding-query</i></tt>, `e.query(q)` is expression-equivalent to `get_env(rcvr).query(q)`.
+</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
