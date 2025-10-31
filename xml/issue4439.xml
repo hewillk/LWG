@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4439" status="New">
+<title><tt>std::optional&lt;T&amp;&gt;::swap</tt> possibly selects ADL-found `swap`</title>
+<section><sref ref="[optional.ref.swap]"/></section>
+<submitter>Jiang An</submitter>
+<date>31 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+Currently, <sref ref="[optional.ref.swap]"/> p1 specifies an "unqualified" `swap` call, which 
+possibly selects an ADL-found swap function due to <sref ref="[contents]"/> and 
+<sref ref="[swappable.requirements]"/>.
+<p/>
+It's unlike to be intentional to call ADL-found `swap` on pointers (given `ranges::swap` 
+doesn't), and the unconditional `noexcept` also suggests that user-provided `swap` functions 
+shouldn't interfere with <tt>optional&lt;T&amp;&gt;::swap</tt>.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[optional.ref.swap]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void swap(optional&amp; rhs) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Equivalent to: <tt><ins>std::</ins>swap(<i>val</i>, rhs.<i>val</i>)</tt>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
