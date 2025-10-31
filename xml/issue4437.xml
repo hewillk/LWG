@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+<!DOCTYPE issue SYSTEM "lwg-issue.dtd">
+
+<issue num="4437" status="New">
+<title>`constant_of(^^v)` for variable `v` of array type produces reflection of pointer constant</title>
+<section><sref ref="[meta.reflection.queries]"/></section>
+<submitter>Tomasz Kamiński</submitter>
+<date>29 Oct 2025</date>
+<priority>99</priority>
+
+<discussion>
+<p>
+The unintended consequence of the late change of `reflect_constant` to accept its parameter by value 
+is that `constant_of(a)` returns a reflection of the value <tt>&amp;a[0]</tt> for a variable of array type.
+<p/>
+For reference, `constant_of` is specified as:
+</p>
+<blockquote><pre>
+if constexpr (is_annotation(<i>R</i>))  {
+  return <i>C</i>;
+} else { 
+  return reflect_constant([: <i>R</i> :]);
+}
+</pre></blockquote>
+<p>
+In case when <tt>[: <i>R</i> :]</tt> is a reference to array, it will decay to a pointer to 
+the first element when accepted by value. I believe this is unintended and we should return an 
+reflection of an array object instead.
+</p>
+</discussion>
+
+<resolution>
+<p>
+This wording is relative to <paper num="N5014"/>.
+</p>
+
+<ol>
+
+<li><p>Modify <sref ref="[meta.reflection.queries]"/> as indicated:</p>
+
+<blockquote>
+<pre>
+consteval info constant_of(info r);
+</pre>
+<blockquote>
+<p>
+-6 Let <tt><i>R</i></tt> be a constant expression of type `info` such that <tt><i>R</i> == r</tt> is 
+`true`. If `r` represents an annotation, then let <tt><i>C</i></tt> be its underlying constant.
+<p/>
+-7- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if constexpr (is_annotation(<i>R</i>)) {
+  return <i>C</i>;
+<ins>} else if constexpr (is_array_type(type_of(<i>R</i>))) {
+  return reflect_constant_array([: <i>R</i> :]);</ins>
+} else {
+  return reflect_constant([: <i>R</i> :]);
+}
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+</resolution>
+
+</issue>
