@@ -30,14 +30,14 @@ This wording is relative to <paper num="N5014"/>.
 <li><p>Modify <sref ref="[meta.reflection.define.aggregate]"/> as indicated:</p>
 
 <blockquote>
-<ul>
+<ul style="list-style-type: none">
 <li>(5.3) &mdash;
 if `options.name` does not contain a value, then `options.bit_width`
 contains a value;
 </li>
 <li>(5.4) &mdash;
 if `options.bit_width` contains a value <i>V</i>, then
-<ul>
+<ul style="list-style-type: none">
 <li>(5.4.1) &mdash;
 `is_integral_type(type) || is_enum_type(type)` is `true`,
 </li>

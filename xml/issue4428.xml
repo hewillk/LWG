@@ -41,7 +41,7 @@ Otherwise, `false`.
 </p>
 <p>-6- <i>Throws</i>:
 `meta::exception` unless
-<ul>
+<ul style="list-style-type: none">
 <li>(6.1) &mdash;
 <ins>the evaluation of</ins>
 `nonstatic_data_members_of(r, access_context::unchecked())`
@@ -93,7 +93,7 @@ is `true`, preserving their order.
 </p>
 <p>-5- <i>Throws</i>:
 `meta::exception` unless
-<ul>
+<ul style="list-style-type: none">
 <li>(5.1) &mdash;
 <ins>the evaluation of</ins>
 `annotations_of(item)`
@@ -141,7 +141,7 @@ the <i>i</i><sup>th</sup> element of `r`.
 </p>
 <p>-11-
 Let <i>P</i> be
-<ul>
+<ul style="list-style-type: none">
 <li>(11.1) &mdash;
 If `sizeof...(`<i>V</i>`) > 0` is `true`,
 then the template parameter object (<sref ref="[temp.param]"/>)

@@ -33,7 +33,7 @@ This wording is relative to <paper num="N5014"/>.
 
 <blockquote>
 <p>-4- <i>Throws</i>: `meta::exception` if<del>:</del>
-<ul>
+<ul style="list-style-type: none">
 <li><del>(4.1) &mdash;</del>
 `r` represents a class member for which <code><i>PARENT-CLS</i>(r)</code>
 is an incomplete class <del>or</del><ins>.</ins>
