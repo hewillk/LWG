@@ -62,6 +62,7 @@ conditionally noexcept.
 </p>
 
 <note>2025-07-01; <paper num="P3623R0"/> would resolve this</note>
+<note>2025-11-03; <paper num="P3016R6"/> would resolve this (replacing P3623R0)</note>
 
 </discussion>
 
