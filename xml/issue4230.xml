@@ -185,14 +185,13 @@ This wording is relative to <paper num="N5014"/>.
 <pre>
 namespace std::simd {
   template&lt;class T, class Abi&gt; class basic_vec {
+    <ins>using <i>real-type</i> = <i>see below</i>; <i>// exposition-only</i></ins>
   public:
     using value_type = T;
     using mask_type = basic_mask&lt;sizeof(T), Abi&gt;;
     using abi_type = Abi;
     using iterator = <i>simd-iterator</i>&lt;basic_vec&gt;;
     using const_iterator = <i>simd-iterator</i>&lt;const basic_vec&gt;;
-    
-    <ins>using <i>real-type</i> = rebind_t&lt;typename T::value_type, basic_vec&gt; <i>// exposition-only</i></ins>
     
     <i>// <sref ref="[simd.ctor]"/>, basic_vec constructors</i>   
     [&hellip;]
@@ -211,6 +210,14 @@ namespace std::simd {
   [&hellip;]
 }
 </pre>
+<p>-2- <i>Recommended practice</i>: [&hellip;]</p>
+<blockquote>[<i>Note 1</i>: &hellip;]</blockquote>
+<p>-?- <ins>
+If `T` is a specialization of `complex`, <i>`real-type`</i> denotes the same type
+as <tt>rebind_t&lt;typename T::value_type, basic_vec&lt;T, Abi&gt;&gt;</tt>,
+otherwise an unspecified non-array object type.
+</ins>
+</p>
 </blockquote>
 </li>
 
