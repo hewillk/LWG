@@ -115,7 +115,7 @@ from some point in the evaluation context.
 </blockquote>
 </li>
 
-<li><p>Modify <sref ref="[meta.reflection.annotation]"/> as indicated:</p>
+<li><p>Modify <sref ref="[meta.reflection.array]"/> as indicated:</p>
 <blockquote>
 <pre>
 template&lt;ranges::input_range R&gt;
