@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4251" status="New">
+<issue num="4251" status="Immediate">
 <title>Move assignment for `indirect` unnecessarily requires copy construction</title>
 <section>
 <sref ref="[indirect.assign]"/>
@@ -128,6 +128,8 @@ the allocator in `*this` is replaced with a copy of the allocator in `other`.
 </superseded>
 
 <note>2025-11-03; Tomasz provides wording.</note>
+
+<note>Kona 2025-11-03; approved by LWG. Status changed: New &rarr; Immediate.</note>
 </discussion>
 
 <resolution>
