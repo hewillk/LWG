@@ -51,7 +51,7 @@ template&lt;execution-policy Ep, <i>sized-random-access-range</i> R, <i>sized-ra
 <blockquote>
 <p>-18- <i>Effects</i> Equivalent to:
 <tt>return ranges::rotate(std::forward&lt;Ep&gt;(exec), ranges::begin(r), middle,
-<del>ranges::end(r)</del><ins>ranges::begin(r) + ranges::distance(r)</ins>
+<del>ranges::end(r)</del><ins>ranges::begin(r) + ranges::distance(r)</ins>,
 ranges::begin(result_r), <del>ranges::end(result_r)</del><ins>ranges::begin(result_r) + ranges::distance(result_r)</ins>);</tt>
 </p>
 </blockquote>
@@ -61,7 +61,7 @@ ranges::begin(result_r), <del>ranges::end(result_r)</del><ins>ranges::begin(resu
 <li><p>Modify <sref ref="[partial.sort]"/> as indicated:</p>
 
 <pre>
-template&lt;execution-policy Ep, sized-random-access-range R,
+template&lt;execution-policy Ep, <i>sized-random-access-range</i> R,
          class Comp = ranges::less, class Proj = identity&gt;
   requires sortable&lt;iterator_t&lt;R&gt;, Comp, Proj&gt;
   borrowed_iterator_t&lt;R&gt;
@@ -98,7 +98,7 @@ template&lt;execution-policy Ep, <i>sized-random-access-range</i> R, class Comp 
 <li><p>Modify <sref ref="[alg.merge]"/> as indicated:</p>
 
 <pre>
-template&lt;execution-policy Ep, sized-random-access-range R, class Comp = ranges::less,
+template&lt;execution-policy Ep, <i>sized-random-access-range</i> R, class Comp = ranges::less,
          class Proj = identity&gt;
   requires sortable&lt;iterator_t&lt;R&gt;, Comp, Proj&gt;
   borrowed_iterator_t&lt;R&gt;
