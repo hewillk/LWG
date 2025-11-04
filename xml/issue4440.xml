@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4440" status="New">
+<issue num="4440" status="Immediate">
 <title>Forward declarations of entities need also in entries</title>
 <section>
 <sref ref="[version.syn]"/>
@@ -19,6 +19,8 @@ should be added to that header too. Proposed change: Add <tt>&lt;iosfwd&gt;</tt>
 to the "also in" entries for `__cpp_lib_char8_t`, `__cpp_lib_spanstream`, and
 `__cpp_lib_syncbuf`.
 </p>
+
+<note>Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.</note>
 </discussion>
 
 <resolution>
