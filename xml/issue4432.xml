@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4432" status="New">
+<issue num="4432" status="Immediate">
 <title>Clarify element initialization for <tt>meta::reflect_constant_array</tt></title>
 <section>
 <sref ref="[meta.define.static]"/>
@@ -52,6 +52,8 @@ where <i><del>e<sub>i</sub></del><ins>it<sub>i</sub></ins></i> is <ins>an iterat
 </ol>
 
 </superseded>
+
+<note>Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.</note>
 </discussion>
 
 <resolution>
