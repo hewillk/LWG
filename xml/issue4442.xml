@@ -32,22 +32,26 @@ template&lt;class T&gt;
 <p>-7- <i>Mandates</i>: `T` is an object type.</p>
 <p>-8- <i>Returns</i>: A reflection of the object designated by `expr`.</p>
 <p>-9- <i>Throws</i>: `meta::exception`
-<ins>if for an lvalue constant expression `E` that computes the object that `expr` refers to, `E`</ins>
-<del>unless `expr`</del> is <ins>not</ins> suitable for use as a constant template argument
-for a constant template parameter of type <tt>T&amp;</tt> (<sref ref="[temp.arg.nontype]"/>).</p>
+<del>unless `expr` is</del>
+<ins>if `E` is not</ins>
+suitable for use as a constant template argument
+for a constant template parameter of type <tt>T&amp;</tt> (<sref ref="[temp.arg.nontype]"/>)
+<ins>, where `E` is an lvalue constant expression that computes the object that `expr` refers to</ins>.</p>
 </blockquote>
 
 <pre>
 template&lt;class T&gt;
-  consteval info reflect_function(T&amp; expr);
+  consteval info reflect_function(T&amp; fn);
 </pre>
 <blockquote>
 <p>-10- <i>Mandates</i>: `T` is an function type.</p>
 <p>-11- <i>Returns</i>: A reflection of the function designated by `fn`.</p>
 <p>-12- <i>Throws</i>: `meta::exception`
-<ins>if for an lvalue constant expression `F` that computes the function that `fn` refers to, `F`</ins>
-<del>unless `fn`</del> is <ins>not</ins> suitable for use as a constant template argument
-for a constant template parameter of type <tt>T&amp;</tt> (<sref ref="[temp.arg.nontype]"/>).</p>
+<del>unless `fn` is</del>
+<ins>if `F` is not</ins>
+suitable for use as a constant template argument
+for a constant template parameter of type <tt>T&amp;</tt> (<sref ref="[temp.arg.nontype]"/>)
+<ins>, where `F` is an lvalue constant expression that computes the function that `fn` refers to</ins>.</p>
 </blockquote>
 
 </li>
