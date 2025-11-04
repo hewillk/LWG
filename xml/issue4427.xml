@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4427" status="New">
+<issue num="4427" status="Immediate">
 <title>`meta::dealias` needs to work with things that aren't entities</title>
 <section><sref ref="[meta.reflection.queries]"/></section>
 <submitter>Jonathan Wakely</submitter>
@@ -19,6 +19,8 @@ The spec for `dealias` says that such uses should fail with an exception.
 In the 2025-10-24 LWG telecon it was agreed that `dealias` should just
 be the identity function for non-entities.
 </p>
+
+<note>Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.</note>
 </discussion>
 
 <resolution>
