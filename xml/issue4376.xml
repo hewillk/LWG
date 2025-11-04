@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4376" status="New">
+<issue num="4376" status="Immediate">
 <title>ABI tag in return type of [simd.mask.unary] is overconstrained</title>
 <section>
 <sref ref="[simd.mask.unary]"/>
@@ -172,6 +172,8 @@ constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins>
 This also resolves <iref ref="4238"/> and addresses 
 <a href="https://github.com/cplusplus/nbballot/issues/872">DE 297</a>.
 </p>
+
+<note>Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.</note>
 </discussion>
 
 <resolution>
