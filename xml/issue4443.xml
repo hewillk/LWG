@@ -42,10 +42,11 @@ template&lt;reflection_range R = initializer_list&lt;info&gt;&gt;
   <li>-8.4.1- <del><i>N<sub>K</sub></i><tt> != </tt><i>N<sub>L</sub></i> is `true`</del>
   <ins><i>N<sub>K</sub></i> is not the same identifier as <i>N<sub>L</sub></i></ins> or</li>
   <li>-8.4.2- <del><i>N<sub>K</sub></i><tt> == u8"_" </tt> is `true`</del>
-  <ins><i>N<sub>K</sub></i> is the identifier `_`</ins></li>
+  <ins><i>N<sub>K</sub></i> is the identifier `_` (<span style="font-variant: small-caps">u+005f low line</span>)</ins>.
+  </li>
 </ul></li>
 </ul></p>
-<p>-9- <i>Effects</i>: Produces an injected declaration <ins>D</ins> (<sref ref="[expr.const]"/>)
+<p>-9- <i>Effects</i>: Produces an injected declaration <i>D</i> (<sref ref="[expr.const]"/>)
 that defines <i>C</i> and has properties as follows: <ul>
 <li>-9.1- [&hellip;]</li>
 <li>-9.2- [&hellip;]</li>
