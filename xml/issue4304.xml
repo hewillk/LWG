@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 <!DOCTYPE issue SYSTEM "lwg-issue.dtd">
 
-<issue num="4304" status="New">
+<issue num="4304" status="Immediate">
 <title><tt>std::optional&lt;<i>NonReturnable</i>&amp;&gt;</tt> is ill-formed due to `value_or`</title>
 <section><sref ref="[optional.ref.observe]"/></section>
 <submitter>Jiang An</submitter>
@@ -81,6 +81,8 @@ return has_value() ? *<i>val</i> : static_cast&lt;X&gt;(std::forward&lt;U&gt;(u)
 
 <note>2025-10-16; Jonathan provides new wording</note>
 
+
+<note>Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.</note>
 </discussion>
 
 <resolution>
