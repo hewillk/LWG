@@ -9,7 +9,10 @@
 <priority>99</priority>
 
 <discussion>
-<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/919">US 220-344</a></b>
+<b>
+Addresses <a href="https://github.com/cplusplus/nbballot/issues/919">US 220-344</a>
+and <a href="https://github.com/cplusplus/nbballot/issues/917">US 224-342</a>
+</b>
 <p>
 <sref ref="[exec.when.all]"/> p5 reads as follows:
 </p>
@@ -46,7 +49,7 @@ The problem is with "<tt>state.<i>stop-src</i>.get_token()</tt>" in bullet (5.2)
 object here. This expression should be `stop_src.get_token()`.
 </p>
 
-<note>Kona 2025-11-05; add edits to address NB comment.</note>
+<note>Kona 2025-11-04; add edits to address NB comments.</note>
 </discussion>
 
 <resolution>
@@ -81,9 +84,13 @@ template&lt;class Env&gt;
 <li>(5.2) &mdash; `e.query(get_stop_token)` is expression-equivalent to <tt><del>state.<i>stop-src</i></del><ins>stop_src</ins>.get_token()</tt>, 
 and
 </li>
-<li>(5.3) &mdash; given a query object `q` with type other than <i>cv</i> `stop_token_t` and whose type 
-satisfies <tt><i>forwarding-query</i></tt>, `e.query(q)` is expression-equivalent to <del>`get_env(rcvr)`</del><ins>`env`</ins>`.query(q)`.
+<li>(5.3) &mdash;
+given a query object `q` with type other than <i>cv</i> `get_stop_token_t`
+<del>and whose type satisfies <tt><i>forwarding-query</i></tt></del>,
+`e.query(q)` is expression-equivalent to <del>`get_env(rcvr)`</del><ins>`env`</ins>`.query(q)`
+<ins>if the type of `q` satisfies <i>`forwarding-query`</i>, and ill-formed otherwise</ins>.
 </li>
+
 </ul>
 </blockquote>
 </li>
