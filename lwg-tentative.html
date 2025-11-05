@@ -54,7 +54,7 @@
 </style>
 </head>
 <body>
-<p>Revised 2025-05-15 at 02:14:59 UTC
+<p>Revised 2025-11-05 at 12:01:33 UTC
 </p><h2>Tentative Issues</h2>
 <hr>
 <h3 id="3908"><a href="#3908">3908</a><sup><a href="https://cplusplus.github.io/LWG/issue3908">(i)</a></sup>. <code>enumerate_view::<i>iterator</i></code> constructor is explicit</h3>
@@ -192,7 +192,7 @@ Change the definition of <code>views::all_t</code> in 25.2 <a href="https://wg21
 </li>
 <li>
 <p>
-Change the definition of <code>viewable_range</code> in 25.4.5 <a href="https://wg21.link/range.refinements">[range.refinements]</a> as indicated:
+Change the definition of <code>viewable_range</code> in 25.4.6 <a href="https://wg21.link/range.refinements">[range.refinements]</a> as indicated:
 </p>
 <blockquote>
 <p>-6-
@@ -459,7 +459,7 @@ Atomic read-modify-write operations shall always read the value from a side effe
 immediately precedes the side effect of the read-modify-write operation in the modification order.
 </p></blockquote>
 <p>
-This wording keeps a similar utterance to 6.9.2.2 <a href="https://wg21.link/intro.races">[intro.races]</a>, and it can clearly convey the meaning 
+This wording keeps a similar utterance to 6.10.2.2 <a href="https://wg21.link/intro.races">[intro.races]</a>, and it can clearly convey the meaning 
 that we say the value read by <code>RWM</code> is associated with the side effect of <code>RMW</code> in the modification order.
 <p/>
 Relevant discussion can be seen <a href="https://github.com/cplusplus/CWG/issues/423">CWG/issues/423</a> here.
@@ -586,7 +586,7 @@ then the implementation ensures that <code>t</code> is a range adaptor closure o
 
 <hr>
 <h3 id="3982"><a href="#3982">3982</a><sup><a href="https://cplusplus.github.io/LWG/issue3982">(i)</a></sup>. <code><i>is-derived-from-view-interface</i></code> should require that <code>T</code> is derived from <code>view_interface&lt;T&gt;</code></h3>
-<p><b>Section:</b> 25.4.4 <a href="https://wg21.link/range.view">[range.view]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+<p><b>Section:</b> 25.4.5 <a href="https://wg21.link/range.view">[range.view]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
  <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2023-08-22 <b>Last modified:</b> 2023-10-30</p>
 <p><b>Priority: </b>Not Prioritized
 </p>
@@ -621,7 +621,7 @@ This wording is relative to <a href="https://wg21.link/N4958" title=" Working Dr
 
 <ol>
 
-<li><p>Modify 25.4.4 <a href="https://wg21.link/range.view">[range.view]</a> as indicated:</p>
+<li><p>Modify 25.4.5 <a href="https://wg21.link/range.view">[range.view]</a> as indicated:</p>
 
 <blockquote>
 <pre>
@@ -639,6 +639,81 @@ is <code>true</code> if and only if <code>T</code> has exactly one public base c
 <code>T</code> has no base classes of type <code>view_interface&lt;<ins>U</ins><del>V</del>&gt;</code> for any
 other type <code><ins>U</ins><del>V</del></code>.
 <p/>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="3992"><a href="#3992">3992</a><sup><a href="https://cplusplus.github.io/LWG/issue3992">(i)</a></sup>. <code>basic_stringbuf::str()&amp;&amp;</code> should enforce &#x1d4aa;(1)</h3>
+<p><b>Section:</b> 31.8.2.4 <a href="https://wg21.link/stringbuf.members">[stringbuf.members]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Peter Sommerlad <b>Opened:</b> 2023-10-05 <b>Last modified:</b> 2025-10-24</p>
+<p><b>Priority: </b>4
+</p>
+<p><b>View all other</b> <a href="lwg-index.html#stringbuf.members">issues</a> in [stringbuf.members].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Recent discussions on <a href="https://github.com/llvm/llvm-project/issues/64644">llvm-64644</a>
+came to the conclusion that <code>basic_stringbuf() &amp;&amp;</code> introduced by <a href="https://wg21.link/P0408" title=" Efficient Access to basic_stringbuf’s Buffer">P0408</a>
+might just copy the underlying buffer into a string object and not actually move the allocated space. 
+While the wording tried to encourage that, especially with the postcondition that the buffer must 
+be empty afterwards, it failed to specify that the move is never a copy.
+<p/>
+I suggest to amend the specification to enforce implementors to do the <code>&#x1d4aa;(1)</code> thing. 
+There might be ABI issues for those who still copy.
+<p/>
+Some investigation into 23.2.2.2 <a href="https://wg21.link/container.reqmts">[container.reqmts]</a> p.16 and 27.4.3.1 <a href="https://wg21.link/basic.string.general">[basic.string.general]</a> 
+shows that a <code>basic_string</code> as a standard container should move with <code>&#x1d4aa;(1)</code>.
+<p/>
+Unfortunately, we cannot say
+</p>
+<blockquote><p>
+<ins><code>str().data() == buf.data()</code> before calling <code>str()</code></ins>
+</p></blockquote>
+<p>
+as a postcondition due to SSO. Maybe a note could be added to eliminate the confusion.
+</p>
+
+<p><i>[2025-10-23; Reflector poll; Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+The requirements are already implied, and proposed wording has no effect.
+</p>
+
+
+<p id="res-3992"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N4958" title=" Working Draft, Programming Languages — C++">N4958</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 31.8.2.4 <a href="https://wg21.link/stringbuf.members">[stringbuf.members]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+basic_string&lt;charT, traits, Allocator&gt; str() &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-9- <i>Postconditions</i>: The underlying character sequence <code>buf</code> is empty and <code>pbase()</code>, <code>pptr()</code>, 
+<code>epptr()</code>, <code>eback()</code>, <code>gptr()</code>, and <code>egptr()</code> are initialized as if by calling 
+<code>init_buf_ptrs()</code> with an empty <code>buf</code>.
+<p/>
+-10- <i>Returns</i>: A <code>basic_string&lt;charT, traits, Allocator&gt;</code> object move constructed from the 
+<code>basic_stringbuf</code>'s underlying character sequence in <code>buf</code>. This can be achieved by first adjusting <code>buf</code> 
+to have the same content as <code>view()</code>.
+<p/>
+<ins>[<i>Note:</i> &mdash; 23.2.2.2 <a href="https://wg21.link/container.reqmts">[container.reqmts]</a> require the move construction of the return
+value to be <code>&#x1d4aa;(1)</code> <i>end note</i>]</ins>
 </p>
 </blockquote>
 </blockquote>
@@ -761,7 +836,6 @@ return *ranges::prev(<ins><i>common-arg-end</i></ins><del>ranges::end</del>(<i>d
  <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2023-11-05 <b>Last modified:</b> 2024-03-11</p>
 <p><b>Priority: </b>Not Prioritized
 </p>
-<p><b>View other</b> <a href="lwg-index-open.html#range.chunk.outer.value">active issues</a> in [range.chunk.outer.value].</p>
 <p><b>View all other</b> <a href="lwg-index.html#range.chunk.outer.value">issues</a> in [range.chunk.outer.value].</p>
 <p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
 <p><b>Discussion:</b></p>
@@ -867,11 +941,348 @@ constexpr default_sentinel_t end() const noexcept;
 
 
 <hr>
+<h3 id="4009"><a href="#4009">4009</a><sup><a href="https://cplusplus.github.io/LWG/issue4009">(i)</a></sup>. <code>drop_view::begin const</code> may have &#x1d4aa;(n) complexity</h3>
+<p><b>Section:</b> 25.7.12.2 <a href="https://wg21.link/range.drop.view">[range.drop.view]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2023-11-08 <b>Last modified:</b> 2025-10-22</p>
+<p><b>Priority: </b>3
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#range.drop.view">active issues</a> in [range.drop.view].</p>
+<p><b>View all other</b> <a href="lwg-index.html#range.drop.view">issues</a> in [range.drop.view].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+<code>drop_view::begin const</code> is specified to return <code>ranges::next(ranges::begin(<i>base_</i>), 
+<i>count_</i>, ranges::end(<i>base_</i>))</code>, which has &#x1d4aa;(n) complexity when <i>base_</i> 
+is a random-access-sized but non-common range (<a href="https://godbolt.org/z/jYdo9K6jn">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;ranges&gt;
+
+int main() {
+  const auto s = std::ranges::subrange(std::views::iota(0uz), size_t(-1));
+  const auto r = std::ranges::drop_view(s, s.size() - 1);
+  const auto b = r.begin(); // <span style="color:red;font-weight:bolder">time out</span>
+}
+</pre></blockquote>
+
+
+<p><i>[2025-10-22; Reflector poll. Status changed: New &rarr; Tentatively NAD]</i></p>
+
+<p>
+Set priority to 3 after reflector poll, status to Tentatively NAD.
+</p>
+<p>
+"NAD, it's <i>Returns</i>: not '<i>Effects</i>: Equivalent to ...',
+implementations need to implement it to return that while meeting the
+amortized &#x1d4aa;(1) guarantee."
+</p>
+
+
+<p id="res-4009"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N4964" title=" Working Draft, Programming Languages — C++">N4964</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 25.7.12.2 <a href="https://wg21.link/range.drop.view">[range.drop.view]</a> as indicated:</p>
+
+<pre>
+constexpr auto begin()
+  requires (!(<i>simple-view</i>&lt;V&gt; &amp;&amp;
+              random_access_range&lt;const V&gt; &amp;&amp; sized_range&lt;const V&gt;));
+<del>constexpr auto begin() const
+  requires random_access_range&lt;const V&gt; &amp;&amp; sized_range&lt;const V&gt;;</del>
+</pre>
+<blockquote>
+<p>
+-3- <i>Returns</i>: 
+</p>
+<ol style="list-style-type: none">
+<li><p><ins>(?.?) &mdash; If <code>V</code> models <code>random_access_range</code> and <code>sized_range</code>,</ins></p>
+<blockquote><pre>
+<ins><code>ranges::begin(<i>base_</i>) + (ranges::distance(<i>base_</i>) - range_difference_t&lt;V&gt;(size()))</code></ins>
+</pre></blockquote>
+</li>
+<li><p><ins>(?.?) &mdash; Otherwise,</ins> <code>ranges::next(ranges::begin(<i>base_</i>), <i>count_</i>, 
+ranges::end(<i>base_</i>))</code>.</p></li>
+</ol>
+<p>
+-4- <i>Remarks</i>: In order to provide the amortized constant-time complexity required by the <code>range</code> 
+concept when <ins><code>V</code></ins><del><code>drop_view</code></del> <ins>does not</ins> model<del>s</del> 
+<ins><code>random_access_range</code> and <code>sized_range</code></ins><del><code>forward_range</code></del>, 
+<ins>this function</ins><del>the first overload</del> caches the result within the <code>drop_view</code> for 
+use on subsequent calls.
+<p/>
+[<i>Note 1</i>: Without this, applying a <code>reverse_view</code> over a <code>drop_view</code> would have quadratic 
+iteration complexity. &mdash; <i>end note</i>]
+</p>
+</blockquote>
+<pre><ins>
+constexpr auto begin() const
+  requires random_access_range&lt;const V&gt; &amp;&amp; sized_range&lt;const V&gt;;</ins>
+</pre>
+<blockquote>
+<p><ins>-?- <i>Returns</i>: <code>ranges::begin(<i>base_</i>) + (ranges::distance(<i>base_</i>) - 
+range_difference_t&lt;const V&gt;(size()))</code>.</ins></p>
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4050"><a href="#4050">4050</a><sup><a href="https://cplusplus.github.io/LWG/issue4050">(i)</a></sup>. Should <code>views::iota(0) | views::take(5)</code> be <code>views::iota(0, 5)</code>?</h3>
+<p><b>Section:</b> 25.7.10.1 <a href="https://wg21.link/range.take.overview">[range.take.overview]</a>, 25.7.10.1 <a href="https://wg21.link/range.take.overview">[range.take.overview]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2024-01-28 <b>Last modified:</b> 2025-10-20</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#range.take.overview">active issues</a> in [range.take.overview].</p>
+<p><b>View all other</b> <a href="lwg-index.html#range.take.overview">issues</a> in [range.take.overview].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Given that C++20 ranges does not introduce the <i>infinite range</i> notification present in range/v3, 
+this means that <code>views::iota(0) | views::take(5)</code> will currently return a <code>take_view</code> object 
+that does not model <code>sized_range</code>.
+</p>
+<p>
+However, with the introduction of C++23 <code>repeat_view</code>, its interaction with <code>views::take</code>/<code>drop</code> 
+does have special handling depending on whether it is an infinite range, which causes 
+<code>views::repeat(0) | views::take(5)</code> to return a <code>repeat_view</code> objects that satisfy <code>sized_range</code>.
+</p>
+<p>
+This inconsistency leads to very different behavior of these two range factories in the case of infinite ranges 
+(<a href="https://godbolt.org/z/4bvToE96x">demo</a>):
+</p>
+<blockquote>
+<pre>
+#include &lt;ranges&gt;
+
+auto take_and_drop = std::views::drop(5)
+                   | std::views::take(4)
+                   | std::views::drop(3)
+                   | std::views::take(2)
+                   | std::views::drop(1);
+
+// The type of iota is drop_view&lt;take_view&lt;drop_view&lt;take_view&lt;drop_view&lt;iota_view&lt;int, unreachable_sentinel_t&gt;&gt;&gt;&gt;&gt;&gt;, which is indeed a template bloat.
+auto iota = std::views::iota(0) | take_and_drop;
+static_assert(std::ranges::sized_range&lt;decltype(iota)&gt;); // <span style="color:red;font-weight:bolder">failed</span>
+
+// The type of repeat is simply std::ranges::repeat_view&lt;int, long&gt;
+std::ranges::sized_range auto repeat = std::views::repeat(0) | take_and_drop; // ok
+</pre>
+</blockquote>
+<p>
+If we do account for the infinity of <code>repeat_view</code>, then I see no reason not to do it for <code>iota_view</code>, 
+as this is obviously intuitive and can indeed be considered an enhancement.
+</p>
+
+<p><i>[2025-10-20; Reflector poll; Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+"This changes meaning of existing C++20 for unclear benefit.
+This would need a paper."
+</p>
+<p>
+"Why does <code class='backtick'>iota(0, 10) | take(5)</code> give you <code class='backtick'>iota(0, 5)</code> but <code class='backtick'>iota(0) | take(5)</code> doesn't?"
+</p>
+<p>
+"IIRC there was opposition to <a href="https://wg21.link/P1739" title=" Avoid template bloat for safe_ranges in combination with 'subrange-y' view adaptors.">P1739</a> introducing any kind of
+special cases in the adaptor objects. What got consensus was only the
+'specialisations' that preserve the exact type of the underlying range.
+Thus <code class='backtick'>iota(0, 10)</code> &rarr; <code class='backtick'>iota(0, 5)</code> was fine, but <code class='backtick'>iota(0)</code> &rarr; <code class='backtick'>iota(0, 5)</code>
+would not have been.
+I still think that all changes that simplify the return types are helpful,
+but it would certainly be a breaking change now."
+</p>
+
+
+<p id="res-4050"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N4971" title=" Working Draft, Programming Languages — C++">N4971</a>.
+</p>
+
+<ol>
+<li><p>Modify 25.7.10.1 <a href="https://wg21.link/range.take.overview">[range.take.overview]</a> as indicated:</p>
+
+<blockquote>
+<p>
+  -2- The name <code>views::take</code> denotes a range adaptor object (25.7.2 <a href="https://wg21.link/range.adaptor.object">[range.adaptor.object]</a>).
+  Let <code>E</code> and <code>F</code> be expressions, let <code>T</code> be <code>remove_cvref_t&lt;decltype((E))&gt;</code>,
+  and let <code>D</code> be <code>range_difference_t&lt;decltype((E))&gt;</code>.
+  If <code>decltype((F))</code> does not model <code>convertible_to&lt;D&gt;</code>, <code>views::take(E, F)</code>
+  is ill-formed. Otherwise, the expression <code>views::take(E, F)</code> is expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+  <li>
+    <p>(2.1) &mdash; if <code>T</code> is a specialization of <code>empty_view</code> (25.6.2.2 <a href="https://wg21.link/range.empty.view">[range.empty.view]</a>),
+      then <code>((void)F, <i>decay-copy</i>(E))</code>, except that the evaluations of <code>E</code>
+      and <code>F</code> are indeterminately sequenced.
+    </p>
+  </li>
+  <li>
+    <p>(2.2) &mdash; Otherwise, if <code>T</code> models <code>random_access_range</code> and <code>sized_range</code>
+      and is a specialization of <code>span</code> (23.7.2.2 <a href="https://wg21.link/views.span">[views.span]</a>),
+      <code>basic_string_view</code> (27.3 <a href="https://wg21.link/string.view">[string.view]</a>), or <code>ranges::subrange</code> 
+      (25.5.4 <a href="https://wg21.link/range.subrange">[range.subrange]</a>), then <code>U(ranges::begin(E), ranges::begin(E) + 
+      std::min&lt;D&gt;(ranges::distance(E), F))</code>, except that <code>E</code> is evaluated only once, 
+      where <code>U</code> is a type determined as follows:
+    </p>
+    <ol style="list-style-type: none">
+      <li>
+        <p>(2.2.1) &mdash; if <code>T</code> is a specialization of <code>span</code>, then <code>U</code> is
+          <code>span&lt;typename T::element_type&gt;</code>;
+        </p>
+      </li>
+      <li>
+        <p>(2.2.2) &mdash; otherwise, if <code>T</code> is a specialization of <code>basic_string_view</code>, then
+          <code>U</code> is <code>T</code>;
+        </p>
+      </li>
+      <li>
+        <p>(2.2.3) &mdash; otherwise, <code>T</code> is a specialization of <code>subrange</code>,
+          and <code>U</code> is <code>subrange&lt;iterator_t&lt;T&gt;&gt;</code>;</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>(2.3) &mdash; otherwise, if <code>T</code> is a specialization of <code>iota_view</code> 
+      (25.6.4.2 <a href="https://wg21.link/range.iota.view">[range.iota.view]</a>) that models <code>random_access_range</code> and <code>sized_range</code>, then
+      <code>iota_view(*ranges::begin(E), *(ranges::begin(E) + std::min&lt;D&gt;(ranges::distance(E), F)))</code>,
+      except that <code>E</code> is evaluated only once.
+    </p>
+  </li>
+  <li>
+    <p>(2.?) &mdash; <ins>Otherwise, if <code>T</code> is a specialization of <code>iota_view</code>
+        that models <code>random_access_range</code> and <code>same_as&lt;sentinel_t&lt;T&gt;,
+          unreachable_sentinel_t&gt;</code> is <code>true</code>, then
+        <code>views::iota(*ranges::begin(E), *(ranges::begin(E) + static_cast&lt;D&gt;(F)))</code>,
+        except that <code>E</code> is evaluated only once.</ins></p>
+  </li>
+
+  <li>
+    <p>(2.4) &mdash; Otherwise, if <code>T</code> is a specialization of <code>repeat_view</code> 
+       (25.6.5.2 <a href="https://wg21.link/range.repeat.view">[range.repeat.view]</a>):
+    </p>
+    <ol style="list-style-type: none">
+      <li>
+        <p>(2.4.1) &mdash; if <code>T</code> models <code>sized_range</code>, then
+        <pre>  views::repeat(*E.<i>value_</i>, std::min&lt;D&gt;(ranges::distance(E), F))</pre>
+        except that <code>E</code> is evaluated only once;</p>
+      </li>
+      <li>
+        <p>(2.4.2) &mdash; otherwise, <code>views::repeat(*E.<i>value_</i>, static_cast&lt;D&gt;(F))</code>.
+        </p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>(2.5) &mdash; Otherwise, <code>take_view(E, F)</code>.</p>
+  </li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.12.1 <a href="https://wg21.link/range.drop.overview">[range.drop.overview]</a> as indicated:</p>
+
+<blockquote>
+<p>
+  -2- The name <code>views::drop</code> denotes a range adaptor object (25.7.2 <a href="https://wg21.link/range.adaptor.object">[range.adaptor.object]</a>).
+  Let <code>E</code> and <code>F</code> be expressions, let <code>T</code> be <code>remove_cvref_t&lt;decltype((E))&gt;</code>,
+  and let <code>D</code> be <code>range_difference_t&lt;decltype((E))&gt;</code>.
+  If <code>decltype((F))</code> does not model <code>convertible_to&lt;D&gt;</code>, <code>views::drop(E, F)</code>
+  is ill-formed. Otherwise, the expression <code>views::drop(E, F)</code> is expression-equivalent to:
+</p>
+<ol style="list-style-type: none">
+  <li>
+    <p>(2.1) &mdash; if <code>T</code> is a specialization of <code>empty_view</code> (25.6.2.2 <a href="https://wg21.link/range.empty.view">[range.empty.view]</a>),
+      then <code>((void)F, <i>decay-copy</i>(E))</code>, except that the evaluations of <code>E</code>
+      and <code>F</code> are indeterminately sequenced.
+    </p>
+  </li>
+  <li>
+    <p>(2.2) &mdash; Otherwise, if <code>T</code> models <code>random_access_range</code> and <code>sized_range</code>
+      and is
+    </p>
+    <ol style="list-style-type: none">
+      <li>
+        <p>(2.2.1) &mdash; a specialization of <code>span</code> (23.7.2.2 <a href="https://wg21.link/views.span">[views.span]</a>),</p>
+      </li>
+      <li>
+        <p>(2.2.2) &mdash; a specialization of <code>basic_string_view</code> (27.3 <a href="https://wg21.link/string.view">[string.view]</a>), </p>
+      </li>
+      <li>
+        <p>(2.2.3) &mdash; a specialization of <code>iota_view</code> (25.6.4.2 <a href="https://wg21.link/range.iota.view">[range.iota.view]</a>), or</p>
+      </li>
+      <li>
+        <p>(2.2.4) &mdash; a specialization of <code>subrange</code> (25.5.4 <a href="https://wg21.link/range.subrange">[range.subrange]</a>)
+          where <code>T::<i>StoreSize</i></code> is <code>false</code>,</p>
+      </li>
+    </ol>
+    <p>then <code>U(ranges::begin(E) + std::min&lt;D&gt;(ranges::distance(E), F), ranges::end(E))</code>,
+      except that <code>E</code> is evaluated only once, where <code>U</code> is <code>span&lt;typename
+        T::element_type&gt;</code>
+      if <code>T</code> is a specialization of <code>span</code> and <code>T</code> otherwise.
+    </p>
+  </li>
+  <li>
+    <p>(2.?) &mdash; <ins>Otherwise, if <code>T</code> is a specialization of <code>iota_view</code>
+        that models
+        <code>random_access_range</code> and <code>same_as&lt;sentinel_t&lt;T&gt;,
+          unreachable_sentinel_t&gt;</code> is <code>true</code>, then
+        <code>views::iota(*(ranges::begin(E) + static_cast&lt;D&gt;(F)))</code>.</ins>
+    </p>
+  </li>
+  <li>
+    <p>(2.3) &mdash; Otherwise, if <code>T</code> is a specialization of <code>subrange</code>
+      (25.5.4 <a href="https://wg21.link/range.subrange">[range.subrange]</a>) that models
+      <code>random_access_range</code> and <code>sized_range</code>, then
+      <code>T(ranges::begin(E) + std::min&lt;D&gt;(ranges::distance(E), F), ranges::end(E),
+        <i>to-unsigned-like</i>(ranges::distance(E) - std::min&lt;D&gt;(ranges::distance(E), F)))</code>,
+      except that <code>E</code> and <code>F</code> are each evaluated only once.
+    </p>
+  </li>
+  <li>
+    <p>(2.4) &mdash; Otherwise, if <code>T</code> is a specialization of <code>repeat_view</code> (25.6.5.2 <a href="https://wg21.link/range.repeat.view">[range.repeat.view]</a>):
+    </p>
+    <ol style="list-style-type: none">
+      <li>
+        <p>(2.4.1) &mdash; if <code>T</code> models <code>sized_range</code>, then
+        <pre>  views::repeat(*E.<i>value_</i>, ranges::distance(E) - std::min&lt;D&gt;(ranges::distance(E), F))</pre>
+        except that <code>E</code> is evaluated only once;</p>
+      </li>
+      <li>
+        <p>(2.4.2) &mdash; otherwise, <code>((void)F, <i>decay-copy</i>(E))</code>, except that the evaluations of
+          <code>E</code> and <code>F</code> are indeterminately sequenced.</p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>(2.5) &mdash; Otherwise, <code>drop_view(E, F)</code>.
+    </p>
+  </li>
+
+</ol>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+<hr>
 <h3 id="4095"><a href="#4095">4095</a><sup><a href="https://cplusplus.github.io/LWG/issue4095">(i)</a></sup>. <code>ranges::fold_<i>meow</i></code> should explicitly spell out the return type</h3>
 <p><b>Section:</b> 26.4 <a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a>, 26.6.18 <a href="https://wg21.link/alg.fold">[alg.fold]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
  <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2024-05-03 <b>Last modified:</b> 2024-06-24</p>
 <p><b>Priority: </b>Not Prioritized
 </p>
+<p><b>View other</b> <a href="lwg-index-open.html#algorithm.syn">active issues</a> in [algorithm.syn].</p>
 <p><b>View all other</b> <a href="lwg-index.html#algorithm.syn">issues</a> in [algorithm.syn].</p>
 <p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
 <p><b>Discussion:</b></p>
@@ -1221,6 +1632,59 @@ to <code class='backtick'>num_get::do_get</code>.
 
 
 <hr>
+<h3 id="4171"><a href="#4171">4171</a><sup><a href="https://cplusplus.github.io/LWG/issue4171">(i)</a></sup>. P2609R3 breaks code that uses <code class='backtick'>views::zip</code> and <code>get&lt;T&gt;</code></h3>
+<p><b>Section:</b> 24.3.6.3 <a href="https://wg21.link/indirectcallable.indirectinvocable">[indirectcallable.indirectinvocable]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> S. B. Tam <b>Opened:</b> 2024-11-01 <b>Last modified:</b> 2025-10-23</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The following use of <code class='backtick'>std::ranges::for_each</code> is valid before <a href="https://wg21.link/P2609R3" title=" Relaxing Ranges Just A Smidge">P2609R3</a> and invalid after that.
+</p>
+<blockquote><pre>
+#include &lt;algorithm&gt;
+#include &lt;ranges&gt;
+#include &lt;tuple&gt;
+using namespace std::ranges;
+
+void f() {
+  int a[1];
+  auto fun = [](auto t) {
+    [[maybe_unused]] auto x = std::get&lt;int&amp;&gt;(t);
+  };
+  for_each(views::zip(a), fun);
+}
+</pre></blockquote>
+<p>
+The reason is that, <a href="https://wg21.link/P2609R3" title=" Relaxing Ranges Just A Smidge">P2609R3</a> requires <code class='backtick'>fun</code> to be <code class='backtick'>invocable</code> with <code>iter_value_t&lt;I&gt;&amp;</code>, 
+which is <code>tuple&lt;int&gt;&amp;</code> when <code class='backtick'>I</code> is <code class='backtick'>zip_view</code>'s iterator, and <code>tuple&lt;int&gt;&amp;</code> 
+doesn't support <code>std::get&lt;int&amp;&gt;(t)</code> because there isn't a <code>int&amp;</code> member.
+<p/>
+P2609R3 argues that "The actual consequence on user code seems small", but I believe that this code pattern is 
+common enough, and it hurts if we cannot use <code>get&lt;int&amp;&gt;(t)</code> in the lambda body.
+<p/>
+Note that <code class='backtick'>for_each</code> doesn't actually call <code class='backtick'>fun</code> with <code>iter_value_t&lt;I&gt;</code>, as can be seen by adding 
+an explicit return type to <code class='backtick'>fun</code>.
+<p/>
+Did LWG foresee this impact of <a href="https://wg21.link/P2609R3" title=" Relaxing Ranges Just A Smidge">P2609R3</a>? Could P2609R3 be reverted to unbreak this code pattern?
+</p>
+
+<p><i>[2025-10-23; Reflector poll; Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+The range concepts are over-constrained by design, and <code class='backtick'>indirect_unary_invocable</code>
+always required invocability with <code class='backtick'>iter_value_t</code>. The P2609 changes enforced this 
+requirement properly for iterators returning proxy references, including <code class='backtick'>zip_iterator</code>.
+</p>
+
+
+<p id="res-4171"><b>Proposed resolution:</b></p>
+
+
+
+
+<hr>
 <h3 id="4184"><a href="#4184">4184</a><sup><a href="https://cplusplus.github.io/LWG/issue4184">(i)</a></sup>. Domain of <code>ranges::c<i>meow</i></code> doesn't match <code>ranges::<i>meow</i></code></h3>
 <p><b>Section:</b> 25.3 <a href="https://wg21.link/range.access">[range.access]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
  <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2024-12-17 <b>Last modified:</b> 2025-02-07</p>
@@ -1280,81 +1744,6 @@ int main() {
 
 
 <hr>
-<h3 id="4188"><a href="#4188">4188</a><sup><a href="https://cplusplus.github.io/LWG/issue4188">(i)</a></sup>. <code>ostream::sentry</code> destructor should handle exceptions</h3>
-<p><b>Section:</b> 31.7.6.2.4 <a href="https://wg21.link/ostream.sentry">[ostream.sentry]</a> <b>Status:</b> <a href="lwg-active.html#Ready">Tentatively Ready</a>
- <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2025-01-14 <b>Last modified:</b> 2025-02-07</p>
-<p><b>Priority: </b>Not Prioritized
-</p>
-<p><b>View other</b> <a href="lwg-index-open.html#ostream.sentry">active issues</a> in [ostream.sentry].</p>
-<p><b>View all other</b> <a href="lwg-index.html#ostream.sentry">issues</a> in [ostream.sentry].</p>
-<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively Ready">Tentatively Ready</a> status.</p>
-<p><b>Discussion:</b></p>
-<p>
-LWG <a href="lwg-closed.html#397" title="ostream::sentry dtor throws exceptions (Status: NAD Editorial)">397</a><sup><a href="https://cplusplus.github.io/LWG/issue397" title="Latest snapshot">(i)</a></sup> suggested changing 31.7.6.2.4 <a href="https://wg21.link/ostream.sentry">[ostream.sentry]</a> to
-say that the <code class='backtick'>ostream::sentry</code> destructor doesn't throw any exceptions.
-That issue was closed as resolved by LWG <a href="lwg-defects.html#835" title="Tying two streams together (correction to DR 581) (Status: C++11)">835</a><sup><a href="https://cplusplus.github.io/LWG/issue835" title="Latest snapshot">(i)</a></sup> which included
-the "Throws: Nothing" change to the <code class='backtick'>sentry</code> destructor.
-However, that part of the resolution never seems to have been applied to
-the working draft. <a href="https://wg21.link/N3091" title=" Editor's Report">N3091</a> mentions applying LWG 835 for
-<a href="https://wg21.link/N3090" title=" Working Draft, Standard for Programming Language C++">N3090</a> but the destructor change is missing, maybe because
-the paragraph for the sentry destructor had been renumbered from p17 to p4
-and LWG 835 didn't show sufficient context to indicate the intended location.
-</p>
-
-<p>
-The problem described in LWG <a href="lwg-closed.html#397" title="ostream::sentry dtor throws exceptions (Status: NAD Editorial)">397</a><sup><a href="https://cplusplus.github.io/LWG/issue397" title="Latest snapshot">(i)</a></sup> is still present:
-the streambuf operations can fail, and the sentry needs to handle that.
-The changes for LWG <a href="lwg-defects.html#835" title="Tying two streams together (correction to DR 581) (Status: C++11)">835</a><sup><a href="https://cplusplus.github.io/LWG/issue835" title="Latest snapshot">(i)</a></sup> ensure no exception is thrown if
-<code>rdbuf()-&gt;pubsync()</code> returns -1 on failure, but do nothing for
-the case where it throws an exception (the original topic of LWG 397!).
-Because C++11 made <code class='backtick'>~sentry</code> implicitly <code class='backtick'>noexcept</code>,
-an exception from <code class='backtick'>rdbuf()-&gt;pubsync()</code> will terminate the process.
-That needs to be fixed.
-</p>
-
-<p>
-Libstdc++ does terminate if <code class='backtick'>pubsync()</code> throws when called by <code class='backtick'>~sentry</code>.
-Both MSVC and Libc++ silently swallow exceptions.
-It seems preferable to handle the exception and report an error,
-just as we do when <code class='backtick'>pubsync()</code> returns -1.
-</p>
-
-
-<p><i>[2025-02-07; Reflector poll]</i></p>
-
-<p>
-Set status to Tentatively Ready after six votes in favour during reflector poll.
-</p>
-
-
-
-<p id="res-4188"><b>Proposed resolution:</b></p>
-<p>
-This wording is relative to <a href="https://wg21.link/N5001">N5001</a>.
-</p>
-
-<ol>
-<li><p>Modify 31.7.6.2.4 <a href="https://wg21.link/ostream.sentry">[ostream.sentry]</a> as indicated:</p>
-
-<blockquote>
-<pre><code>~sentry();</code></pre>
-<blockquote>
--4- If
-<code>(os.flags() &amp; ios_base::unitbuf) &amp;&amp; !uncaught_exceptions() &amp;&amp; os.good()</code> is <code class='backtick'>true</code>, calls <code>os.rdbuf()-&gt;pubsync()</code>.
-If that function returns −1
-<ins> or exits via an exception</ins>,
-sets <code class='backtick'>badbit</code> in <code class='backtick'>os.rdstate()</code> without propagating an exception.
-</blockquote>
-</blockquote>
-</li>
-</ol>
-
-
-
-
-
-
-<hr>
 <h3 id="4194"><a href="#4194">4194</a><sup><a href="https://cplusplus.github.io/LWG/issue4194">(i)</a></sup>. <code>atomic&lt;void*&gt;</code> should use generic class template</h3>
 <p><b>Section:</b> 32.5.8.5 <a href="https://wg21.link/atomics.types.pointer">[atomics.types.pointer]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
  <b>Submitter:</b> Gonzalo Brito <b>Opened:</b> 2025-01-16 <b>Last modified:</b> 2025-02-07</p>
@@ -1408,7 +1797,7 @@ but to reject attempts at arithmetic. They all do this correctly today.
 
 <p id="res-4194"><b>Proposed resolution:</b></p>
 <p>
-This wording is relative to <a href="https://wg21.link/N5001">N5001</a>.
+This wording is relative to <a href="https://wg21.link/N5001" title=" Working Draft, Programming Languages — C++">N5001</a>.
 </p>
 
 <ol>
@@ -1429,62 +1818,87 @@ specialization are standard-layout structs. They each have a trivial destructor.
 
 
 <hr>
-<h3 id="4200"><a href="#4200">4200</a><sup><a href="https://cplusplus.github.io/LWG/issue4200">(i)</a></sup>. The <code class='backtick'>operation_state</code> concept can be simplified</h3>
-<p><b>Section:</b> 33.8.1 <a href="https://wg21.link/exec.opstate.general">[exec.opstate.general]</a> <b>Status:</b> <a href="lwg-active.html#Ready">Tentatively Ready</a>
- <b>Submitter:</b> Eric Niebler <b>Opened:</b> 2025-02-03 <b>Last modified:</b> 2025-02-07</p>
+<h3 id="4219"><a href="#4219">4219</a><sup><a href="https://cplusplus.github.io/LWG/issue4219">(i)</a></sup>. <code>std::vector::erase[_if]</code> should be based on ranges <code class='backtick'>remove</code></h3>
+<p><b>Section:</b> 23.3.13.6 <a href="https://wg21.link/vector.erasure">[vector.erasure]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Peter Kasting <b>Opened:</b> 2025-03-05 <b>Last modified:</b> 2025-10-21</p>
 <p><b>Priority: </b>Not Prioritized
 </p>
-<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively Ready">Tentatively Ready</a> status.</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
 <p><b>Discussion:</b></p>
 <p>
-Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/312">cplusplus/sender-receiver #312</a>.
-</p>
-<p>
-The current defn of the <code class='backtick'>operation_state</code> concept is:
-
-<pre><code>
-template&lt;class O&gt;
-  concept operation_state =
-    derived_from&lt;typename O::operation_state_concept, operation_state_t&gt; &amp;&amp;
-    is_object_v&lt;O&gt; &amp;&amp;
-    requires (O&amp; o) {
-      { start(o) } noexcept;
-    };
-</code></pre>
-
-I think the <code>is_object_v&lt;O&gt;</code> constraint is not needed
-because the <code>derived_from</code> constraint has already established that
-<code>O</code> is a class type.
-</p>
-<p>
-And <code class='backtick'>start(o)</code> is always <code class='backtick'>noexcept</code> now that <code class='backtick'>start</code> mandates the
-<code class='backtick'>noexcept</code>-ness of <code class='backtick'>op.start()</code>.
+C++20 added <code>std::vector::erase[_if]</code>. Per 23.3.13.6 <a href="https://wg21.link/vector.erasure">[vector.erasure]</a>, these are equivalent 
+to a call to <code>std::remove[_if]</code> followed by an appropriate <code>erase</code>.
+<p/>
+This is unfortunate, because <code class='backtick'>std::remove_if</code> is specified (by 26.7.8 <a href="https://wg21.link/alg.remove">[alg.remove]</a>) as invoking 
+its predicate as <code class='backtick'>pred(*i)</code>, while <code class='backtick'>std::ranges::remove_if</code> uses the more flexible 
+<code class='backtick'>invoke(pred, invoke(proj, *i))</code>. Disregarding the projection, the latter allows the use of member function 
+pointers as predicates, while the former does not.
+<p/>
+I assume the committee intentionally did not change the non-ranges version to use <code class='backtick'>invoke</code> because it 
+caused a backwards-compatibility risk. (If I am mistaken and this was an oversight, perhaps this and 
+other non-ranges algorithms that take predicates should be updated to use invoke() to invoke them.)
+<p/>
+If that's true, though, it's perplexing why a new-to-c++20 function like <code class='backtick'>std::vector::erase_if</code> 
+should suffer the same drawback.
 </p>
 
-<p><i>[2025-02-07; Reflector poll]</i></p>
+<p><i>[2025-10-21; Reflector poll. Status changed: New &rarr; Tentatively NAD.]</i></p>
 
 <p>
-Set status to Tentatively Ready after seven votes in favour during reflector poll.
+"This is a design change and needs a paper."
 </p>
 
+<p><i>[2025-10-21; .]</i></p>
 
-
-<p id="res-4200"><b>Proposed resolution:</b></p>
 <p>
-This wording is relative to <a href="https://wg21.link/N5001">N5001</a>.
+"Paper should discuss whether <code>std::erase_if(c, &amp;T::mf)</code> works on paper,
+currently works on STL implementations in the field, and whether it <i>should</i> work."
 </p>
+
+
+<p id="res-4219"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5001" title=" Working Draft, Programming Languages — C++">N5001</a>.
+</p>
+
 <ol>
-<li>
-Modify 33.8.1 <a href="https://wg21.link/exec.opstate.general">[exec.opstate.general]</a> as indicated:
-<blockquote><pre><code>
-template&lt;class O&gt;
-  concept operation_state =
-    derived_from&lt;typename O::operation_state_concept, operation_state_t&gt; &amp;&amp;
-    <del>is_object_v&lt;O&gt; &amp;&amp;</del>
-    requires (O&amp; o) {
-      <del>{</del> start(o) <del>} noexcept</del>;
-    };
-</code></pre></blockquote>
+
+<li><p>Modify 23.3.13.6 <a href="https://wg21.link/vector.erasure">[vector.erasure]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class Allocator, class U = T&gt;
+  constexpr typename vector&lt;T, Allocator&gt;::size_type
+    erase(vector&lt;T, Allocator&gt;&amp; c, const U&amp; value);
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+auto <ins>r</ins><del>it</del> = <ins>ranges::</ins>remove(c<del>.begin(), c.end()</del>, value);
+<del>auto r = distance(it, c.end());</del>
+c.erase(<ins>r.begin()</ins><del>it</del>, <ins>r</ins><del>c</del>.end());
+return r<ins>.size()</ins>;
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class T, class Allocator, class Predicate&gt;
+  constexpr typename vector&lt;T, Allocator&gt;::size_type
+    erase_if(vector&lt;T, Allocator&gt;&amp; c, Predicate pred);
+</pre>
+<blockquote>
+<p>
+-2- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+auto <ins>r</ins><del>it</del> = <ins>ranges::</ins>remove_if(c<del>.begin(), c.end()</del>, pred);
+<del>auto r = distance(it, c.end());</del>
+c.erase(<ins>r.begin()</ins><del>it</del>, <ins>r</ins><del>c</del>.end());
+return r<ins>.size()</ins>;
+</pre></blockquote>
+</blockquote>
+</blockquote>
 </li>
 </ol>
 
@@ -1494,75 +1908,1422 @@ template&lt;class O&gt;
 
 
 <hr>
-<h3 id="4201"><a href="#4201">4201</a><sup><a href="https://cplusplus.github.io/LWG/issue4201">(i)</a></sup>. <code class='backtick'>with-await-transform::await_transform</code> should not use a deduced return type</h3>
-<p><b>Section:</b> 33.9.4 <a href="https://wg21.link/exec.awaitable">[exec.awaitable]</a> <b>Status:</b> <a href="lwg-active.html#Ready">Tentatively Ready</a>
- <b>Submitter:</b> Brian Bi <b>Opened:</b> 2025-02-03 <b>Last modified:</b> 2025-02-07</p>
+<h3 id="4228"><a href="#4228">4228</a><sup><a href="https://cplusplus.github.io/LWG/issue4228">(i)</a></sup>. Does <code>vector&lt;bool, Allocator&gt;</code> mandate that <code class='backtick'>Allocator::value_type</code> is <code class='backtick'>bool</code>?</h3>
+<p><b>Section:</b> 23.3.14.1 <a href="https://wg21.link/vector.bool.pspc">[vector.bool.pspc]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Stephan T. Lavavej <b>Opened:</b> 2025-03-18 <b>Last modified:</b> 2025-06-13</p>
 <p><b>Priority: </b>Not Prioritized
 </p>
-<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively Ready">Tentatively Ready</a> status.</p>
+<p><b>View all other</b> <a href="lwg-index.html#vector.bool.pspc">issues</a> in [vector.bool.pspc].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
 <p><b>Discussion:</b></p>
 <p>
-Imported from <a href="https://github.com/cplusplus/sender-receiver/issues/309">cplusplus/sender-receiver #309</a>.
+<a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a> 23.3.14.1 <a href="https://wg21.link/vector.bool.pspc">[vector.bool.pspc]</a>/2 says:
 </p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
 <p>
-33.9.4 <a href="https://wg21.link/exec.awaitable">[exec.awaitable]</a>/p5
+Unless described below, all operations have the same requirements and semantics as the primary <code class='backtick'>vector</code> template, 
+except that operations dealing with the <code class='backtick'>bool</code> value type map to bit values in the container storage and 
+<code class='backtick'>allocator_traits::construct</code> (20.2.9.3 <a href="https://wg21.link/allocator.traits.members">[allocator.traits.members]</a>) is not used to construct these values.
 </p>
+</blockquote>
 <p>
-The use of the deduced return type causes the definition of the sender's
-<code class='backtick'>as_awaitable</code> method to be instantiated too early,
-e.g., when the sender is passed to <code class='backtick'>get_completion_signatures</code>.
+23.2.2.5 <a href="https://wg21.link/container.alloc.reqmts">[container.alloc.reqmts]</a>/5 says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+<i>Mandates</i>: <code class='backtick'>allocator_type::value_type</code> is the same as <code class='backtick'>X::value_type</code>.
+</p>
+</blockquote>
+<p>
+Is <code>vector&lt;bool, allocator&lt;int&gt;&gt;</code> forbidden? There's implementation divergence: 
+MSVC's STL enforces the mandate, while libc++ and libstdc++ accept this code, discovered while 
+running libc++'s tests with MSVC's STL.
+<p/>
+Preferred resolution: I would be satisfied with resolving this as NAD, with a record that LWG believes 
+that "all operations have the same requirements" means that the <i>Mandate</i> applies. I suppose that 
+an editorial note could also be added to this effect, although I don't believe it's necessary.
+<p/>
+Alternate resolution: If LWG believes that the <i>Mandate</i> does not apply, and that <code>vector&lt;bool&gt;</code> 
+should be unique among containers in accepting <code>allocator&lt;Anything&gt;</code>, then I believe that 
+a normative sentence should be added to 23.3.14.1 <a href="https://wg21.link/vector.bool.pspc">[vector.bool.pspc]</a>/2, specifically creating an exemption 
+to 23.2.2.5 <a href="https://wg21.link/container.alloc.reqmts">[container.alloc.reqmts]</a>/5.
 </p>
 
-<p><i>[Eric provides wording]</i></p>
-
-
-
-<p><i>[2025-02-07; Reflector poll]</i></p>
+<p><i>[2025-06-13; Reflector poll]</i></p>
 
 <p>
-Set status to Tentatively Ready after five votes in favour during reflector poll.
+Set status to Tentatively NAD. This is just a bug in some implementations
+(now fixed in libstdc++).
 </p>
 
 
 
-<p id="res-4201"><b>Proposed resolution:</b></p>
+<p id="res-4228"><b>Proposed resolution:</b></p>
+
+
+
+
+
+<hr>
+<h3 id="4229"><a href="#4229">4229</a><sup><a href="https://cplusplus.github.io/LWG/issue4229">(i)</a></sup>. <code class='backtick'>std::ranges::to</code> with union return type</h3>
+<p><b>Section:</b> 25.5.7.2 <a href="https://wg21.link/range.utility.conv.to">[range.utility.conv.to]</a>, 25.5.7.3 <a href="https://wg21.link/range.utility.conv.adaptors">[range.utility.conv.adaptors]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Jiang An <b>Opened:</b> 2025-03-20 <b>Last modified:</b> 2025-10-20</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#range.utility.conv.to">active issues</a> in [range.utility.conv.to].</p>
+<p><b>View all other</b> <a href="lwg-index.html#range.utility.conv.to">issues</a> in [range.utility.conv.to].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
 <p>
-This wording is relative to <a href="https://wg21.link/N5001">N5001</a>.
+LWG <a href="lwg-defects.html#3847" title="ranges::to can still return views (Status: C++23)">3847</a><sup><a href="https://cplusplus.github.io/LWG/issue3847" title="Latest snapshot">(i)</a></sup> made <code class='backtick'>std::ranges::to</code> require the return type (or the target type for the overload 
+returning range adaptor closure object) to be a <i>cv</i>-unqualified class type. Although the term 
+"class type" in core language specification also covers union types, implementations (libstdc++ and MSVC STL) 
+tend to implement this part of the <i>Mandates</i> only with <code class='backtick'>std::is_class_v</code>, which rejects union types.
+<p/>
+E.g. the following program is rejected by libstdc++ and MSVC STL 
+(<a href="https://godbolt.org/z/MnsY4Tzen">https://godbolt.org/z/MnsY4Tzen</a>):
 </p>
-<ol>
-<li>
-Modify 33.9.4 <a href="https://wg21.link/exec.awaitable">[exec.awaitable]</a> as indicated:
-<blockquote>
--5-
-Let <i><code>with-await-transform</code></i> be the exposition-only class template:
+<blockquote><pre>
+#include &lt;memory&gt;
+#include &lt;ranges&gt;
+#include &lt;type_traits&gt;
+#include &lt;utility&gt;
+#include &lt;vector&gt;
 
-<pre><code>
-namespace std::execution {
-  template&lt;class T, class Promise&gt;
-    concept <i>has-as-awaitable</i> =                                  <i>// exposition only</i>
-      requires (T&amp;&amp; t, Promise&amp; p) {
-        { std::forward&lt;T&gt;(t).as_awaitable(p) } -&gt; is-awaitable&lt;Promise&amp;&gt;;
-      };
+template&lt;class T, class A = std::allocator&lt;T&gt;&gt;
+union weird_vector {
+  std::vector&lt;T, A&gt; vec_;
 
-  template&lt;class Derived&gt;
-    struct <i>with-await-transform</i> {                               <i>// exposition only</i>
-      template&lt;class T&gt;
-        T&amp;&amp; await_transform(T&amp;&amp; value) noexcept {
-          return std::forward&lt;T&gt;(value);
-        }
+  constexpr weird_vector() : vec_() {}
+  constexpr weird_vector(const weird_vector&amp; other) : vec_(other.vec_) {}
+  constexpr weird_vector(weird_vector&amp;&amp; other) noexcept : vec_(std::move(other.vec_)) {}
 
-      template&lt;has-as-awaitable&lt;Derived&gt; T&gt;
-        <del>decltype(auto)</del><ins>auto</ins> await_transform(T&amp;&amp; value)
-          noexcept(noexcept(std::forward&lt;T&gt;(value).as_awaitable(declval&lt;Derived&amp;&gt;())))
-        <ins>-&gt; decltype(std::forward&lt;T&gt;(value).as_awaitable(declval&lt;Derived&amp;&gt;()))</ins> {
-          return std::forward&lt;T&gt;(value).as_awaitable(static_cast&lt;Derived&amp;&gt;(*this));
-        }
-    };
+  template&lt;class U&gt;
+    requires (!std::same_as&lt;std::remove_cvref_t&lt;U&gt;, weird_vector&gt;) &amp;&amp;
+      (!std::same_as&lt;std::remove_cvref_t&lt;U&gt;, std::vector&lt;T, A&gt;&gt;) &amp;&amp;
+      requires(U&amp;&amp; u) { std::vector&lt;T, A&gt;(std::forward&lt;U&gt;(u)); }
+  constexpr explicit weird_vector(U&amp;&amp; u) : vec_(std::forward&lt;U&gt;(u)) {}
+
+  template&lt;class T1, class T2, class... Ts&gt;
+    requires requires(T1&amp;&amp; t1, T2&amp;&amp; t2, Ts&amp;&amp;... ts) {
+      std::vector&lt;T, A&gt;(std::forward&lt;T1&gt;(t1), std::forward&lt;T2&gt;(t2), std::forward&lt;Ts&gt;(ts)...);
+    }
+  constexpr weird_vector(T1&amp;&amp; t1, T2&amp;&amp; t2, Ts&amp;&amp;... ts)
+    : vec_(std::forward&lt;T1&gt;(t1), std::forward&lt;T2&gt;(t2), std::forward&lt;Ts&gt;(ts)...) {}
+
+  constexpr weird_vector&amp; operator=(const weird_vector&amp; other) {
+    vec_ = other.vec_;
+    return *this;
+  }
+  constexpr weird_vector&amp; operator=(weird_vector&amp;&amp; other)
+    noexcept(std::is_nothrow_move_assignable_v&lt;std::vector&lt;T, A&gt;&gt;) {
+    vec_ = std::move(other.vec_);
+    return *this;
+  }
+
+  constexpr ~weird_vector() {
+    vec_.~vector();
+  }
+};
+
+int main() {
+  int arr[]{42, 1729};
+  auto v [[maybe_unused]] = std::ranges::to&lt;weird_vector&lt;int&gt;&gt;(arr);
 }
-</code></pre>
+</pre></blockquote>
+<p>
+Although libc++ currently accepts this example, the acceptance seems to be a bug, because libc++ hasn't 
+implemented the "class" part in the <i>Mandates</i> at all 
+(<a href="https://github.com/llvm/llvm-project/issues/132133">llvm/llvm-project#132133</a>).
+<p/>
+It's unclear whether union types were intended to be accepted. Perhaps we should follow implementations' 
+choices and reject them.
+</p>
+
+<p><i>[2025-10-20; Reflector poll; Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+"Those implementations have bugs and should be fixed."
+</p>
+<p>
+There's no intrinsic reason why unions (with suitable constructors)
+should be rejected here."
+</p>
+
+
+<p id="res-4229"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 25.5.7.2 <a href="https://wg21.link/range.utility.conv.to">[range.utility.conv.to]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class C, input_range R, class... Args&gt; requires (!view&lt;C&gt;)
+  constexpr C to(R&amp;&amp; r, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: <code class='backtick'>C</code> is a cv-unqualified <ins>non-union</ins> class type.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 25.5.7.3 <a href="https://wg21.link/range.utility.conv.adaptors">[range.utility.conv.adaptors]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class C, class... Args&gt; requires (!view&lt;C&gt;)
+  constexpr auto to(Args&amp;&amp;... args);
+template&lt;template&lt;class...&gt; class C, class... Args&gt;
+  constexpr auto to(Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: For the first overload, <code class='backtick'>C</code> is a cv-unqualified <ins>non-union</ins> class type.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4244"><a href="#4244">4244</a><sup><a href="https://cplusplus.github.io/LWG/issue4244">(i)</a></sup>. Whether the spuriously failed comparison applies to <code class='backtick'>compare_exchange_strong</code> is unclear</h3>
+<p><b>Section:</b> 32.5.7.2 <a href="https://wg21.link/atomics.ref.ops">[atomics.ref.ops]</a>, 32.5.8.2 <a href="https://wg21.link/atomics.types.operations">[atomics.types.operations]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> jim x <b>Opened:</b> 2025-04-17 <b>Last modified:</b> 2025-10-20</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#atomics.ref.ops">active issues</a> in [atomics.ref.ops].</p>
+<p><b>View all other</b> <a href="lwg-index.html#atomics.ref.ops">issues</a> in [atomics.ref.ops].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Both <code class='backtick'>compare_exchange_strong</code> and <code class='backtick'>compare_exchange_weak</code> share the same specified rule
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+If and only if the comparison is <code class='backtick'>false</code> then, after the atomic operation, the value in 
+<code class='backtick'>expected</code> is replaced by the value read from the value referenced by <code class='backtick'>*ptr</code> during the 
+atomic comparison.
+</p>
+</blockquote>
+<p>
+However, there is a remark for the weak version
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+A weak compare-and-exchange operation may fail spuriously.
+</p>
+</blockquote>
+<p>
+That is, even when the contents of memory referred to by <code class='backtick'>expected</code> and <code class='backtick'>ptr</code> are equal, 
+it may return <code class='backtick'>false</code> and store back to expected the same memory contents that were 
+originally there.
+<p/>
+However, we don't explicitly say whether the strong version can have the spuriously failed 
+comparison. The status quo is that we can only infer the point from the name, namely, the 
+strong version should have a stronger guarantee than the weak version.
+<p/>
+<b>Suggested resolution:</b>
+<p/>
+Explicitly specify whether <code class='backtick'>compare_exchange_strong</code> can have the spurious failed comparison.
+</p>
+
+<p><i>[2025-10-20; Reflector poll. Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+"The <i>Effects</i>: explain the behaviour, and don't allow for spurious failures."
+</p>
+<p>
+"The <i>Remarks</i>: are normative and are explicitly adding permission to fail
+spuriously. Absent such permission, the specification for strong operations
+is clear and has no spurious failures."
+</p>
+
+
+<p id="res-4244"><b>Proposed resolution:</b></p>
+
+
+
+
+
+<hr>
+<h3 id="4246"><a href="#4246">4246</a><sup><a href="https://cplusplus.github.io/LWG/issue4246">(i)</a></sup>. Redundant constraint in <code class='backtick'>range_formatter::format</code></h3>
+<p><b>Section:</b> 28.5.7.2 <a href="https://wg21.link/format.range.formatter">[format.range.formatter]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-04-18 <b>Last modified:</b> 2025-06-12</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all other</b> <a href="lwg-index.html#format.range.formatter">issues</a> in [format.range.formatter].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Currently, the signature of <code class='backtick'>range_formatter::format</code> is as follows:
+</p>
+<blockquote><pre>
+template&lt;ranges::input_range R, class FormatContext&gt;
+  requires formattable&lt;ranges::range_reference_t&lt;R&gt;, charT&gt; &amp;&amp;
+           same_as&lt;remove_cvref_t&lt;ranges::range_reference_t&lt;R&gt;&gt;, T&gt;
+typename FormatContext::iterator
+  format(R&amp;&amp; r, FormatContext&amp; ctx) const;
+</pre></blockquote>
+<p>
+which requires that the reference type of the range parameter must be <code class='backtick'>formattable</code>,
+and such type must be exactly <code class='backtick'>T</code> after removing the <i>cvref</i>-qualifiers.
+</p>
+<p>
+However, satisfying the latter always implies satisfying the former, as the <code class='backtick'>range_formatter</code> class
+already requires that <code class='backtick'>T</code> must be <code class='backtick'>formattable</code>.
+</p>
+<p>
+There is no need to perform a redundant check here.
+</p>
+
+<p><i>[2025-06-12; Reflector poll]</i></p>
+
+<p>
+Set status to Tentatively NAD. This is not redundant, it might check that
+<code class='backtick'>const T</code> is formattable, which is not the same as checking that
+<code class='backtick'>T</code> is formattable.
+</p>
+
+
+
+<p id="res-4246"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 28.5.7.2 <a href="https://wg21.link/format.range.formatter">[format.range.formatter]</a> as indicated:</p>
+
+<blockquote>
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class charT = char&gt;
+    requires same_as&lt;remove_cvref_t&lt;T>, T> &amp;&amp; formattable&lt;T, charT&gt;
+  class range_formatter {
+    [&hellip;]
+    template&lt;ranges::input_range R, class FormatContext&gt;
+        requires <del>formattable&lt;ranges::range_reference_t&lt;R&gt;, charT&gt; &amp;&amp;</del>
+                 same_as&lt;remove_cvref_t&lt;ranges::range_reference_t&lt;R&gt;&gt;, T&gt;
+      typename FormatContext::iterator
+        format(R&amp;&amp; r, FormatContext&amp; ctx) const;
+  };
+}
+</pre>
+</blockquote>
+[&hellip;]
+<pre>
+template&lt;ranges::input_range R, class FormatContext&gt;
+  requires <del>formattable&lt;ranges::range_reference_t&lt;R&gt;, charT&gt; &amp;&amp;</del>
+           same_as&lt;remove_cvref_t&lt;ranges::range_reference_t&lt;R&gt;&gt;, T&gt;
+typename FormatContext::iterator
+  format(R&amp;&amp; r, FormatContext&amp; ctx) const;
+</pre>
+<blockquote>
+<p>
+-11- <i>Effects</i>: Writes the following into <code>ctx.out()</code>, adjusted according to the
+<i>range-format-spec</i>:
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4271"><a href="#4271">4271</a><sup><a href="https://cplusplus.github.io/LWG/issue4271">(i)</a></sup>. Caching range views claim amortized amortized &#x1d4aa;(1) runtime
+complexity for algorithms that are in fact &#x1d4aa;(n)</h3>
+<p><b>Section:</b> 24.3.1 <a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a>, 25.4.3 <a href="https://wg21.link/range.approximately.sized">[range.approximately.sized]</a>, 25.4.1 <a href="https://wg21.link/range.req.general">[range.req.general]</a>, 25.4.2 <a href="https://wg21.link/range.range">[range.range]</a>, 25.4.4 <a href="https://wg21.link/range.sized">[range.sized]</a>, 25.7.8.2 <a href="https://wg21.link/range.filter.view">[range.filter.view]</a>, 25.7.12.2 <a href="https://wg21.link/range.drop.view">[range.drop.view]</a>, 25.7.13.2 <a href="https://wg21.link/range.drop.while.view">[range.drop.while.view]</a>, 25.7.17.2 <a href="https://wg21.link/range.split.view">[range.split.view]</a>, 25.7.21.2 <a href="https://wg21.link/range.reverse.view">[range.reverse.view]</a>, 25.7.30.2 <a href="https://wg21.link/range.slide.view">[range.slide.view]</a>, 25.7.31.2 <a href="https://wg21.link/range.chunk.by.view">[range.chunk.by.view]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Andreas Weis <b>Opened:</b> 2025-06-02 <b>Last modified:</b> 2025-10-23</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all other</b> <a href="lwg-index.html#iterator.requirements.general">issues</a> in [iterator.requirements.general].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Currently range views that cache the result of their operation claim an
+amortized &#x1d4aa;(1) worst-case runtime complexity. This is inconsistent 
+with the established practice in algorithm analysis, where the given
+complexity bound must hold for all possible sequences of operations.
+Caching is not sufficient to lower the complexity bound here, as the
+sequence that contains only a single call to the operation will cause a
+runtime cost linear in the size of the underlying range. Thus all of the
+caching range operations are in fact &#x1d4aa;(n).
+<p/>
+Apart from the caching view operations, this also has secondary impacts
+in other places that rely on the complexity of iterator functions, such
+as the iterator requirements and functions for computing the size of a
+range.
+<p/>
+It is unclear how desirable it is under these circumstances to continue
+disallowing other kinds of &#x1d4aa;(n) behavior for iterator functions. 
+While caching offers clear benefits in the context of lazy evaluation, it
+cannot prevent losing the &#x1d4aa;(1) complexity guarantee. The proposed
+changes below therefore do not address the issue that other types of
+views (such as hypothetical non-caching variants of the affected views)
+that were previously considered invalid will become valid with these
+changes.
+</p>
+
+<p><i>[2025-10-23; Reflector poll; Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+Relaxing complexity of <code class='backtick'>ranges::begin</code>/<code class='backtick'>ranges::end</code> is design change,
+and not direction we want to pursue.
+<p>
+</p>
+The "amortized constant" are not quite right words to describe
+intended requirements. A rework preserving the intent of current wording
+would be welcomed.
+</p>
+
+
+<p id="res-4271"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a>.
+</p>
+
+<ol>
+<li><p>Modify 24.3.1 <a href="https://wg21.link/iterator.requirements.general">[iterator.requirements.general]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-14- All the categories of iterators require only those functions that are realizable 
+for a given category in <del>constant time (amortized)</del><ins>linear time</ins>. 
+Therefore, requirement tables and concept definitions for the iterators do not specify
+complexity.
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify 25.4.3 <a href="https://wg21.link/range.approximately.sized">[range.approximately.sized]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-1- The <code class='backtick'>approximately_sized_range</code> concept refines range with the requirement that 
+an approximation of the number of elements in the range can be determined in 
+<del>amortized constant</del><ins>linear</ins> time using <code class='backtick'>ranges::reserve_hint</code>.
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify 25.4.1 <a href="https://wg21.link/range.req.general">[range.req.general]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-2- The <code class='backtick'>range</code> concept requires that <code class='backtick'>ranges::begin</code> and <code class='backtick'>ranges::end</code> return an 
+iterator and a sentinel, respectively. The <code class='backtick'>sized_range</code> concept refines range 
+with the requirement that <code class='backtick'>ranges::size</code> be <del>amortized</del> &#x1d4aa;(<del>1</del><ins>n</ins>).
+The <code class='backtick'>view</code> concept specifies requirements on a <code class='backtick'>range</code> type to provide operations 
+with predictable complexity.
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify 25.4.2 <a href="https://wg21.link/range.range">[range.range]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-2- Given an expression <code class='backtick'>t</code> such that <code class='backtick'>decltype((t))</code> is <code>T&amp;</code>, <code class='backtick'>T</code> models <code class='backtick'>range</code> 
+only if
+</p>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; [&hellip;]</p></li>
+<li><p>(2.2) &mdash; both <code class='backtick'>ranges::begin(t)</code> and <code class='backtick'>ranges::end(t)</code> are <del>amortized
+constant</del><ins>linear</ins> time and non-modifying,
+and</p></li>
+<li><p>(2.3) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify 25.4.4 <a href="https://wg21.link/range.sized">[range.sized]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-1- The <code class='backtick'>sized_range</code> concept refines <code class='backtick'>approximately_sized_range</code> with the 
+requirement that the number of elements in the range can be determined in 
+<del>amortized constant</del><ins>linear</ins> time using <code class='backtick'>ranges::size</code>.
+</p>
+<pre>
+template&lt;class T&gt;
+  concept sized_range =
+    approximately_sized_range&lt;T&gt; &amp;&amp; requires(T&amp; t) { ranges::size(t); };
+</pre>
+<blockquote>
+<p>
+-2- Given an lvalue <code class='backtick'>t</code> of type <code>remove_reference_t&lt;T&gt;</code>, <code class='backtick'>T</code> models 
+<code class='backtick'>sized_range</code> only if
+</p>
+</blockquote>
+<ol style="list-style-type: none">
+<li><p>(2.1) &mdash; <code class='backtick'>ranges::size(t)</code> is <del>amortized</del> &#x1d4aa;(<del>1</del><ins>n</ins>), 
+does not modify <code class='backtick'>t</code>, and is equal to <code class='backtick'>ranges::distance(ranges::begin(t), ranges::end(t))</code>, 
+and</p></li>
+<li><p>(2.2) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.8.2 <a href="https://wg21.link/range.filter.view">[range.filter.view]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <i>iterator</i> begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Preconditions</i>: [&hellip;]
+<p/>
+-4- <i>Returns</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: <del>In order to provide the amortized constant time complexity required 
+by the <code class='backtick'>range</code> concept when <code class='backtick'>filter_view</code> models <code class='backtick'>forward_range</code>, this</del><ins>This</ins> 
+function caches the result within the <code class='backtick'>filter_view</code> for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.12.2 <a href="https://wg21.link/range.drop.view">[range.drop.view]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr auto begin()
+  requires (!(<i>simple-view</i>&lt;V&gt; &amp;&amp;
+              random_access_range&lt;const V&gt; &amp;&amp; sized_range&lt;const V&gt;));
+constexpr auto begin() const
+  requires random_access_range&lt;const V&gt; &amp;&amp; sized_range&lt;const V&gt;;
+</pre>
+<blockquote>
+<p>
+-3- <i>Returns</i>: [&hellip;]
+<p/>
+-4- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the <code class='backtick'>range</code> concept when <code class='backtick'>drop_view</code> models <code class='backtick'>forward_range</code>, the</del><ins>The</ins> 
+first overload caches the result within the <code class='backtick'>drop_view</code> for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.13.2 <a href="https://wg21.link/range.drop.while.view">[range.drop.while.view]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr auto begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Preconditions</i>: [&hellip;]
+<p/>
+-4- <i>Returns</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the <code class='backtick'>range</code> concept when <code class='backtick'>drop_while_view</code> models <code class='backtick'>forward_range</code>, the</del><ins>The</ins> 
+first call caches the result within the <code class='backtick'>drop_while_view</code> for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.17.2 <a href="https://wg21.link/range.split.view">[range.split.view]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <i>iterator</i> begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Returns</i>: [&hellip;]
+<p/>
+-4- <i>Remarks</i>: <del>In order to provide the amortized constant time complexity 
+required by the <code class='backtick'>range</code> concept, this</del><ins>This</ins> function caches the result 
+within the <code class='backtick'>split_view</code> for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.21.2 <a href="https://wg21.link/range.reverse.view">[range.reverse.view]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr reverse_iterator&lt;iterator_t&lt;V&gt;&gt; begin();
+</pre>
+<blockquote>
+<p>
+-2- <i>Returns</i>: [&hellip;]
+<p/>
+-3- <i>Remarks</i>: <del>In order to provide the amortized constant time complexity 
+required by the <code class='backtick'>range</code> concept, this</del><ins>This</ins> function caches the 
+result within the <code class='backtick'>reverse_view</code> for use on subsequent calls.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.30.2 <a href="https://wg21.link/range.slide.view">[range.slide.view]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr auto begin()
+  requires (!(<i>simple-view</i>&lt;V&gt; &amp;&amp; <i>slide-caches-nothing</i>&lt;const V&gt;));
+</pre>
+<blockquote>
+<p>
+-3- <i>Returns</i>: [&hellip;]
+<p/>
+-4- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the <code class='backtick'>range</code> concept, this</del><ins>This</ins> function caches the result 
+within the <code class='backtick'>slide_view</code> for use on subsequent calls when <code class='backtick'>V</code> models
+<code><i>slide-caches-first</i></code>.
+</p>
+</blockquote>
+[&hellip;]
+<pre>
+constexpr auto end()
+  requires (!(<i>simple-view</i>&lt;V&gt; &amp;&amp; <i>slide-caches-nothing</i>&lt;const V&gt;));
+</pre>
+<blockquote>
+<p>
+-6- <i>Returns</i>: [&hellip;]
+<p/>
+-7- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the <code class='backtick'>range</code> concept, this</del><ins>This</ins> function caches the result 
+within the <code class='backtick'>slide_view</code> for use on subsequent calls when <code class='backtick'>V</code> models
+<code><i>slide-caches-first</i></code>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 25.7.31.2 <a href="https://wg21.link/range.chunk.by.view">[range.chunk.by.view]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <i>iterator</i> begin();
+</pre>
+<blockquote>
+<p>
+-3- <i>Preconditions</i>: [&hellip;]
+<p/>
+-4- <i>Returns</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: <del>In order to provide the amortized constant-time complexity 
+required by the <code class='backtick'>range</code> concept, this</del><ins>This</ins> function caches the result 
+within the <code class='backtick'>chunk_by_view</code> for use on subsequent calls.
+</p>
+</blockquote>
 </blockquote>
 </li>
 </ol>
+
+
+
+
+
+<hr>
+<h3 id="4309"><a href="#4309">4309</a><sup><a href="https://cplusplus.github.io/LWG/issue4309">(i)</a></sup>. How are two <code class='backtick'>seq_cst</code> operations ordered in the single total order if these two operations are unsequenced?</h3>
+<p><b>Section:</b> 32.5.4 <a href="https://wg21.link/atomics.order">[atomics.order]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> jim x <b>Opened:</b> 2025-08-06 <b>Last modified:</b> 2025-10-23</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#atomics.order">active issues</a> in [atomics.order].</p>
+<p><b>View all other</b> <a href="lwg-index.html#atomics.order">issues</a> in [atomics.order].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Consider this snippet code:
+</p>
+<blockquote><pre>
+std::atomic&lt;int&gt; flag = {0};
+std::atomic&lt;int&gt; turn = {0};
+
+if(flag + turn){}
+</pre></blockquote>
+<p>
+The loads of <code class='backtick'>flag</code> and <code class='backtick'>turn</code> as the operands of <code class='backtick'>+</code> are unsequenced according to [intro.execution] p10.
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+Except where noted, evaluations of operands of individual operators and of subexpressions of individual expressions are unsequenced.
+</p>
+</blockquote>
+<p>
+However, 32.5.4 <a href="https://wg21.link/atomics.order">[atomics.order]</a> p4 says:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+There is a single total order <i>S</i> on all <code class='backtick'>memory_order::seq_cst</code> operations, including fences, 
+that satisfies the following constraints.
+</p></blockquote>
+<p>
+Then, it says that:
+</p>
+<blockquote style="border-left: 3px solid #ccc;padding-left: 15px;">
+<p>
+First, if <i>A</i> and <i>B</i> are <code class='backtick'>memory_order::seq_cst</code> operations and <i>A</i> strongly happens 
+before <i>B</i>, then <i>A</i> precedes <i>B</i> in <i>S</i>.
+</p></blockquote>
+<p>
+According to the first sentence, the load of <code class='backtick'>flag</code> and the load of <code class='backtick'>turn</code> do have an order in the single 
+total order <i>S</i> since they are both <code class='backtick'>memory_order::seq_cst</code> operations. However, since they are unsequenced, 
+the second sentence does not apply to them. So, what's the order of them in <i>S</i>? Is the order of them in 
+<i>S</i> unspecified?
+<p/>
+<b>Suggested Resolution:</b>
+<p/>
+We may want to say the order of such operations is indeterminate in the single total order. That is,  
+either <i>A</i> precedes <i>B</i> or <i>B</i> precedes <i>A</i>, but it is unspecified which.
+</p>
+
+<p><i>[2025-10-23; Reflector poll; Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+The loads are both done within functions calls, so are at worst indeterminately sequenced.
+So we already say what the suggested resolution wants.
+</p>
+
+
+<p id="res-4309"><b>Proposed resolution:</b></p>
+
+
+
+
+
+<hr>
+<h3 id="4321"><a href="#4321">4321</a><sup><a href="https://cplusplus.github.io/LWG/issue4321">(i)</a></sup>. How are evaluations occurring within a store and a load operation ordered where the store synchronized with the load</h3>
+<p><b>Section:</b> 32.5.8.2 <a href="https://wg21.link/atomics.types.operations">[atomics.types.operations]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> jim x <b>Opened:</b> 2025-08-20 <b>Last modified:</b> 2025-10-23</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#atomics.types.operations">active issues</a> in [atomics.types.operations].</p>
+<p><b>View all other</b> <a href="lwg-index.html#atomics.types.operations">issues</a> in [atomics.types.operations].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Consider this example:
+</p>
+<blockquote><pre>
+std::atomic&lt;int&gt; v = 0;
+// thread 1:
+v.store(1, memory_order::release); // #1
+// thread 2:
+v.load(memory_order::acquire); // #2
+</pre></blockquote>
+<p>
+Say, <code class='backtick'>#2</code> reads the value written by <code class='backtick'>#1</code>, <code class='backtick'>#1</code> synchronizes with <code class='backtick'>#2</code>. According to 6.10.2.2 <a href="https://wg21.link/intro.races">[intro.races]</a> p7:
+</p>
+<blockquote>
+<p>
+ An evaluation <i>A</i> <i>happens before an evaluation</i> <i>B</i> (or, equivalently, <i>B</i> 
+ happens after <i>A</i>) if either
+</p>
+<ol style="list-style-type: none">
+<li><p>(7.1) &mdash; [&hellip;]</p></li>
+<li><p>(7.2) &mdash; <i>A</i> synchronizes with <i>B</i>, or</p></li>
+<li><p>(7.3) &mdash; [&hellip;]</p></li>
+</ol>
+</blockquote>
+<p>
+So, <code class='backtick'>#1</code> happens before <i>B</i>. However, 6.10.1 <a href="https://wg21.link/intro.execution">[intro.execution]</a> p12 says:
+</p>
+<blockquote>
+<p>
+For each
+</p>
+<ol style="list-style-type: none">
+<li><p>(12.1) &mdash; function invocation,</p></li>
+<li><p>(12.2) &mdash; [&hellip;]</p></li>
+<li><p>(12.3) &mdash; [&hellip;]</p></li>
+</ol>
+<p>
+<i>F</i>, each evaluation that does not occur within <i>F</i> but is evaluated 
+on the same thread and as part of the same signal handler (if any) is either 
+sequenced before all evaluations that occur within <i>F</i> or sequenced after 
+all evaluations that occur within <i>F</i>;
+</p>
+</blockquote>
+<p>
+Because both <code class='backtick'>v.store(...)</code> and <code class='backtick'>v.load(...)</code> are function invocations, and we can think that the member 
+functions comprise some evaluations to form the operation, therefore, how are these evaluations that 
+occur within the <code class='backtick'>store</code> ordered with those within the <code class='backtick'>load</code>?
+<p/>
+The rule only says the <code class='backtick'>store</code> synchronizes with the <code class='backtick'>load</code>, hence, the evaluation of the function 
+call expression <code class='backtick'>v.store(...)</code> happens before the evaluation of the function call expression <code class='backtick'>v.load(...)</code>, 
+but how about these evaluations occurring within these functions?
+<p/>
+A possible resolution might be: The order between all evaluations occurring within a function invocation 
+and another evaluation <i>B</i> is determined by how the evaluation of the function call expression is 
+ordered in relation to the expression <i>B</i>.
+<p/>
+For example, if <code class='backtick'>v.store()</code> happens-before <i>E</i>, then all evaluations occurring within the <code class='backtick'>store</code> 
+happen-before <i>E</i>. As well, <code class='backtick'>v.store(...)</code> synchronizes with <code class='backtick'>v.load(...)</code>, then all evaluations 
+occurring within <code class='backtick'>v.store(...)</code> synchronize with all evaluations occurring within <code class='backtick'>v.load(...)</code>.
+</p>
+
+<p><i>[2025-10-23; Reflector poll; Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+The load/store functions invocations participate in happens-before as
+atomic (indivisible) units.
+</p>
+
+
+<p id="res-4321"><b>Proposed resolution:</b></p>
+
+
+
+
+
+<hr>
+<h3 id="4337"><a href="#4337">4337</a><sup><a href="https://cplusplus.github.io/LWG/issue4337">(i)</a></sup>. <code>co_await change_coroutine_scheduler(s)</code> requires assignable</h3>
+<p><b>Section:</b> 33.13.6.5 <a href="https://wg21.link/task.promise">[task.promise]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Dietmar Kühl <b>Opened:</b> 2025-08-31 <b>Last modified:</b> 2025-10-27</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#task.promise">active issues</a> in [task.promise].</p>
+<p><b>View all other</b> <a href="lwg-index.html#task.promise">issues</a> in [task.promise].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/958">US 256-383</a></b>
+<p>
+The specification of <code>change_coroutine_scheduler(sched)</code> uses
+<code>std::exchange</code> to put the scheduler into place
+(in 33.13.6.5 <a href="https://wg21.link/task.promise">[task.promise]</a> paragraph 11).
+The problem is that <code>std::exchange(x, v)</code> expects
+<code>x</code> to be assignable from <code>v</code> but there is
+no requirement for scheduler to be assignable.
+</p>
+
+<p><i>[2025-10-23; Reflector poll. Status &rarr; Tentatively NAD .]</i></p>
+
+<p>
+"<code class='backtick'>scheduler</code> requires <code class='backtick'>copyable</code> which requires assignment."
+</p>
+
+
+<p id="res-4337"><b>Proposed resolution:</b></p>
+<p>
+Change the wording in 33.13.6.5 <a href="https://wg21.link/task.promise">[task.promise]</a> paragraph 11
+to avoid the use of <code>std::exchange</code> and transfer the using
+construction:
+<blockquote>
+<pre>
+template&lt;class Sch&gt;
+  auto await_transform(change_coroutine_scheduler&lt;Sch&gt; sch) noexcept;
+</pre>
+<p>
+-11- <i>Effects</i>: Equivalent to:
+</p>
+<pre>
+<del>return await_transform(just(exchange(SCHED(*this), scheduler_type(sch.scheduler))), *this);</del><ins>
+auto* s{address_of(<i>SCHED</i>(*this))};
+auto rc{std::move(*s)};
+s->~scheduler_type();
+new(s) scheduler_type(std::move(sch));
+return std::move(rc);
+</ins>
+</pre>
+</blockquote>
+</p>
+
+
+
+
+
+<hr>
+<h3 id="4362"><a href="#4362">4362</a><sup><a href="https://cplusplus.github.io/LWG/issue4362">(i)</a></sup>. Inconsistent usage of <code class='backtick'>constexpr</code> for <code class='backtick'>inplace_stop_token</code> and <code class='backtick'>inplace_stop_source</code></h3>
+<p><b>Section:</b> 32.3.8 <a href="https://wg21.link/stoptoken.inplace">[stoptoken.inplace]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Lewis Baker <b>Opened:</b> 2025-08-28 <b>Last modified:</b> 2025-10-17</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The <code class='backtick'>inplace_stop_source::get_token()</code> member function is declared <code class='backtick'>constexpr</code>, 
+but there are no <code class='backtick'>constexpr</code> member-functions declared on <code class='backtick'>inplace_stop_token</code>, 
+making the utility of being able to call this member function during constant 
+evaluation limited.
+<p/>
+Should the member functions of <code class='backtick'>inplace_stop_token</code> also be declared <code class='backtick'>constexpr</code>?
+i.e. <code class='backtick'>operator==</code>, <code class='backtick'>swap()</code>, <code class='backtick'>stop_possible()</code> and <code class='backtick'>stop_requested()</code>.
+<p/>
+The <code class='backtick'>operator==</code> and <code class='backtick'>stop_possible()</code> and <code class='backtick'>swap()</code> member functions should be 
+able to be made <code class='backtick'>constexpr</code> trivially as they are just required to compare/modify 
+pointers to the associated stop source.
+<p/>
+The <code class='backtick'>stop_requested()</code> member function is specified to be equivalent to calling 
+<code class='backtick'>stop_requested()</code> on the associated <code class='backtick'>inplace_stop_source</code> (if any), which is not 
+currently declared <code class='backtick'>constexpr</code> primarily because its implementation requires 
+synchronisation/atomic operations.
+<p/>
+Now that <code class='backtick'>std::atomic</code> operations are now <code class='backtick'>constexpr</code>, it may be possible/appropriate 
+for <code class='backtick'>stop_requested()</code> on both <code class='backtick'>inplace_stop_source</code> and <code class='backtick'>inplace_stop_token</code> to also 
+be declared <code class='backtick'>constexpr</code>.
+</p>
+<p><i>[2025-10-17; Reflector poll. Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+This allows constant-initializing a token, it's basically a constructor.
+Other member functions don't need to be constexpr,
+similar to how <code class='backtick'>std::mutex::lock()</code> doesn't need to be constexpr
+for constant-init of <code class='backtick'>std::mutex</code> to be useful.
+</p>
+
+
+<p id="res-4362"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i>: This is the minimum proposed wording change. Additionally, consider adding 
+<code class='backtick'>constexpr</code> to the declaration of <code class='backtick'>inplace_stop_token::stop_requested()</code> (in 
+32.3.8.1 <a href="https://wg21.link/stoptoken.inplace.general">[stoptoken.inplace.general]</a> and 32.3.8.2 <a href="https://wg21.link/stoptoken.inplace.mem">[stoptoken.inplace.mem]</a>) and to 
+<code class='backtick'>inplace_stop_source::stop_requested()</code> (in 32.3.9.1 <a href="https://wg21.link/stopsource.inplace.general">[stopsource.inplace.general]</a> and 
+32.3.9.3 <a href="https://wg21.link/stopsource.inplace.mem">[stopsource.inplace.mem]</a>)]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify 32.3.8.1 <a href="https://wg21.link/stoptoken.inplace.general">[stoptoken.inplace.general]</a>, class <code class='backtick'>inplace_stop_token</code> synopsis, as indicated:</p>
+
+<blockquote><pre>
+namespace std {
+  class inplace_stop_token {
+  public:
+    template&lt;class CallbackFn&gt;
+      using callback_type = inplace_stop_callback&lt;CallbackFn&gt;;
+    
+    <ins>constexpr</ins> inplace_stop_token() = default;
+    <ins>constexpr</ins> bool operator==(const inplace_stop_token&amp;) const = default;
+    
+    // <i>32.3.8.2 <a href="https://wg21.link/stoptoken.inplace.mem">[stoptoken.inplace.mem]</a>, member functions</i>
+    bool stop_requested() const noexcept;
+    <ins>constexpr</ins> bool stop_possible() const noexcept;
+    <ins>constexpr</ins> void swap(inplace_stop_token&amp;) noexcept;
+    
+  private:
+    const inplace_stop_source* <i>stop-source</i> = nullptr; // <i>exposition only</i>
+  };
+}
+</pre></blockquote>
+
+</li>
+
+
+<li><p>Modify 32.3.8.2 <a href="https://wg21.link/stoptoken.inplace.mem">[stoptoken.inplace.mem]</a> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i>: As a drive-by fix this adds the missing return type <code class='backtick'>bool</code> to the
+<code class='backtick'>stop_possible()</code> prototype]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+<ins>constexpr</ins> void swap(inplace_stop_token&amp; rhs) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: Exchanges the values of <code><i>stop-source</i></code> and <code>rhs.<i>stop-source</i></code>.
+</p>
+</blockquote>
+[&hellip;]
+<pre>
+<ins>constexpr bool</ins> stop_possible() const noexcept;
+</pre>
+<blockquote>
+<p>
+-4- <i>Returns</i>: <code><i>stop-source</i> != nullptr</code>.
+</p>
+</blockquote>
+
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4363"><a href="#4363">4363</a><sup><a href="https://cplusplus.github.io/LWG/issue4363">(i)</a></sup>. <code class='backtick'>transform_sender</code> comparing types ignoring <i>cv</i>-qualifiers doesn't take into account differences in value category</h3>
+<p><b>Section:</b> 33.9.6 <a href="https://wg21.link/exec.snd.transform">[exec.snd.transform]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Lewis Baker <b>Opened:</b> 2025-08-28 <b>Last modified:</b> 2025-10-23</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+In 33.9.6 <a href="https://wg21.link/exec.snd.transform">[exec.snd.transform]</a> p1, the specification for <code class='backtick'>transform_sender()</code> states:
+</p>
+<blockquote>
+<p>
+Let <code><i>transformed-sndr</i></code> be the expression
+</p>
+<blockquote><pre>
+dom.transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+if that expression is well-formed; otherwise,
+</p>
+<blockquote><pre>
+default_domain().transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+Let <code><i>final-sndr</i></code> be the expression <code><i>transformed-sndr</i></code> if 
+<code><i>transformed-sndr</i></code> and <code><i>sndr</i></code> have the same type ignoring 
+cv-qualifiers; otherwise, it is the expression <code>transform_sender(dom, <i>transformed-sndr</i>, env...)</code>.
+</p>
+</blockquote>
+<p>
+However, the use of the phrase "have the same type ignoring cv-qualifiers" asks to compare 
+the types without <code class='backtick'>const</code> or <code class='backtick'>volatile</code> qualifiers, but doesn't take into account differences 
+in value category of the types of these expressions.
+<p/>
+For example <code class='backtick'>sndr</code> might have type <code>T&amp;&amp;</code> and <code><i>transformed-sndr</i></code> 
+might return a new prvalue of type <code class='backtick'>T</code>.
+<p/>
+My interpretation of the current wording is that I should apply the test 
+<code>same_as&lt;remove_cv_t&lt;decltype(sndr)&gt;, remove_cv_t&lt;decltype(<i>transformed-sndr</i>)&gt;&gt;</code>.
+<p/>
+However, <code class='backtick'>remove_cv_t</code> does not remove reference-qualifiers from a type <code>Sndr&amp;&amp;</code> 
+(which in the above example, is the type of <code class='backtick'>sndr</code>), and thus would compare as different to 
+a <code><i>transform-sndr</i></code> type of <code class='backtick'>Sndr</code>.
+<p/>
+I believe the intention is that this should instead use 
+<code>same_as&lt;remove_cvref_t&lt;decltype(sndr)&gt;, remove_cvref_t&lt;decltype(<i>transformed-sndr</i>)&gt;&gt;</code>. 
+For example, the 
+<a href="https://github.com/NVIDIA/stdexec/blob/4669060ad3b70508740449f9c30f06867a9bd890/include/stdexec/__detail/__transform_sender.hpp#L88">
+implementation</a> in NVIDIA's stdexec repository uses <code>same_as&lt;decay_t&lt;T&gt;, decay_t&lt;U&gt;&gt;</code> 
+for this check.
+<p/>
+The wording should be modified to use a phrase that removes both reference and cv-qualifiers when comparing types.
+</p>
+
+<p><i>[2025-10-23; Reflector poll. Status &rarr; Tentatively NAD .]</i></p>
+
+<p>
+"NAD, expressions never have reference type."
+</p>
+
+
+<p id="res-4363"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 33.9.6 <a href="https://wg21.link/exec.snd.transform">[exec.snd.transform]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::execution {
+  template&lt;class Domain, sender Sndr, <i>queryable</i>... Env&gt;
+    requires (sizeof...(Env) &lt;= 1)
+  constexpr sender decltype(auto) transform_sender(Domain dom, Sndr&amp;&amp; sndr, const Env&amp;... env)
+    noexcept(<i>see below</i>);
+}
+</pre>
+<blockquote>
+<p>
+-1- Let <code><i>transformed-sndr</i></code> be the expression
+</p>
+<blockquote><pre>
+dom.transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+if that expression is well-formed; otherwise,
+</p>
+<blockquote><pre>
+default_domain().transform_sender(std::forward&lt;Sndr&gt;(sndr), env...)
+</pre></blockquote>
+<p>
+Let <code><i>final-sndr</i></code> be the expression <code><i>transformed-sndr</i></code> if 
+<code><i>transformed-sndr</i></code> and <code><i>sndr</i></code> have the same <ins>decayed</ins>
+type <del>ignoring cv-qualifiers</del>; otherwise, it is the expression 
+<code>transform_sender(dom, <i>transformed-sndr</i>, env...)</code>.
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4371"><a href="#4371">4371</a><sup><a href="https://cplusplus.github.io/LWG/issue4371">(i)</a></sup>. Container adaptor's <code class='backtick'>empty</code>/<code class='backtick'>size</code> should be <code class='backtick'>noexcept</code></h3>
+<p><b>Section:</b> 23.6.3.1 <a href="https://wg21.link/queue.defn">[queue.defn]</a>, 23.6.4.1 <a href="https://wg21.link/priqueue.overview">[priqueue.overview]</a>, 23.6.6.2 <a href="https://wg21.link/stack.defn">[stack.defn]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-09-09 <b>Last modified:</b> 2025-10-22</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all other</b> <a href="lwg-index.html#queue.defn">issues</a> in [queue.defn].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+C++23 container adaptors <code>flat_<i>meow</i></code> all have <code class='backtick'>noexcept</code> <code class='backtick'>size</code>/<code class='backtick'>empty</code> members.
+<p/>
+However, the <code class='backtick'>size</code>/<code class='backtick'>empty</code> members of other container adaptors are not mark <code class='backtick'>noexcept</code>, 
+even though they behave the same as <code>flat_<i>meow</i></code> that returning the <code class='backtick'>size</code>/<code class='backtick'>empty</code> 
+of the underlying container.
+<p/>
+It makes sense to make them <code class='backtick'>noexcept</code> as well for consistency. Although the standard doesn't
+explicitly say those two members of the container must not throw, the fact that all standard 
+containers and common third-party containers mark them as unconditionally <code class='backtick'>noexcept</code> implies 
+that it's perfectly reasonable to assume that they never will.
+</p>
+
+<p><i>[2025-10-22 Reflector poll. Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+General disagrement with the proposed change.
+Implicitly changing container requirements.
+We should fix <code class='backtick'>flat_</code> adaptors instead.
+</p>
+
+
+<p id="res-4371"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 23.6.3.1 <a href="https://wg21.link/queue.defn">[queue.defn]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class Container = deque&lt;T&gt;&gt;
+  class queue {
+  public:
+    [&hellip;]
+    constexpr bool              empty() const <ins>noexcept</ins> { return c.empty(); }
+    constexpr size_type         size()  const <ins>noexcept</ins> { return c.size(); }
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify 23.6.4.1 <a href="https://wg21.link/priqueue.overview">[priqueue.overview]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class Container = vector&lt;T&gt;,
+           class Compare = less&lt;typename Container::value_type&gt;&gt;
+  class priority_queue {
+  public:
+    [&hellip;]
+    constexpr bool            empty() const <ins>noexcept</ins> { return c.empty(); }
+    constexpr size_type       size()  const <ins>noexcept</ins> { return c.size(); }
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify 23.6.6.2 <a href="https://wg21.link/stack.defn">[stack.defn]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T, class Container = deque&lt;T&gt;&gt;
+  class stack {
+  public:
+    [&hellip;]
+    constexpr bool              empty() const <ins>noexcept</ins> { return c.empty(); }
+    constexpr size_type         size()  const <ins>noexcept</ins> { return c.size(); }
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+<hr>
+<h3 id="4391"><a href="#4391">4391</a><sup><a href="https://cplusplus.github.io/LWG/issue4391">(i)</a></sup>. Ambiguities of <code class='backtick'>simd::basic_vec</code> constructor</h3>
+<p><b>Section:</b> 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-09-29 <b>Last modified:</b> 2025-10-17</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#simd.ctor">active issues</a> in [simd.ctor].</p>
+<p><b>View all other</b> <a href="lwg-index.html#simd.ctor">issues</a> in [simd.ctor].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The broadcasting, generator-based, and range constructors of <code class='backtick'>simd::basic_vec</code> all take a single
+argument, and their constraints are not mutually exclusive.
+<p/>
+This means that when a type satisfies both characteristics, such as a range that can be converted to a
+<code class='backtick'>value_type</code>, this will lead to ambiguity:
+</p>
+<blockquote>
+<pre>
+#include &lt;simd&gt;
+
+struct S {
+  operator double() const;       // basic_vec(U&amp;&amp; value)
+  
+  double operator()(int) const;  // basic_vec(G&amp;&amp; gen)
+
+  double* begin() const;         // basic_vec(R&amp;&amp; r, flags&lt;Flags...&gt; = {});
+  double* end() const;
+  constexpr static int size() { return 2; }
+};
+
+int main() {
+  std::simd::vec&lt;double&gt; simd(S{}); // <span style="color:#C80000;font-weight:bold">error: call of overloaded 'basic_simd(S)' is ambiguous</span>
+}
+</pre>
+</blockquote>
+<p>
+Do we need more constraints, similar to the one in <code>string_view(R&amp;&amp; r)</code> that requires
+<code class='backtick'>R</code> not to be convertible to <code class='backtick'>const char*</code>, to make the above work, i.e., only invoke the
+broadcasting constructor?
+</p>
+
+<p><i>[2025-10-17; Reflector poll. Status changed: New &rarr; Tentatively NAD.]</i></p>
+
+<p>
+Users of such types should do disambiguation explicitly, <code class='backtick'>basic_vec</code> should not guess what they mean.
+</p>
+
+
+<p id="res-4391"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+
+<li><p>Modify 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class G&gt; constexpr explicit basic_vec(G&amp;&amp; gen);
+</pre>
+<blockquote>
+<p>
+-8- Let <code>From<sub><i>i</i></sub></code> denote the type
+   <code>decltype(gen(integral_constant&lt;<i>simd-size-type</i>, <i>i</i>&gt;()))</code>.
+<p/>
+-9- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+   <li><p>
+   <ins>(9.?) &mdash; <code>constructible_from&lt;value_type, G&gt;</code> is <code>false</code>.</ins>
+   </p></li>
+   <li><p>
+    <ins>(9.?) &mdash;</ins>
+    <code>From<sub><i>i</i></sub></code> satisfies <code>convertible_to&lt;value_type&gt;</code> for all 
+    <code><i>i</i></code> in the range of [<code>0, size()</code>). In addition, for all <i>i</i> in the range of
+    [<code>0, size()</code>), if <code>From<sub><i>i</i></sub></code> is an arithmetic type, conversion from 
+    <code>From<sub><i>i</i></sub></code> to <code>value_type</code> is value-preserving.</p>
+   </li>
+</ol>
+</blockquote>
+[&hellip;]
+<pre>
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, flags&lt;Flags...&gt; = {});
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, const mask_type&amp; mask, flags&lt;Flags...&gt; = {});
+</pre>
+<blockquote>
+<p>
+-12- Let mask be <code class='backtick'>mask_type(true)</code> for the overload with no <code class='backtick'>mask</code> parameter.
+<p/>
+-13- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+   <li><p>
+   (13.1) &mdash; <code class='backtick'>R</code> models <code class='backtick'>ranges::contiguous_range</code> and <code class='backtick'>ranges::sized_range</code>,
+   </p></li>
+   <li><p>
+   (13.2) &mdash; <code class='backtick'>ranges::size(r)</code> is a constant expression, <del>and</del>
+   </p></li>
+   <li><p>
+   (13.3) &mdash; <code class='backtick'>ranges::size(r)</code> is equal to <code class='backtick'>size()</code><del>.</del><ins>,</ins>
+   </p></li>
+   <li><p>
+   <ins>(13.?) &mdash; <code>constructible_from&lt;value_type, R&gt;</code> is <code class='backtick'>false</code>, and</ins>
+   </p></li>
+   <li><p>
+   <ins>(13.?) &mdash; <code>r(integral_constant&lt;<i>simd-size-type</i>, 0&gt;())</code> is not a valid
+            expression.</ins>
+   </p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4404"><a href="#4404">4404</a><sup><a href="https://cplusplus.github.io/LWG/issue4404">(i)</a></sup>. Should <code>span(R&amp;&amp;)</code> CTAD apply P2280?</h3>
+<p><b>Section:</b> 23.7.2.2.3 <a href="https://wg21.link/span.deduct">[span.deduct]</a> <b>Status:</b> <a href="lwg-active.html#NAD">Tentatively NAD</a>
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-10-04 <b>Last modified:</b> 2025-10-20</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Tentatively NAD">Tentatively NAD</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Thanks to <a href="https://wg21.link/P2280R4" title=" Using unknown references in constant expressions">P2280R4</a>, <code class='backtick'>simd::basic_vec</code>'s CTAD can specify template parameters 
+directly through <code class='backtick'>ranges::size</code>:
+</p>
+<blockquote><pre>
+basic_vec(R&amp;&amp; r, ...) -&gt; vec&lt;ranges::range_value_t&lt;R&gt;, ranges::size(r)&gt;
+</pre></blockquote>
+<p>
+However, <code>span</code> with similar CTAD forms do not have this automatic static size optimization applied:
+</p>
+<blockquote><pre>
+span(R&amp;&amp;) -&gt; span&lt;remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;&gt;;
+</pre></blockquote>
+<p>
+Do we need to do it for <code>span</code>?
+<p/>
+Note that the <code class='backtick'>span</code> constructor actually requires <code class='backtick'>R</code> to be a <code class='backtick'>contiguous_range</code> and a
+<code class='backtick'>sized_range</code>. If it is further required that <code class='backtick'>ranges::size</code> be a constant expression, only raw array,
+<code class='backtick'>array</code>, <code class='backtick'>span</code>, <code class='backtick'>ranges::empty_view</code>, and <code class='backtick'>ranges::single_view</code> satisfy this requirement. 
+Given that <code class='backtick'>span</code> already has CTAD for raw arrays and <code class='backtick'>array</code>s, this improvement is not 
+significant, but it still seems worthwhile as a compile-time optimization for certain
+user-defined types or in some specialized cases (<a href="https://godbolt.org/z/vjPxKzdTf">demo</a>):
+</p>
+<blockquote><pre>
+#include &lt;array&gt;
+#include &lt;ranges&gt;
+
+constexpr std::size_t N = 42;
+
+auto to_span(auto&amp; r) { 
+  static_assert(std::ranges::size(r) == N); // ok after P2280
+  return std::span(r);
+}
+
+std::array&lt;int, N&gt; a;
+auto s1 = to_span(a);
+static_assert(std::same_as&lt;decltype(s1), std::span&lt;int, N&gt;&gt;);
+
+auto r = std::array&lt;int, N&gt;{} | std::views::as_const; // as_const_view&lt;owning_view&lt;array&lt;int, N&gt;&gt;&gt;
+auto s2 = to_span(r);
+static_assert(std::same_as&lt;decltype(s2), std::span&lt;const int, N&gt;&gt;); // <span style="color:red;font-weight:bolder">fire, ok after this PR</span>
+</pre></blockquote>
+
+<p><i>[2025-10-20 Reflector poll. Status changed: NAD &rarr; Tentatively NAD.]</i></p>
+
+<p>
+This is breaking change, and we need a paper with analysis.
+</p>
+
+
+<p id="res-4404"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 23.7.2.2.1 <a href="https://wg21.link/span.overview">[span.overview]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class ElementType, size_t Extent = dynamic_extent&gt;
+  class span {
+    [&hellip;]
+  };
+  [&hellip;]
+  template&lt;class R&gt;
+    span(R&amp;&amp; <ins>r</ins>) -&gt; <ins><i>see below</i></ins><del>span&lt;remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;&gt;</del>;
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 23.7.2.2.3 <a href="https://wg21.link/span.deduct">[span.deduct]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class R&gt;
+  span(R&amp;&amp; <ins>r</ins>) -&gt; <ins><i>see below</i></ins><del>span&lt;remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;&gt;</del>;
+</pre>
+<blockquote>
+<p>
+-2- <i>Constraints</i>: <code class='backtick'>R</code> satisfies <code class='backtick'>ranges::contiguous_range</code>.
+<p/>
+<ins>-?- <i>Remarks</i>: Let <code class='backtick'>T</code> denote the type <code>remove_reference_t&lt;ranges::range_reference_t&lt;R&gt;&gt;</code>.
+The deduced type is equivalent to</ins>
+</p>
+<ol style="list-style-type: none">
+  <li><p>
+  <ins>(?.1) &mdash; <code>span&lt;T, static_cast&lt;size_t&gt;(ranges::size(r))&gt;</code>
+if <code class='backtick'>R</code> satisfies <code class='backtick'>ranges::sized_range</code> and <code class='backtick'>ranges::size(r)</code> is a constant expression.</ins>
+  </p></li>
+  <li><p>
+  <ins>(?.2) &mdash; <code>span&lt;T&gt;</code> otherwise.</ins>
+  </p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
 
 
 

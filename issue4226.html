@@ -64,13 +64,13 @@
 <p><em>This page is a snapshot from the LWG issues list, see the <a href="lwg-active.html">Library Active Issues List</a> for more information and the meaning of <a href="lwg-active.html#New">New</a> status.</em></p>
 <h3 id="4226"><a href="lwg-active.html#4226">4226</a>. <code>to_input_view::<i>iterator</i></code> cannot be compared to its <code class='backtick'>const</code> sentinel</h3>
 <p><b>Section:</b> 25.7.35 <a href="https://wg21.link/range.to.input">[range.to.input]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
- <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-03-15 <b>Last modified:</b> 2025-03-22</p>
-<p><b>Priority: </b>Not Prioritized
+ <b>Submitter:</b> Hewill Kang <b>Opened:</b> 2025-03-15 <b>Last modified:</b> 2025-06-13</p>
+<p><b>Priority: </b>2
 </p>
 <p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
 <p><b>Discussion:</b></p>
 <p>
-<code class='backtick'>to_input_view</code> was recently added to the working draft by <a href="https://wg21.link/P3137R3">P3137R3</a>.
+<code class='backtick'>to_input_view</code> was recently added to the working draft by <a href="https://wg21.link/P3137R3" title=" views::to_input">P3137R3</a>.
 <p/>
 Consider: (<a href="https://godbolt.org/z/7s1hPscrG">demo</a>):
 </p>
@@ -109,10 +109,17 @@ sentinel type, which rules out <code>to_input_view::<i>iterator</i></code>, so t
 I believe we may need to introduce a custom sentinel class for <code>to_input_view</code>.
 </p>
 
+<p><i>[2025-06-13; Reflector poll]</i></p>
+
+<p>
+Set priority to 2 after reflector poll.
+</p>
+
+
 
 <p id="res-4226"><b>Proposed resolution:</b></p>
 <p>
-This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+This wording is relative to <a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a>.
 </p>
 
 <ol>

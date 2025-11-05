@@ -63,12 +63,15 @@
 <hr>
 <p><em>This page is a snapshot from the LWG issues list, see the <a href="lwg-active.html">Library Active Issues List</a> for more information and the meaning of <a href="lwg-active.html#New">New</a> status.</em></p>
 <h3 id="4238"><a href="lwg-active.html#4238">4238</a>. <code>simd_mask&lt;complex&lt;double&gt;&gt;::operator+/-/~</code> return a disabled <code class='backtick'>simd</code> specialization</h3>
-<p><b>Section:</b> 29.10.8.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
- <b>Submitter:</b> Matthias Kretz <b>Opened:</b> 2025-03-27 <b>Last modified:</b> 2025-03-29</p>
-<p><b>Priority: </b>Not Prioritized
+<p><b>Section:</b> 29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> <b>Status:</b> <a href="lwg-active.html#New">New</a>
+ <b>Submitter:</b> Matthias Kretz <b>Opened:</b> 2025-03-27 <b>Last modified:</b> 2025-10-27</p>
+<p><b>Priority: </b>1
 </p>
+<p><b>View other</b> <a href="lwg-index-open.html#simd.mask.unary">active issues</a> in [simd.mask.unary].</p>
+<p><b>View all other</b> <a href="lwg-index.html#simd.mask.unary">issues</a> in [simd.mask.unary].</p>
 <p><b>View all issues with</b> <a href="lwg-status.html#New">New</a> status.</p>
 <p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/872">DE 297</a></b>
 <p>
 Consider:
 </p>
@@ -105,15 +108,25 @@ basic_simd_mask&lt;<i>integer-from</i>&lt;16&gt;, Abi&gt;&gt;&gt;</code>
 (closest to the status quo)</p></li>
 </ol>
 
+<p><i>[2025-06-12; Reflector poll]</i></p>
+
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
+
+<p><i>[2025-10-17; related to <a href="lwg-active.html#4376" title="ABI tag in return type of [simd.mask.unary] is overconstrained (Status: Immediate)">4376</a><sup><a href="https://cplusplus.github.io/LWG/issue4376" title="Latest snapshot">(i)</a></sup>.]</i></p>
+
+
 
 <p id="res-4238"><b>Proposed resolution:</b></p>
 <p>
-This wording is relative to <a href="https://wg21.link/N5008">N5008</a>.
+This wording is relative to <a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a>.
 </p>
 
 <ol>
 
-<li><p>Modify 29.10.8.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> as indicated:</p>
+<li><p>Modify 29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> as indicated:</p>
 
 <blockquote>
 <pre>

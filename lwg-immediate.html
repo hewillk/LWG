@@ -62,7 +62,7 @@
 </tr>
 <tr>
 <td align="left">Date:</td>
-<td align="left">Revised 2025-05-15 at 02:14:59 UTC
+<td align="left">Revised 2025-11-05 at 12:01:33 UTC
 </td>
 </tr>
 <tr>
@@ -75,5 +75,4792 @@
 </tr>
 </table>
 <h2>Immediate Issues</h2>
+<hr>
+<h3 id="4015"><a href="#4015">4015</a><sup><a href="https://cplusplus.github.io/LWG/issue4015">(i)</a></sup>. LWG 3973 broke <code>const</code> overloads of <code>std::optional</code> monadic operations</h3>
+<p><b>Section:</b> 22.5.3.8 <a href="https://wg21.link/optional.monadic">[optional.monadic]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2023-11-24 <b>Last modified:</b> 2025-11-05</p>
+<p><b>Priority: </b>1
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The resolution of LWG <a href="lwg-defects.html#3973" title="Monadic operations should be ADL-proof (Status: WP)">3973</a><sup><a href="https://cplusplus.github.io/LWG/issue3973" title="Latest snapshot">(i)</a></sup> (adopted in Kona) changed all
+occurrences of <code>value()</code> to <code>*val</code>.
+The intention was not to change the meaning, just avoid the non-freestanding
+<code>value()</code> function, and avoid ADL that would be caused by using
+<code>**this</code>.
+However, in the <code>const</code> overloads such as
+<code>and_then(F&amp;&amp;) const</code> the type of <code>value()</code>
+was <code>const T&amp;</code>, but the type of <code>*val</code> is always
+<code>T&amp;</code>. This implies that the const overloads invoke the callable
+with a non-const argument, which is incorrect (and would be undefined
+behaviour for a <code>const std::optional&lt;T&gt;</code>).
+
+</p>
+<p>
+On the LWG reflector it was suggested that we should rewrite the specification
+of <code>std::optional</code> to stop using an exposition-only data member
+of type <code>T*</code>. No such member ever exists in real implemetations,
+so it is misleading and leads to specification bugs of this sort.
+</p>
+<p>
+Change the class definition in 22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a>
+to use a union, and update every use of <code>val</code> accordingly
+throughout 22.5.3 <a href="https://wg21.link/optional.optional">[optional.optional]</a>.
+For consistency with 22.8.6.1 <a href="https://wg21.link/expected.object.general">[expected.object.general]</a> we might
+also want to introduce a <code>bool has_val</code> member and refer to
+that in the specification.
+</p>
+<blockquote>
+<pre><code>
+  private:
+    <del>T *val;         <em>// exposition only</em></del>
+    <ins>bool has_val;   <em>// exposition only</em></ins>
+    <ins>union {</ins>
+      <ins>T val;        <em>// exposition only</em></ins>
+    <ins>};</ins>
+  };
+</code></pre>
+</blockquote>
+<p>For example, in 22.5.3.9 <a href="https://wg21.link/optional.mod">[optional.mod]</a>:</p>
+<blockquote>
+<p>
+-1- <i>Effects</i>:
+If <code>*this</code> contains a value, calls
+<code>val<del>-&gt;</del><ins>.</ins>T::~T()</code> to destroy the contained
+value<ins> and sets <code>has_val</code> to <code>false</code></ins>;
+otherwise no effect.
+</p>
+</blockquote>
+
+<p><i>[2023-11-26; Daniel provides wording]</i></p>
+
+<p>
+The proposed wording is considerably influenced by that of the specification of <code>expected</code>, but
+attempts to reduce the amount of changes to not perfectly mimic it. Although "the contained value" is
+a magic word of power it seemed feasible and simpler to use the new exposition-only member <code><i>val</i></code>
+directly in some (but not all) places, usually involved with initializations.
+<p/>
+Furthermore, I have only added "and sets <code><i>has_val</i></code> to <code>true/false</code>"
+where either the <i>Effects</i> wording says "otherwise no effect" or in other cases if the postconditions
+did not already say that indirectly. I also added extra mentioning of <code><i>has_val</i></code> changes in tables
+where different cells had very different effects on that member (unless these cells specify postconditions),
+to prevent misunderstanding.
+</p>
+
+<p><i>[2024-03-11; Reflector poll]</i></p>
+
+<p>
+Set priority to 1 after reflector poll in November 2023.
+Six votes for 'Tentatively Ready' but enough uncertainty to deserve
+discussion at a meeting.
+</p>
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N4964" title=" Working Draft, Programming Languages — C++">N4964</a> <em>after</em> application of the wording of LWG <a href="lwg-defects.html#3973" title="Monadic operations should be ADL-proof (Status: WP)">3973</a><sup><a href="https://cplusplus.github.io/LWG/issue3973" title="Latest snapshot">(i)</a></sup>.
+</p>
+
+<ol>
+
+<li><p>Modify 22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a>, class template <code>optional</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T&gt;
+  class optional {
+  public:
+    using value_type = T;
+    [&hellip;]
+  private:
+    <ins>bool <i>has_val</i>; // <i>exposition only</i>
+    union {</ins>
+      T <ins><i>val</i></ins><del>*val</del>; // <i>exposition only</i>
+    <ins>};</ins>
+  };
+
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-2- <ins>Member <code><i>has_val</i></code> indicates whether an <code>optional&lt;T&gt;</code> object contains a
+value</ins><del>When an <code>optional&lt;T&gt;</code> object contains a value, member <code>val</code> points to
+the contained value</del>.
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.2 <a href="https://wg21.link/optional.ctor">[optional.ctor]</a> as indicated:</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note</i>: Normatively, this subclause doesn't require any changes, but I'm suggesting to replace
+phrases of the form "[&hellip;]initializes the contained value with"] by "[&hellip;]initializes <code><i>val</i></code> with"
+as we do in 22.8.6.2 <a href="https://wg21.link/expected.object.cons">[expected.object.cons]</a>. I intentionally did not add extra
+"and sets <code><i>has_val</i></code> to <code>true/false</code>" since those effects are already guaranteed by the postconditions]
+</p>
+</blockquote>
+
+<blockquote>
+<pre>
+constexpr optional(const optional&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code><del>*</del>rhs<ins>.<i>val</i></ins></code>.
+<p/>
+-5- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr optional(optional&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-8- <i>Constraints</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>.
+<code>rhs.has_value()</code> is unchanged.
+<p/>
+-10- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class... Args&gt; constexpr explicit optional(in_place_t, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-13- <i>Constraints</i>: [&hellip;]
+<p/>
+-14- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-15- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U, class... Args&gt;
+  constexpr explicit optional(in_place_t, initializer_list&lt;U&gt; il, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-18- <i>Constraints</i>: [&hellip;]
+<p/>
+-19- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>il, std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-20- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U = T&gt; constexpr explicit(<i>see below</i>) optional(U&amp;&amp; v);
+</pre>
+<blockquote>
+<p>
+-23- <i>Constraints</i>: [&hellip;]
+<p/>
+-24- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>std::forward&lt;U&gt;(v)</code>.
+<p/>
+-25- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) optional(const optional&lt;U&gt;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-28- <i>Constraints</i>: [&hellip;]
+<p/>
+-29- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code><del>*</del>rhs<ins>.<i>val</i></ins></code>.
+<p/>
+-30- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) optional(optional&lt;U&gt;&amp;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-33- <i>Constraints</i>: [&hellip;]
+<p/>
+-34- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with
+<code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>. <code>rhs.has_value()</code> is unchanged.
+<p/>
+-35- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.3 <a href="https://wg21.link/optional.dtor">[optional.dtor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr ~optional();
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>is_trivially_destructible_v&lt;T&gt; != true</code> and <code>*this</code> contains a value,
+calls <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code><ins>.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.4 <a href="https://wg21.link/optional.assign">[optional.assign]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(nullopt_t) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>*this</code> contains a value, calls
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> to destroy the contained
+value <ins>and sets <code><i>has_val</i></code> to <code>false</code></ins>; otherwise no effect.
+<p/>
+-2- <i>Postconditions</i>: <code>*this</code> does not contain a value.
+</p>
+</blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(const optional&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: See Table 58.
+</p>
+<table border="1">
+<caption>Table 58 &mdash; <code>optional::operator=(const optional&amp;)</code> effects [tab:optional.assign.copy]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code><del>*</del>rhs<ins>.<i>val</i></ins></code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code><del>*</del>rhs<ins>.<i>val</i></ins></code><br/>
+<ins>and sets <code><i>has_val</i></code> to <code>true</code></ins>
+</td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code><br/>
+<ins>and sets <code><i>has_val</i></code> to <code>false</code></ins>
+</td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-5- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(optional&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-8- <i>Constraints</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: See Table 59. The result of the expression <code>rhs.has_value()</code> remains unchanged.
+<p/>
+-10- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-11- <i>Returns</i>: <code>*this</code>.
+</p>
+<table border="1">
+<caption>Table 59 &mdash; <code>optional::operator=(optional&amp;&amp;)</code> effects [tab:optional.assign.move]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del> with
+<code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> <ins>and sets <code><i>has_val</i></code> to <code>true</code></ins></td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code><ins>and sets <code><i>has_val</i></code> to <code>false</code></ins></td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-12- <i>Remarks</i>: [&hellip;]
+<p/>
+-13- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s move constructor, the state
+of <code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception
+safety guarantee of <code>T</code>'s move constructor. If an exception is thrown during the call to
+<code>T</code>'s move assignment, the state of <code><del>*</del><ins><i>val</i></ins><del>val</del></code>
+and <code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception
+safety guarantee of <code>T</code>'s move assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U = T&gt; constexpr optional&lt;T&gt;&amp; operator=(U&amp;&amp; v);
+</pre>
+<blockquote>
+<p>
+-14- <i>Constraints</i>: [&hellip;]
+<p/>
+-15- <i>Effects</i>: If <code>*this</code> contains a value, assigns <code>std::forward&lt;U&gt;(v)</code>
+to <ins><code><i>val</i></code></ins><del>the contained value</del>; otherwise direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::forward&lt;U&gt;(v)</code>.
+<p/>
+-16- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-17- <i>Returns</i>: <code>*this</code>.
+<p/>
+-18- <i>Remarks</i>: If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code>
+remains unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code>v</code> is determined by the exception safety guarantee of <code>T</code>'s constructor. If an exception
+is thrown during the call to <code>T</code>'s assignment, the state of <code><ins><i>val</i></ins><del>*val</del></code>
+and <code>v</code> is determined by the exception safety guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr optional&lt;T&gt;&amp; operator=(const optional&lt;U&gt;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-19- <i>Constraints</i>: [&hellip;]
+<p/>
+-20- <i>Effects</i>: See Table 60.
+</p>
+<table border="1">
+<caption>Table 60 &mdash; <code>optional::operator=(const optional&lt;U&gt;&amp;)</code> effects [tab:optional.assign.copy.templ]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code><del>*</del>rhs<ins>.<i>val</i></ins></code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code><del>*</del>rhs<ins>.<i>val</i></ins></code> <ins>and sets <code><i>has_val</i></code> to <code>true</code></ins></td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> <ins>and sets <code><i>has_val</i></code> to <code>false</code></ins></td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-21- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-22- <i>Returns</i>: <code>*this</code>.
+<p/>
+-23- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s constructor. If an exception is thrown during the call to <code>T</code>'s
+assignment, the state of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr optional&lt;T&gt;&amp; operator=(optional&lt;U&gt;&amp;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-24- <i>Constraints</i>: [&hellip;]
+<p/>
+-25- <i>Effects</i>: See Table 61. The result of the expression <code>rhs.has_value()</code> remains unchanged.
+</p>
+<table border="1">
+<caption>Table 61 &mdash; <code>optional::operator=(optional&lt;U&gt;&amp;&amp;)</code> effects [tab:optional.assign.move.templ]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del> with<br/>
+<code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> <ins>and sets <code><i>has_val</i></code> to <code>true</code></ins></td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> <ins>and sets <code><i>has_val</i></code> to <code>false</code></ins></td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-26- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-27- <i>Returns</i>: <code>*this</code>.
+<p/>
+-28- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s constructor. If an exception is thrown during the call to <code>T</code>'s
+assignment, the state of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class... Args&gt; constexpr T&amp; emplace(Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-29- <i>Mandates</i>: [&hellip;]
+<p/>
+-30- <i>Effects</i>: Calls <code>*this = nullopt</code>. Then direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-31- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-32- <i>Returns</i>: <ins><code><i>val</i></code></ins><del>A reference to the new contained value</del>.
+<p/>
+[&hellip;]
+<p/>
+-34- <i>Remarks</i>: If an exception is thrown during the call to <code>T</code>'s constructor, <code>*this</code>
+does not contain a value, and the previous <code><ins><i>val</i></ins><del>*val</del></code> (if any)
+has been destroyed.
+</p>
+</blockquote>
+<pre>
+template&lt;class U, class... Args&gt; constexpr T&amp; emplace(initializer_list&lt;U&gt; il, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-35- <i>Constraints</i>: [&hellip;]
+<p/>
+-36- <i>Effects</i>: Calls <code>*this = nullopt</code>. Then direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>il, std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-37- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-38- <i>Returns</i>: <ins><code><i>val</i></code></ins><del>A reference to the new contained value</del>.
+<p/>
+[&hellip;]
+<p/>
+-40- <i>Remarks</i>: If an exception is thrown during the call to <code>T</code>'s constructor, <code>*this</code>
+does not contain a value, and the previous <code><ins><i>val</i></ins><del>*val</del></code> (if any)
+has been destroyed.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.5 <a href="https://wg21.link/optional.swap">[optional.swap]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void swap(optional&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: [&hellip;]
+<p/>
+-2- <i>Preconditions</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: See Table 62.
+</p>
+<table border="1">
+<caption>Table 62 &mdash; <code>optional::swap(optional&amp;)</code> effects [tab:optional.swap]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>calls <code>swap(<ins><i>val</i></ins><del>*(*this)</del>, <del>*</del>rhs<ins>.<i>val</i></ins>)</code></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value of <code>*this</code></del><br/>
+with <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>, followed by <code>rhs.<ins><i>val</i>.</ins><del>val-&gt;</del>T::~T()</code>;<br/>
+postcondition is that <code>*this</code> contains a value and <code>rhs</code> does<br/>
+not contain a value</td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>direct-non-list-initializes <del>the contained value of</del> <code>rhs<ins>.<i>val</i></ins></code><br/>
+with <code>std::move(<ins><i>val</i></ins><del>*(*this)</del>)</code>, followed by <code><ins><i>val</i>.</ins><del>val-&gt;</del>T::~T()</code>;<br/>
+postcondition is that <code>*this</code> does not contain a value and <code>rhs</code><br/>
+contains a value</td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-4- <i>Throws</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: [&hellip;]
+<p/>
+-6- If any exception is thrown, the results of the expressions <code>this-&gt;has_value()</code> and
+<code>rhs.has_value()</code> remain unchanged. If an exception is thrown during the call to function <code>swap</code>,
+the state of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>swap</code> for lvalues of <code>T</code>. If an exception is thrown during the call to
+<code>T</code>'s move constructor, the state of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s move constructor.
+<p/>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.7 <a href="https://wg21.link/optional.observe">[optional.observe]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr const T* operator-&gt;() const noexcept;
+constexpr T* operator-&gt;() noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-2- <i>Returns</i>: <code><ins>addressof(<i>val</i>)</ins><del>val</del></code>.
+<p/>
+-3- [&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr const T&amp; operator*() const &amp; noexcept;
+constexpr T&amp; operator*() &amp; noexcept;
+</pre>
+<blockquote>
+<p>
+-4- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-5- <i>Returns</i>: <code><ins><i>val</i></ins><del>*val</del></code>.
+<p/>
+-6- [&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr T&amp;&amp; operator*() &amp;&amp; noexcept;
+constexpr const T&amp;&amp; operator*() const &amp;&amp; noexcept;
+</pre>
+<blockquote>
+<p>
+-7- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-8- <i>Effects</i>: Equivalent to: <code>return std::move(<ins><i>val</i></ins><del>*val</del>);</code>
+</p>
+</blockquote>
+<pre>
+constexpr explicit operator bool() const noexcept;
+</pre>
+<blockquote>
+<p>
+<del>-9- <i>Returns</i>: <code>true</code> if and only if <code>*this</code> contains a value.</del>
+<p/>
+<del>-10- <i>Remarks</i>: This function is a constexpr function.</del>
+</p>
+</blockquote>
+<pre>
+constexpr bool has_value() const noexcept;
+</pre>
+<blockquote>
+<p>
+-11- <i>Returns</i>: <ins><code><i>has_val</i></code></ins><del><code>true</code> if and only if <code>*this</code> contains a value</del>.
+<p/>
+-12- <i>Remarks</i>: <ins>These functions are</ins><del>This function is a</del> constexpr function<ins>s</ins>.
+</p>
+</blockquote>
+<pre>
+constexpr const T&amp; value() const &amp;;
+constexpr T&amp; value() &amp;;
+</pre>
+<blockquote>
+<p>
+-13- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? <ins><i>val</i></ins><del>*val</del> : throw bad_optional_access();
+</pre></blockquote>
+</blockquote>
+<pre>
+constexpr T&amp;&amp; value() &amp;&amp;;
+constexpr const T&amp;&amp; value() const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-14- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? std::move(<ins><i>val</i></ins><del>*val</del>) : throw bad_optional_access();
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr T value_or(U&amp;&amp; v) const &amp;;
+</pre>
+<blockquote>
+<p>
+-15- <i>Mandates</i>: [&hellip;]
+<p/>
+-16- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? <ins><i>val</i></ins><del>**this</del> : static_cast&lt;T&gt;(std::forward&lt;U&gt;(v));
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr T value_or(U&amp;&amp; v) &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-17- <i>Mandates</i>: [&hellip;]
+<p/>
+-18- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? std::move(<ins><i>val</i></ins><del>**this</del>) : static_cast&lt;T&gt;(std::forward&lt;U&gt;(v));
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.8 <a href="https://wg21.link/optional.monadic">[optional.monadic]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) &amp;;
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) const &amp;;
+</pre>
+<blockquote>
+<p>
+-1- Let <code>U</code> be <code>invoke_result_t&lt;F, decltype(<ins>(<i>val</i>)</ins><del>*val</del>)&gt;</code>.
+<p/>
+-2- <i>Mandates</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if (*this) {
+  return invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>);
+} else {
+  return remove_cvref_t&lt;U&gt;();
+}
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) &amp;&amp;;
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-4- Let <code>U</code> be <code>invoke_result_t&lt;F, decltype(std::move(<ins><i>val</i></ins><del>*val</del>))&gt;</code>.
+<p/>
+-5- <i>Mandates</i>: [&hellip;]
+<p/>
+-6- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if (*this) {
+  return invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>));
+} else {
+  return remove_cvref_t&lt;U&gt;();
+}
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) &amp;;
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) const &amp;;
+</pre>
+<blockquote>
+<p>
+-7- Let <code>U</code> be <code>remove_cv_t&lt;invoke_result_t&lt;F, decltype(<ins>(<i>val</i>)</ins><del>*val</del>)&gt;&gt;</code>.
+<p/>
+-8- <i>Mandates</i>: <code>U</code> is a non-array object type other than <code>in_place_t</code> or <code>nullopt_t</code>. The declaration
+</p>
+<blockquote><pre>
+U u(invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>));
+</pre></blockquote>
+<p>
+is well-formed for some invented variable <code>u</code>.
+<p/>
+[&hellip;]
+<p/>
+-9- <i>Returns</i>: If <code>*this</code> contains a value, an <code>optional&lt;U&gt;</code> object whose contained value is
+direct-non-list-initialized with <code>invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>)</code>; otherwise,
+<code>optional&lt;U&gt;()</code>.
+</p>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) &amp;&amp;;
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-10- Let <code>U</code> be <code>remove_cv_t&lt;invoke_result_t&lt;F, decltype(std::move(<ins><i>val</i></ins><del>*val</del>))&gt;&gt;</code>.
+<p/>
+-11- <i>Mandates</i>: <code>U</code> is a non-array object type other than <code>in_place_t</code> or <code>nullopt_t</code>. The declaration
+</p>
+<blockquote><pre>
+U u(invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>)));
+</pre></blockquote>
+<p>
+is well-formed for some invented variable <code>u</code>.
+<p/>
+[&hellip;]
+<p/>
+-12- <i>Returns</i>: If <code>*this</code> contains a value, an <code>optional&lt;U&gt;</code> object whose contained value is
+direct-non-list-initialized with <code>invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>))</code>; otherwise,
+<code>optional&lt;U&gt;()</code>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.9 <a href="https://wg21.link/optional.mod">[optional.mod]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void reset() noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>*this</code> contains a value, calls <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code>
+to destroy the contained value <ins>and sets <code><i>has_val</i></code> to <code>false</code></ins>; otherwise no effect.
+<p/>
+-2- <i>Postconditions</i>: <code>*this</code> does not contain a value.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</blockquote>
+
+<p><i>[St. Louis 2024-06-24; Jonathan provides improved wording]</i></p>
+
+<p><i>[2024-08-21; LWG telecon]</i></p>
+
+<p>
+During telecon review it was suggested to replace
+22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a> p1 and p2.
+On the reflector Daniel requested to keep the "additional storage" prohibition,
+so that will be addressed by issue <a href="lwg-defects.html#4141" title="Improve prohibitions on &quot;additional storage&quot; (Status: WP)">4141</a><sup><a href="https://cplusplus.github.io/LWG/issue4141" title="Latest snapshot">(i)</a></sup> instead.
+</p>
+
+<p><i>[2024-10-02; Jonathan tweaks proposed resolution]</i></p>
+
+<p>
+On the reflector we decided that the union member should use <code class='backtick'>remove_cv_t</code>,
+as proposed for <code class='backtick'>expected</code> by issue <a href="lwg-active.html#3891" title="LWG 3870 breaks std::expected&lt;cv T, E&gt; (Status: New)">3891</a><sup><a href="https://cplusplus.github.io/LWG/issue3891" title="Latest snapshot">(i)</a></sup>.
+The rest of the proposed resolution is unchanged, so that edit was made
+in-place below, instead of as a new resolution that supersedes the old one.
+</p>
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N4988" title=" Working Draft, Programming Languages — C++">N4988</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a>, class template <code>optional</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T&gt;
+  class optional {
+  public:
+    using value_type = T;
+    [&hellip;]
+  private:
+    <del>*val // <i>exposition only</i></del>;
+    <ins>union {</ins>
+      <ins>remove_cv_t&lt;T&gt; <i>val</i>; // <i>exposition only</i></ins>
+    <ins>};</ins>
+  };
+
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-1-
+<ins>
+When its member <code><i>val</i></code> is active
+(11.5.1 <a href="https://wg21.link/class.union.general">[class.union.general]</a>),
+an instance of <code>optional&lt;T&gt;</code> is said to
+<i>contain a value</i>, and <code><i>val</i></code> is referred to as its
+<i>contained value</i>.
+</ins>
+<del>
+Any instance of <code>optional&lt;T&gt;</code> at any given time either
+contains a value or does not contain a value.
+When an instance of <code>optional&lt;T&gt;</code> <i>contains a value</i>,
+it means that an object of type <code>T</code>,
+referred to as the</del>
+<ins>An</ins>
+optional object's
+<ins>contained value</ins>
+<del><i>contained value</i>, </del>
+is allocated within the storage of the optional object.
+Implementations are not permitted to use additional storage,
+such as dynamic memory, to allocate its contained value.
+<del>
+When an object of type <code>optional&lt;T&gt;</code>
+is contextually converted to <code>bool</code>,
+the conversion returns <code class='backtick'>true</code> if the object contains a value;
+otherwise the conversion returns <code class='backtick'>false</code>.
+</del>
+</p>
+<p>
+<del>
+-2- When an <code>optional&lt;T&gt;</code> object contains a value,
+member <code>val</code>
+points to the contained value.
+</del>
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.2 <a href="https://wg21.link/optional.ctor">[optional.ctor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr optional(const optional&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code><del>*</del>rhs<ins>.<i>val</i></ins></code>.
+<p/>
+-5- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr optional(optional&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-8- <i>Constraints</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>.
+<code>rhs.has_value()</code> is unchanged.
+<p/>
+-10- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class... Args&gt; constexpr explicit optional(in_place_t, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-13- <i>Constraints</i>: [&hellip;]
+<p/>
+-14- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-15- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U, class... Args&gt;
+  constexpr explicit optional(in_place_t, initializer_list&lt;U&gt; il, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-18- <i>Constraints</i>: [&hellip;]
+<p/>
+-19- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>il, std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-20- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U = T&gt; constexpr explicit(<i>see below</i>) optional(U&amp;&amp; v);
+</pre>
+<blockquote>
+<p>
+-23- <i>Constraints</i>: [&hellip;]
+<p/>
+-24- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>std::forward&lt;U&gt;(v)</code>.
+<p/>
+-25- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) optional(const optional&lt;U&gt;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-28- <i>Constraints</i>: [&hellip;]
+<p/>
+-29- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code><del>*</del>rhs<ins>.<i>val</i></ins></code>.
+<p/>
+-30- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) optional(optional&lt;U&gt;&amp;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-33- <i>Constraints</i>: [&hellip;]
+<p/>
+-34- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with
+<code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>. <code>rhs.has_value()</code> is unchanged.
+<p/>
+-35- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.3 <a href="https://wg21.link/optional.dtor">[optional.dtor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr ~optional();
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>is_trivially_destructible_v&lt;T&gt; != true</code> and <code>*this</code> contains a value,
+calls <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code><ins>.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.4 <a href="https://wg21.link/optional.assign">[optional.assign]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(nullopt_t) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>*this</code> contains a value, calls
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> to destroy the contained
+value; otherwise no effect.
+<p/>
+-2- <i>Postconditions</i>: <code>*this</code> does not contain a value.
+</p>
+</blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(const optional&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: See Table 58.
+</p>
+<table border="1">
+<caption>Table 58 &mdash; <code>optional::operator=(const optional&amp;)</code> effects [tab:optional.assign.copy]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code><del>*</del>rhs<ins>.<i>val</i></ins></code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code><del>*</del>rhs<ins>.<i>val</i></ins></code><br/>
+</td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code><br/>
+</td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-5- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(optional&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-8- <i>Constraints</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: See Table 59. The result of the expression <code>rhs.has_value()</code> remains unchanged.
+<p/>
+-10- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-11- <i>Returns</i>: <code>*this</code>.
+</p>
+<table border="1">
+<caption>Table 59 &mdash; <code>optional::operator=(optional&amp;&amp;)</code> effects [tab:optional.assign.move]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del> with
+<code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code></td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code></td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-12- <i>Remarks</i>: [&hellip;]
+<p/>
+-13- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s move constructor, the state
+of <code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception
+safety guarantee of <code>T</code>'s move constructor. If an exception is thrown during the call to
+<code>T</code>'s move assignment, the <ins>states</ins> <del>state</del> of <code><del>*</del><ins><i>val</i></ins><del>val</del></code>
+and <code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception
+safety guarantee of <code>T</code>'s move assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U = T&gt; constexpr optional&lt;T&gt;&amp; operator=(U&amp;&amp; v);
+</pre>
+<blockquote>
+<p>
+-14- <i>Constraints</i>: [&hellip;]
+<p/>
+-15- <i>Effects</i>: If <code>*this</code> contains a value, assigns <code>std::forward&lt;U&gt;(v)</code>
+to <ins><code><i>val</i></code></ins><del>the contained value</del>; otherwise direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::forward&lt;U&gt;(v)</code>.
+<p/>
+-16- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-17- <i>Returns</i>: <code>*this</code>.
+<p/>
+-18- <i>Remarks</i>: If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code>
+remains unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code>v</code> is determined by the exception safety guarantee of <code>T</code>'s constructor. If an exception
+is thrown during the call to <code>T</code>'s assignment, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code>
+and <code>v</code> <ins>are</ins> <del>is</del> determined by the exception safety guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr optional&lt;T&gt;&amp; operator=(const optional&lt;U&gt;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-19- <i>Constraints</i>: [&hellip;]
+<p/>
+-20- <i>Effects</i>: See Table 60.
+</p>
+<table border="1">
+<caption>Table 60 &mdash; <code>optional::operator=(const optional&lt;U&gt;&amp;)</code> effects [tab:optional.assign.copy.templ]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code><del>*</del>rhs<ins>.<i>val</i></ins></code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code><del>*</del>rhs<ins>.<i>val</i></ins></code> </td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> </td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-21- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-22- <i>Returns</i>: <code>*this</code>.
+<p/>
+-23- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s constructor. If an exception is thrown during the call to <code>T</code>'s
+assignment, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception safety
+guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr optional&lt;T&gt;&amp; operator=(optional&lt;U&gt;&amp;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-24- <i>Constraints</i>: [&hellip;]
+<p/>
+-25- <i>Effects</i>: See Table 61. The result of the expression <code>rhs.has_value()</code> remains unchanged.
+</p>
+<table border="1">
+<caption>Table 61 &mdash; <code>optional::operator=(optional&lt;U&gt;&amp;&amp;)</code> effects [tab:optional.assign.move.templ]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del> with<br/>
+<code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> </td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> </td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-26- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-27- <i>Returns</i>: <code>*this</code>.
+<p/>
+-28- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s constructor. If an exception is thrown during the call to <code>T</code>'s
+assignment, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception safety
+guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class... Args&gt; constexpr T&amp; emplace(Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-29- <i>Mandates</i>: [&hellip;]
+<p/>
+-30- <i>Effects</i>: Calls <code>*this = nullopt</code>. Then direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-31- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-32- <i>Returns</i>: <ins><code><i>val</i></code></ins><del>A reference to the new contained value</del>.
+<p/>
+[&hellip;]
+<p/>
+-34- <i>Remarks</i>: If an exception is thrown during the call to <code>T</code>'s constructor, <code>*this</code>
+does not contain a value, and the previous <code><ins><i>val</i></ins><del>*val</del></code> (if any)
+has been destroyed.
+</p>
+</blockquote>
+<pre>
+template&lt;class U, class... Args&gt; constexpr T&amp; emplace(initializer_list&lt;U&gt; il, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-35- <i>Constraints</i>: [&hellip;]
+<p/>
+-36- <i>Effects</i>: Calls <code>*this = nullopt</code>. Then direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>il, std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-37- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-38- <i>Returns</i>: <ins><code><i>val</i></code></ins><del>A reference to the new contained value</del>.
+<p/>
+[&hellip;]
+<p/>
+-40- <i>Remarks</i>: If an exception is thrown during the call to <code>T</code>'s constructor, <code>*this</code>
+does not contain a value, and the previous <code><ins><i>val</i></ins><del>*val</del></code> (if any)
+has been destroyed.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.5 <a href="https://wg21.link/optional.swap">[optional.swap]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void swap(optional&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: [&hellip;]
+<p/>
+-2- <i>Preconditions</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: See Table 62.
+</p>
+<table border="1">
+<caption>Table 62 &mdash; <code>optional::swap(optional&amp;)</code> effects [tab:optional.swap]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>calls <code>swap(<ins><i>val</i></ins><del>*(*this)</del>, <del>*</del>rhs<ins>.<i>val</i></ins>)</code></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value of <code>*this</code></del><br/>
+with <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>, followed by <code>rhs.<ins><i>val</i>.</ins><del>val-&gt;</del>T::~T()</code>;<br/>
+postcondition is that <code>*this</code> contains a value and <code>rhs</code> does<br/>
+not contain a value</td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>direct-non-list-initializes <del>the contained value of</del> <code>rhs<ins>.<i>val</i></ins></code><br/>
+with <code>std::move(<ins><i>val</i></ins><del>*(*this)</del>)</code>, followed by <code><ins><i>val</i>.</ins><del>val-&gt;</del>T::~T()</code>;<br/>
+postcondition is that <code>*this</code> does not contain a value and <code>rhs</code><br/>
+contains a value</td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-4- <i>Throws</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: [&hellip;]
+<p/>
+-6- If any exception is thrown, the results of the expressions <code>this-&gt;has_value()</code> and
+<code>rhs.has_value()</code> remain unchanged. If an exception is thrown during the call to function <code>swap</code>,
+the state of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>swap</code> for lvalues of <code>T</code>. If an exception is thrown during the call to
+<code>T</code>'s move constructor, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception safety
+guarantee of <code>T</code>'s move constructor.
+<p/>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.7 <a href="https://wg21.link/optional.observe">[optional.observe]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr const T* operator-&gt;() const noexcept;
+constexpr T* operator-&gt;() noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-2- <i>Returns</i>: <code><ins>addressof(<i>val</i>)</ins><del>val</del></code>.
+<p/>
+-3- [&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr const T&amp; operator*() const &amp; noexcept;
+constexpr T&amp; operator*() &amp; noexcept;
+</pre>
+<blockquote>
+<p>
+-4- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-5- <i>Returns</i>: <code><ins><i>val</i></ins><del>*val</del></code>.
+<p/>
+-6- [&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr T&amp;&amp; operator*() &amp;&amp; noexcept;
+constexpr const T&amp;&amp; operator*() const &amp;&amp; noexcept;
+</pre>
+<blockquote>
+<p>
+-7- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-8- <i>Effects</i>: Equivalent to: <code>return std::move(<ins><i>val</i></ins><del>*val</del>);</code>
+</p>
+</blockquote>
+<pre>
+constexpr explicit operator bool() const noexcept;
+</pre>
+<blockquote>
+<p>
+-9- <i>Returns</i>: <code>true</code> if and only if <code>*this</code> contains a value.
+<p/>
+-10- <i>Remarks</i>: This function is a constexpr function.
+</p>
+</blockquote>
+<pre>
+constexpr bool has_value() const noexcept;
+</pre>
+<blockquote>
+<p>
+-11- <i>Returns</i>: <code>true</code> if and only if <code>*this</code> contains a value.
+<p/>
+-12- <i>Remarks</i>: This function is a constexpr function.
+</p>
+</blockquote>
+<pre>
+constexpr const T&amp; value() const &amp;;
+constexpr T&amp; value() &amp;;
+</pre>
+<blockquote>
+<p>
+-13- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? <ins><i>val</i></ins><del>*val</del> : throw bad_optional_access();
+</pre></blockquote>
+</blockquote>
+<pre>
+constexpr T&amp;&amp; value() &amp;&amp;;
+constexpr const T&amp;&amp; value() const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-14- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? std::move(<ins><i>val</i></ins><del>*val</del>) : throw bad_optional_access();
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr T value_or(U&amp;&amp; v) const &amp;;
+</pre>
+<blockquote>
+<p>
+-15- <i>Mandates</i>: [&hellip;]
+<p/>
+-16- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? <ins><i>val</i></ins><del>**this</del> : static_cast&lt;T&gt;(std::forward&lt;U&gt;(v));
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr T value_or(U&amp;&amp; v) &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-17- <i>Mandates</i>: [&hellip;]
+<p/>
+-18- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? std::move(<ins><i>val</i></ins><del>**this</del>) : static_cast&lt;T&gt;(std::forward&lt;U&gt;(v));
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.8 <a href="https://wg21.link/optional.monadic">[optional.monadic]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) &amp;;
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) const &amp;;
+</pre>
+<blockquote>
+<p>
+-1- Let <code>U</code> be <code>invoke_result_t&lt;F, decltype(<ins>(<i>val</i>)</ins><del>*val</del>)&gt;</code>.
+<p/>
+-2- <i>Mandates</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if (*this) {
+  return invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>);
+} else {
+  return remove_cvref_t&lt;U&gt;();
+}
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) &amp;&amp;;
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-4- Let <code>U</code> be <code>invoke_result_t&lt;F, decltype(std::move(<ins><i>val</i></ins><del>*val</del>))&gt;</code>.
+<p/>
+-5- <i>Mandates</i>: [&hellip;]
+<p/>
+-6- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if (*this) {
+  return invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>));
+} else {
+  return remove_cvref_t&lt;U&gt;();
+}
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) &amp;;
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) const &amp;;
+</pre>
+<blockquote>
+<p>
+-7- Let <code>U</code> be <code>remove_cv_t&lt;invoke_result_t&lt;F, decltype(<ins>(<i>val</i>)</ins><del>*val</del>)&gt;&gt;</code>.
+<p/>
+-8- <i>Mandates</i>: <code>U</code> is a non-array object type other than <code>in_place_t</code> or <code>nullopt_t</code>. The declaration
+</p>
+<blockquote><pre>
+U u(invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>));
+</pre></blockquote>
+<p>
+is well-formed for some invented variable <code>u</code>.
+<p/>
+[&hellip;]
+<p/>
+-9- <i>Returns</i>: If <code>*this</code> contains a value, an <code>optional&lt;U&gt;</code> object whose contained value is
+direct-non-list-initialized with <code>invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>)</code>; otherwise,
+<code>optional&lt;U&gt;()</code>.
+</p>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) &amp;&amp;;
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-10- Let <code>U</code> be <code>remove_cv_t&lt;invoke_result_t&lt;F, decltype(std::move(<ins><i>val</i></ins><del>*val</del>))&gt;&gt;</code>.
+<p/>
+-11- <i>Mandates</i>: <code>U</code> is a non-array object type other than <code>in_place_t</code> or <code>nullopt_t</code>. The declaration
+</p>
+<blockquote><pre>
+U u(invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>)));
+</pre></blockquote>
+<p>
+is well-formed for some invented variable <code>u</code>.
+<p/>
+[&hellip;]
+<p/>
+-12- <i>Returns</i>: If <code>*this</code> contains a value, an <code>optional&lt;U&gt;</code> object whose contained value is
+direct-non-list-initialized with <code>invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>))</code>; otherwise,
+<code>optional&lt;U&gt;()</code>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.9 <a href="https://wg21.link/optional.mod">[optional.mod]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void reset() noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>*this</code> contains a value, calls <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code>
+to destroy the contained value; otherwise no effect.
+<p/>
+-2- <i>Postconditions</i>: <code>*this</code> does not contain a value.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+</blockquote>
+
+<p><i>[2025-11-03; Tomasz tweaks proposed resolution]</i></p>
+
+<p>
+Updated converting constructor and assignments to use <code class='backtick'>operator*()</code>
+directly, required to correctly support <code>optional&lt;T&amp;&gt;</code>.
+Also update corresponding constructor in specialization.
+</p>
+
+
+<p><i>[Kona 2025-11-05; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4015"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a>, class template <code>optional</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T&gt;
+  class optional {
+  public:
+    using value_type = T;
+    [&hellip;]
+  private:
+    <del>T* val; // <i>exposition only</i></del>
+    <ins>union {</ins>
+      <ins>remove_cv_t&lt;T&gt; <i>val</i>; // <i>exposition only</i></ins>
+    <ins>};</ins>
+  };
+
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.1 <a href="https://wg21.link/optional.optional.general">[optional.optional.general]</a> as indicated:</p>
+
+<blockquote>
+<p>
+-1-
+<ins>
+An instance of <code>optional&lt;T&gt;</code> is said to
+<i>contain a value</i> when and only when its member <code><i>val</i></code> is active
+(11.5.1 <a href="https://wg21.link/class.union.general">[class.union.general]</a>);
+<code><i>val</i></code> is referred to as its <i>contained value</i>.
+</ins>
+<del>
+An object of type <code>optional&lt;T&gt;</code> at any given time either
+contains a value or does not contain a value.
+When an object of type <code>optional&lt;T&gt;</code> <i>contains a value</i>,
+it means that an object of type <code>T</code>,
+referred to as the</del>
+<ins>An</ins>
+optional object's
+<ins>contained value</ins>
+<del><i>contained value</i>, </del>
+is nested within (6.8.2 <a href="https://wg21.link/intro.object">[intro.object]</a>) the optional object.
+<del>
+When an object of type <code>optional&lt;T&gt;</code>
+is contextually converted to <code>bool</code>,
+the conversion returns <code class='backtick'>true</code> if the object contains a value;
+otherwise the conversion returns <code class='backtick'>false</code>.
+</del>
+</p>
+<p>
+<del>
+-2- When an <code>optional&lt;T&gt;</code> object contains a value,
+member <code>val</code>
+points to the contained value.
+</del>
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.2 <a href="https://wg21.link/optional.ctor">[optional.ctor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr optional(const optional&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code><del>*</del>rhs<ins>.<i>val</i></ins></code>.
+<p/>
+-5- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr optional(optional&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-8- <i>Constraints</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>.
+<code>rhs.has_value()</code> is unchanged.
+<p/>
+-10- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class... Args&gt; constexpr explicit optional(in_place_t, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-13- <i>Constraints</i>: [&hellip;]
+<p/>
+-14- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-15- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U, class... Args&gt;
+  constexpr explicit optional(in_place_t, initializer_list&lt;U&gt; il, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-18- <i>Constraints</i>: [&hellip;]
+<p/>
+-19- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>il, std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-20- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U = T&gt; constexpr explicit(<i>see below</i>) optional(U&amp;&amp; v);
+</pre>
+<blockquote>
+<p>
+-23- <i>Constraints</i>: [&hellip;]
+<p/>
+-24- <i>Effects</i>: Direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code>std::forward&lt;U&gt;(v)</code>.
+<p/>
+-25- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) optional(const optional&lt;U&gt;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-28- <i>Constraints</i>: [&hellip;]
+<p/>
+-29- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code><del>*</del>rhs<ins>.operator*()</ins></code>.
+<p/>
+-30- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) optional(optional&lt;U&gt;&amp;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-33- <i>Constraints</i>: [&hellip;]
+<p/>
+-34- <i>Effects</i>: If <code>rhs</code> contains a value, direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with
+<code><del>*</del>std::move(rhs)<ins>.operator*()</ins></code>. <code>rhs.has_value()</code> is unchanged.
+<p/>
+-35- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.3 <a href="https://wg21.link/optional.dtor">[optional.dtor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr ~optional();
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>is_trivially_destructible_v&lt;T&gt; != true</code> and <code>*this</code> contains a value,
+calls <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code><ins>.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.4 <a href="https://wg21.link/optional.assign">[optional.assign]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(nullopt_t) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>*this</code> contains a value, calls
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> to destroy the contained
+value; otherwise no effect.
+<p/>
+-2- <i>Postconditions</i>: <code>*this</code> does not contain a value.
+</p>
+</blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(const optional&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-4- <i>Effects</i>: See Table 58.
+</p>
+<table border="1">
+<caption>Table 58 &mdash; <code>optional::operator=(const optional&amp;)</code> effects [tab:optional.assign.copy]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code><del>*</del>rhs<ins>.<i>val</i></ins></code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code><del>*</del>rhs<ins>.<i>val</i></ins></code><br/>
+</td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code><br/>
+</td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-5- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr optional&lt;T&gt;&amp; operator=(optional&amp;&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-8- <i>Constraints</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: See Table 59. The result of the expression <code>rhs.has_value()</code> remains unchanged.
+<p/>
+-10- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-11- <i>Returns</i>: <code>*this</code>.
+</p>
+<table border="1">
+<caption>Table 59 &mdash; <code>optional::operator=(optional&amp;&amp;)</code> effects [tab:optional.assign.move]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del> with
+<code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code></td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code></td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-12- <i>Remarks</i>: [&hellip;]
+<p/>
+-13- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s move constructor, the state
+of <code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception
+safety guarantee of <code>T</code>'s move constructor. If an exception is thrown during the call to
+<code>T</code>'s move assignment, the <ins>states</ins> <del>state</del> of <code><del>*</del><ins><i>val</i></ins><del>val</del></code>
+and <code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception
+safety guarantee of <code>T</code>'s move assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U = T&gt; constexpr optional&lt;T&gt;&amp; operator=(U&amp;&amp; v);
+</pre>
+<blockquote>
+<p>
+-14- <i>Constraints</i>: [&hellip;]
+<p/>
+-15- <i>Effects</i>: If <code>*this</code> contains a value, assigns <code>std::forward&lt;U&gt;(v)</code>
+to <ins><code><i>val</i></code></ins><del>the contained value</del>; otherwise direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::forward&lt;U&gt;(v)</code>.
+<p/>
+-16- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-17- <i>Returns</i>: <code>*this</code>.
+<p/>
+-18- <i>Remarks</i>: If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code>
+remains unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code>v</code> is determined by the exception safety guarantee of <code>T</code>'s constructor. If an exception
+is thrown during the call to <code>T</code>'s assignment, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code>
+and <code>v</code> <ins>are</ins> <del>is</del> determined by the exception safety guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr optional&lt;T&gt;&amp; operator=(const optional&lt;U&gt;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-19- <i>Constraints</i>: [&hellip;]
+<p/>
+-20- <i>Effects</i>: See Table 60.
+</p>
+<table border="1">
+<caption>Table 60 &mdash; <code>optional::operator=(const optional&lt;U&gt;&amp;)</code> effects [tab:optional.assign.copy.templ]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code><del>*</del>rhs<ins>.operator*()</ins></code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del>
+with <code><del>*</del>rhs<ins>.operator*()</ins></code> </td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> </td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-21- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-22- <i>Returns</i>: <code>*this</code>.
+<p/>
+-23- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s constructor. If an exception is thrown during the call to <code>T</code>'s
+assignment, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception safety
+guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr optional&lt;T&gt;&amp; operator=(optional&lt;U&gt;&amp;&amp; rhs);
+</pre>
+<blockquote>
+<p>
+-24- <i>Constraints</i>: [&hellip;]
+<p/>
+-25- <i>Effects</i>: See Table 61. The result of the expression <code>rhs.has_value()</code> remains unchanged.
+</p>
+<table border="1">
+<caption>Table 61 &mdash; <code>optional::operator=(optional&lt;U&gt;&amp;&amp;)</code> effects [tab:optional.assign.move.templ]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>assigns <code><del>*</del>std::move(rhs)<ins>.operator*()</ins></code> to <ins><code><i>val</i></code></ins><del>the contained value</del></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value</del> with<br/>
+<code><del>*</del>std::move(rhs)<ins>.operator*()</ins></code> </td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>destroys the contained value by calling<br/>
+<code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code> </td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-26- <i>Postconditions</i>: <code>rhs.has_value() == this-&gt;has_value()</code>.
+<p/>
+-27- <i>Returns</i>: <code>*this</code>.
+<p/>
+-28- If any exception is thrown, the result of the expression <code>this-&gt;has_value()</code> remains
+unchanged. If an exception is thrown during the call to <code>T</code>'s constructor, the state of
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>T</code>'s constructor. If an exception is thrown during the call to <code>T</code>'s
+assignment, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception safety
+guarantee of <code>T</code>'s assignment.
+</p>
+</blockquote>
+<pre>
+template&lt;class... Args&gt; constexpr T&amp; emplace(Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-29- <i>Mandates</i>: [&hellip;]
+<p/>
+-30- <i>Effects</i>: Calls <code>*this = nullopt</code>. Then direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-31- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-32- <i>Returns</i>: <ins><code><i>val</i></code></ins><del>A reference to the new contained value</del>.
+<p/>
+[&hellip;]
+<p/>
+-34- <i>Remarks</i>: If an exception is thrown during the call to <code>T</code>'s constructor, <code>*this</code>
+does not contain a value, and the previous <code><ins><i>val</i></ins><del>*val</del></code> (if any)
+has been destroyed.
+</p>
+</blockquote>
+<pre>
+template&lt;class U, class... Args&gt; constexpr T&amp; emplace(initializer_list&lt;U&gt; il, Args&amp;&amp;... args);
+</pre>
+<blockquote>
+<p>
+-35- <i>Constraints</i>: [&hellip;]
+<p/>
+-36- <i>Effects</i>: Calls <code>*this = nullopt</code>. Then direct-non-list-initializes
+<ins><code><i>val</i></code></ins><del>the contained value</del> with <code>il, std::forward&lt;Args&gt;(args)...</code>.
+<p/>
+-37- <i>Postconditions</i>: <code>*this</code> contains a value.
+<p/>
+-38- <i>Returns</i>: <ins><code><i>val</i></code></ins><del>A reference to the new contained value</del>.
+<p/>
+[&hellip;]
+<p/>
+-40- <i>Remarks</i>: If an exception is thrown during the call to <code>T</code>'s constructor, <code>*this</code>
+does not contain a value, and the previous <code><ins><i>val</i></ins><del>*val</del></code> (if any)
+has been destroyed.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.5 <a href="https://wg21.link/optional.swap">[optional.swap]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void swap(optional&amp; rhs) noexcept(<i>see below</i>);
+</pre>
+<blockquote>
+<p>
+-1- <i>Mandates</i>: [&hellip;]
+<p/>
+-2- <i>Preconditions</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: See Table 62.
+</p>
+<table border="1">
+<caption>Table 62 &mdash; <code>optional::swap(optional&amp;)</code> effects [tab:optional.swap]</caption>
+
+<tr>
+<th></th>
+<th><b><code>*this</code> contains a value</b></th>
+<th><b><code>*this</code> does not contain a value</b></th>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> contains a value</b></td>
+<td>calls <code>swap(<ins><i>val</i></ins><del>*(*this)</del>, <del>*</del>rhs<ins>.<i>val</i></ins>)</code></td>
+<td>direct-non-list-initializes <ins><code><i>val</i></code></ins><del>the contained value of <code>*this</code></del><br/>
+with <code>std::move(<del>*</del>rhs<ins>.<i>val</i></ins>)</code>, followed by <code>rhs.<ins><i>val</i>.</ins><del>val-&gt;</del>T::~T()</code>;<br/>
+postcondition is that <code>*this</code> contains a value and <code>rhs</code> does<br/>
+not contain a value</td>
+</tr>
+
+<tr>
+<td><b><code>rhs</code> does not contain a value</b></td>
+<td>direct-non-list-initializes <del>the contained value of</del> <code>rhs<ins>.<i>val</i></ins></code><br/>
+with <code>std::move(<ins><i>val</i></ins><del>*(*this)</del>)</code>, followed by <code><ins><i>val</i>.</ins><del>val-&gt;</del>T::~T()</code>;<br/>
+postcondition is that <code>*this</code> does not contain a value and <code>rhs</code><br/>
+contains a value</td>
+<td>no effect</td>
+</tr>
+</table>
+<p>
+-4- <i>Throws</i>: [&hellip;]
+<p/>
+-5- <i>Remarks</i>: [&hellip;]
+<p/>
+-6- If any exception is thrown, the results of the expressions <code>this-&gt;has_value()</code> and
+<code>rhs.has_value()</code> remain unchanged. If an exception is thrown during the call to function <code>swap</code>,
+the state of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> is determined by the exception safety
+guarantee of <code>swap</code> for lvalues of <code>T</code>. If an exception is thrown during the call to
+<code>T</code>'s move constructor, the <ins>states</ins> <del>state</del> of <code><ins><i>val</i></ins><del>*val</del></code> and
+<code><del>*</del>rhs.<ins><i>val</i></ins><del>val</del></code> <ins>are</ins> <del>is</del> determined by the exception safety
+guarantee of <code>T</code>'s move constructor.
+<p/>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.7 <a href="https://wg21.link/optional.observe">[optional.observe]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr const T* operator-&gt;() const noexcept;
+constexpr T* operator-&gt;() noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-2- <i>Returns</i>: <code><ins>addressof(<i>val</i>)</ins><del>val</del></code>.
+<p/>
+-3- [&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr const T&amp; operator*() const &amp; noexcept;
+constexpr T&amp; operator*() &amp; noexcept;
+</pre>
+<blockquote>
+<p>
+-4- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-5- <i>Returns</i>: <code><ins><i>val</i></ins><del>*val</del></code>.
+<p/>
+-6- [&hellip;]
+</p>
+</blockquote>
+<pre>
+constexpr T&amp;&amp; operator*() &amp;&amp; noexcept;
+constexpr const T&amp;&amp; operator*() const &amp;&amp; noexcept;
+</pre>
+<blockquote>
+<p>
+-7- <i>Preconditions</i>: <code>*this</code> contains a value.
+<p/>
+-8- <i>Effects</i>: Equivalent to: <code>return std::move(<ins><i>val</i></ins><del>*val</del>);</code>
+</p>
+</blockquote>
+<pre>
+constexpr explicit operator bool() const noexcept;
+</pre>
+<blockquote>
+<p>
+-9- <i>Returns</i>: <code>true</code> if and only if <code>*this</code> contains a value.
+<p/>
+-10- <i>Remarks</i>: This function is a constexpr function.
+</p>
+</blockquote>
+<pre>
+constexpr bool has_value() const noexcept;
+</pre>
+<blockquote>
+<p>
+-11- <i>Returns</i>: <code>true</code> if and only if <code>*this</code> contains a value.
+<p/>
+-12- <i>Remarks</i>: This function is a constexpr function.
+</p>
+</blockquote>
+<pre>
+constexpr const T&amp; value() const &amp;;
+constexpr T&amp; value() &amp;;
+</pre>
+<blockquote>
+<p>
+-13- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? <ins><i>val</i></ins><del>*val</del> : throw bad_optional_access();
+</pre></blockquote>
+</blockquote>
+<pre>
+constexpr T&amp;&amp; value() &amp;&amp;;
+constexpr const T&amp;&amp; value() const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-14- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? std::move(<ins><i>val</i></ins><del>*val</del>) : throw bad_optional_access();
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr T value_or(U&amp;&amp; v) const &amp;;
+</pre>
+<blockquote>
+<p>
+-15- <i>Mandates</i>: [&hellip;]
+<p/>
+-16- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? <ins><i>val</i></ins><del>**this</del> : static_cast&lt;T&gt;(std::forward&lt;U&gt;(v));
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class U&gt; constexpr T value_or(U&amp;&amp; v) &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-17- <i>Mandates</i>: [&hellip;]
+<p/>
+-18- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? std::move(<ins><i>val</i></ins><del>**this</del>) : static_cast&lt;T&gt;(std::forward&lt;U&gt;(v));
+</pre></blockquote>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.8 <a href="https://wg21.link/optional.monadic">[optional.monadic]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) &amp;;
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) const &amp;;
+</pre>
+<blockquote>
+<p>
+-1- Let <code>U</code> be <code>invoke_result_t&lt;F, decltype(<ins>(<i>val</i>)</ins><del>*val</del>)&gt;</code>.
+<p/>
+-2- <i>Mandates</i>: [&hellip;]
+<p/>
+-3- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if (*this) {
+  return invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>);
+} else {
+  return remove_cvref_t&lt;U&gt;();
+}
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) &amp;&amp;;
+template&lt;class F&gt; constexpr auto and_then(F&amp;&amp; f) const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-4- Let <code>U</code> be <code>invoke_result_t&lt;F, decltype(std::move(<ins><i>val</i></ins><del>*val</del>))&gt;</code>.
+<p/>
+-5- <i>Mandates</i>: [&hellip;]
+<p/>
+-6- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+if (*this) {
+  return invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>));
+} else {
+  return remove_cvref_t&lt;U&gt;();
+}
+</pre></blockquote>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) &amp;;
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) const &amp;;
+</pre>
+<blockquote>
+<p>
+-7- Let <code>U</code> be <code>remove_cv_t&lt;invoke_result_t&lt;F, decltype(<ins>(<i>val</i>)</ins><del>*val</del>)&gt;&gt;</code>.
+<p/>
+-8- <i>Mandates</i>: <code>U</code> is a non-array object type other than <code>in_place_t</code> or <code>nullopt_t</code>. The declaration
+</p>
+<blockquote><pre>
+U u(invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>));
+</pre></blockquote>
+<p>
+is well-formed for some invented variable <code>u</code>.
+<p/>
+[&hellip;]
+<p/>
+-9- <i>Returns</i>: If <code>*this</code> contains a value, an <code>optional&lt;U&gt;</code> object whose contained value is
+direct-non-list-initialized with <code>invoke(std::forward&lt;F&gt;(f), <ins><i>val</i></ins><del>*val</del>)</code>; otherwise,
+<code>optional&lt;U&gt;()</code>.
+</p>
+</blockquote>
+<pre>
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) &amp;&amp;;
+template&lt;class F&gt; constexpr auto transform(F&amp;&amp; f) const &amp;&amp;;
+</pre>
+<blockquote>
+<p>
+-10- Let <code>U</code> be <code>remove_cv_t&lt;invoke_result_t&lt;F, decltype(std::move(<ins><i>val</i></ins><del>*val</del>))&gt;&gt;</code>.
+<p/>
+-11- <i>Mandates</i>: <code>U</code> is a non-array object type other than <code>in_place_t</code> or <code>nullopt_t</code>. The declaration
+</p>
+<blockquote><pre>
+U u(invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>)));
+</pre></blockquote>
+<p>
+is well-formed for some invented variable <code>u</code>.
+<p/>
+[&hellip;]
+<p/>
+-12- <i>Returns</i>: If <code>*this</code> contains a value, an <code>optional&lt;U&gt;</code> object whose contained value is
+direct-non-list-initialized with <code>invoke(std::forward&lt;F&gt;(f), std::move(<ins><i>val</i></ins><del>*val</del>))</code>; otherwise,
+<code>optional&lt;U&gt;()</code>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.3.9 <a href="https://wg21.link/optional.mod">[optional.mod]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr void reset() noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Effects</i>: If <code>*this</code> contains a value, calls <code><del>val-&gt;</del><ins><i>val</i>.</ins>T::~T()</code>
+to destroy the contained value; otherwise no effect.
+<p/>
+-2- <i>Postconditions</i>: <code>*this</code> does not contain a value.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.4.2 <a href="https://wg21.link/optional.ref.ctor">[optional.ref.ctor]</a> as indicated:</p>
+
+<pre>
+template&lt;class U&gt;
+  constexpr explicit(!is_convertible_v&lt;U&amp;, T&amp;&gt;)
+  optional(optional&lt;U&gt;&amp; rhs) noexcept(is_nothrow_constructible_v&lt;T&amp;, U&amp;&gt;);
+</pre>
+<blockquote>
+<p/>
+-8- <i>Constraints</i>: [&hellip;]
+<p/>
+-9- <i>Effects</i>: Equivalent to:
+<pre>
+  if (rhs.has_value()) convert-ref-init-val(<del>*</del>rhs<ins>.operator*()</ins>);
+</pre>
+<p/>
+-10- <i>Remarks</i>: [&hellip;]
+</blockquote>
+
+<pre>
+template&lt;class U&gt;
+  constexpr explicit(!is_convertible_v&lt;const U&amp;, T&amp;&gt;)
+  optional(const optional&lt;U&gt;&amp; rhs) noexcept(is_nothrow_constructible_v&lt;T&amp;, const U&amp;&gt;);
+</pre>
+<blockquote>
+<p/>
+-11- <i>Constraints</i>: [&hellip;]
+<p/>
+-12- <i>Effects</i>: Equivalent to:
+<pre>
+  if (rhs.has_value()) convert-ref-init-val(<del>*</del>rhs<ins>.operator*()</ins>);
+</pre>
+<p/>
+-13- <i>Remarks</i>: [&hellip;]
+</blockquote>
+
+<pre>
+template&lt;class U&gt;
+  constexpr explicit(!is_convertible_v&lt;U, T&amp;&gt;)
+  optional(optional&lt;U&gt;&amp;&amp; rhs) noexcept(is_nothrow_constructible_v&lt;T&amp;, U&gt;);
+</pre>
+<blockquote>
+<p/>
+-14- <i>Constraints</i>: [&hellip;]
+<p/>
+-15- <i>Effects</i>: Equivalent to:
+<pre>
+  if (rhs.has_value()) convert-ref-init-val(<del>*</del>std::move(rhs)<ins>.operator*()</ins>);
+</pre>
+<p/>
+-16- <i>Remarks</i>: [&hellip;]
+</blockquote>
+
+<pre>
+template&lt;class U&gt;
+  constexpr explicit(!is_convertible_v&lt;const U, T&amp;&gt;)
+  optional(const optional&lt;U&gt;&amp;&amp; rhs) noexcept(is_nothrow_constructible_v&lt;T&amp;, const U&gt;);
+</pre>
+<blockquote>
+<p/>
+-17- <i>Constraints</i>: [&hellip;]
+<p/>
+-18- <i>Effects</i>: Equivalent to:
+<pre>
+  if (rhs.has_value()) convert-ref-init-val(<del>*</del>std::move(rhs)<ins>.operator*()</ins>);
+</pre>
+<p/>
+-19- <i>Remarks</i>: [&hellip;]
+</blockquote>
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4230"><a href="#4230">4230</a><sup><a href="https://cplusplus.github.io/LWG/issue4230">(i)</a></sup>. <code>simd&lt;complex&gt;::real/imag</code> is overconstrained</h3>
+<p><b>Section:</b> 29.10.8.4 <a href="https://wg21.link/simd.complex.access">[simd.complex.access]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Matthias Kretz <b>Opened:</b> 2025-03-18 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>2
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+29.10.8.4 <a href="https://wg21.link/simd.complex.access">[simd.complex.access]</a> overconstrains the arguments to <code class='backtick'>real</code> and <code class='backtick'>imag</code>.
+<code>complex&lt;T&gt;::real/imag</code> allows conversions to <code class='backtick'>T</code> whereas <code>simd&lt;complex&lt;T&gt;&gt;</code>
+requires basically an exact match (<code>same_as&lt;simd&lt;T&gt;&gt;</code> modulo ABI tag differences).
+</p>
+<blockquote><pre>
+complex&lt;double&gt; c = {};
+c.real(1.f); // OK
+
+simd&lt;complex&lt;double&gt;&gt; sc = {};
+sc.real(simd&lt;float&gt;(1.f)); // <span style="color:red;font-weight:bolder">ill-formed, should be allowed</span>
+</pre></blockquote>
+<p>
+The design intent was to match the <code>std::complex&lt;T&gt;</code> interface. In which case
+the current wording doesn't match that intent. <code class='backtick'>complex</code> doesn't say <code>real(same_as&lt;T&gt; auto)</code> 
+but 'real(T)', which allows conversions.
+<p/>
+This issue is also present in the <code class='backtick'>basic_simd(real, imag)</code> constructor. It deduces the type for the 
+real/imag arguments instead of using a dependent type derived from <code class='backtick'>value_type</code> and ABI tag.
+</p>
+<blockquote><pre>
+// OK:
+complex&lt;double&gt; c{1., 1.f};
+
+// <span style="color:red;font-weight:bolder">Ill-formed, should be allowed</span>:
+simd&lt;complex&lt;double&gt;&gt; sc0(1., 1.);
+simd&lt;complex&lt;double&gt;, 4&gt; sc1(simd&lt;double, 4&gt;(1.), simd&lt;float, 4&gt;(1.f));
+</pre></blockquote>
+
+<p><i>[2025-06-13; Reflector poll]</i></p>
+
+<p>
+Set priority to 2 after reflector poll.
+</p>
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 29.10.7.1 <a href="https://wg21.link/simd.overview">[simd.overview]</a>, class template <code class='backtick'>basic_simd</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::datapar {
+  template&lt;class T, class Abi&gt; class basic_simd {
+  public:
+    using value_type = T;
+    using mask_type = basic_simd_mask&lt;sizeof(T), Abi&gt;;
+    using abi_type = Abi;
+    
+    <ins>using <i>real-type</i> = rebind_t&lt;typename T::value_type, basic_simd&gt; <i>// exposition-only</i></ins>
+    
+    <i>// 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a>, basic_simd constructors</i>   
+    [&hellip;]
+    <del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+      constexpr explicit(<i>see below</i>) basic_simd(const <ins><i>real-type</i></ins><del>V</del>&amp; reals, const <ins><i>real-type</i></ins><del>V</del>&amp; imags = {}) noexcept;
+    [&hellip;]
+    <i>// 29.10.8.4 <a href="https://wg21.link/simd.complex.access">[simd.complex.access]</a>, basic_simd complex-value accessors</i>
+    constexpr <ins><i>real-type</i></ins><del>auto</del> real() const noexcept;
+    constexpr <ins><i>real-type</i></ins><del>auto</del> imag() const noexcept;
+    <del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+      constexpr void real(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+    <del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+      constexpr void imag(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+<del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+  constexpr explicit(<i>see below</i>) basic_simd(const <ins><i>real-type</i></ins><del>V</del>&amp; reals, const <ins><i>real-type</i></ins><del>V</del>&amp; imags = {}) noexcept;
+</pre>
+<blockquote>
+<p>
+-19- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p><del>(19.1) &mdash;</del> <code><i>simd-complex</i>&lt;basic_simd&gt;</code> is modeled<ins>.</ins><del>, and</del></p></li>
+<li><p><del>(19.2) &mdash; <code class='backtick'>V::size() == size()</code> is <code class='backtick'>true</code>.</del></p></li>
+</ol>
+<p>
+[&hellip;]
+<p/>
+-21- <i>Remarks</i>: The expression inside <code class='backtick'>explicit</code> evaluates to <code class='backtick'>false</code> if and only if the 
+floating-point conversion rank of <code class='backtick'>T::value_type</code> is greater than or equal to the floating-point 
+conversion rank of <code><ins><i>real-type</i></ins><del>V</del>::value_type</code>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.8.4 <a href="https://wg21.link/simd.complex.access">[simd.complex.access]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <ins><i>real-type</i></ins><del>auto</del> real() const noexcept;
+constexpr <ins><i>real-type</i></ins><del>auto</del> imag() const noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Constraints</i>: <code><i>simd-complex</i>&lt;basic_simd&gt;</code> is modeled.
+<p/>
+-2- <i>Returns</i>: An object of type <code><ins><i>real-type</i></ins><del>rebind_t&lt;typename T::value_type, basic_simd&gt;</del></code> 
+where the <code><i>i</i></code><sup>th</sup> element is initialized to the result of 
+<code><i>cmplx-func</i>(operator[](<i>i</i>))</code> for all <code><i>i</i></code> in the range 
+<code class='backtick'>[0, size())</code>, where <code><i>cmplx-func</i></code> is the corresponding function from 
+<code>&lt;complex&gt;</code>.
+</p>
+</blockquote>
+<pre>
+<del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+  constexpr void real(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+<del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+  constexpr void imag(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+</pre>
+<blockquote>
+<p>
+-3- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p><del>(3.1) &mdash;</del> <code><i>simd-complex</i>&lt;basic_simd&gt;</code> is modeled<ins>.</ins><del>,</del></p></li>
+<li><p><del>(3.2) &mdash; <code>same_as&lt;typename V::value_type, typename T::value_type&gt;</code> is modeled, and</del></p></li>
+<li><p><del>(3.3) &mdash; <code class='backtick'>V::size() == size()</code> is <code class='backtick'>true</code>.</del></p></li>
+</ol>
+<p>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+</blockquote>
+
+<p><i>[2025-07-21; Matthias Kretz comments]</i></p>
+
+<p>
+The currently shown P/R says:
+</p>
+<blockquote><p>
+<i>Remarks</i>: The expression inside <code class='backtick'>explicit</code> evaluates to <code class='backtick'>false</code> if and only if
+the floating-point conversion rank of <code class='backtick'>T::value_type</code> is greater than or equal
+to the floating-point conversion rank of <code><i>real-type</i>::value_type</code>.
+</p></blockquote>
+<p>
+But, by construction, <code><i>real-type</i>::value_type</code> is the same as <code class='backtick'>T::value_type</code>. 
+So we get an elaborately worded <code class='backtick'>explicit(false)</code> here (which is correct).
+Consequently, the proposed resolution needs to strike <code class='backtick'>explicit(&lt;i&gt;see below&lt;/i&gt;)</code>
+from 29.10.7.1 <a href="https://wg21.link/simd.overview">[simd.overview]</a> and 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> and drop the Remarks paragraph (21).
+</p>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4230"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+
+<ol>
+
+<li><p>Modify 29.10.7.1 <a href="https://wg21.link/simd.overview">[simd.overview]</a>, class template <code class='backtick'>basic_vec</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;class T, class Abi&gt; class basic_vec {
+    <ins>using <i>real-type</i> = <i>see below</i>; <i>// exposition-only</i></ins>
+  public:
+    using value_type = T;
+    using mask_type = basic_mask&lt;sizeof(T), Abi&gt;;
+    using abi_type = Abi;
+    using iterator = <i>simd-iterator</i>&lt;basic_vec&gt;;
+    using const_iterator = <i>simd-iterator</i>&lt;const basic_vec&gt;;
+    
+    <i>// 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a>, basic_vec constructors</i>   
+    [&hellip;]
+    <del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+      constexpr <del>explicit(<i>see below</i>)</del> basic_vec(const <ins><i>real-type</i></ins><del>V</del>&amp; reals, const <ins><i>real-type</i></ins><del>V</del>&amp; imags = {}) noexcept;
+    [&hellip;]
+    <i>// 29.10.8.4 <a href="https://wg21.link/simd.complex.access">[simd.complex.access]</a>, basic_vec complex-value accessors</i>
+    constexpr <ins><i>real-type</i></ins><del>auto</del> real() const noexcept;
+    constexpr <ins><i>real-type</i></ins><del>auto</del> imag() const noexcept;
+    <del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+      constexpr void real(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+    <del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+      constexpr void imag(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+    [&hellip;]
+  };
+  [&hellip;]
+}
+</pre>
+<p>-2- <i>Recommended practice</i>: [&hellip;]</p>
+<blockquote>[<i>Note 1</i>: &hellip;]</blockquote>
+<p>-?- <ins>
+If <code class='backtick'>T</code> is a specialization of <code class='backtick'>complex</code>, <i><code class='backtick'>real-type</code></i> denotes the same type
+as <code>rebind_t&lt;typename T::value_type, basic_vec&lt;T, Abi&gt;&gt;</code>,
+otherwise an unspecified non-array object type.
+</ins>
+</p>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+<del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+  constexpr <del>explicit(<i>see below</i>)</del> 
+    basic_vec(const <ins><i>real-type</i></ins><del>V</del>&amp; reals, const <ins><i>real-type</i></ins><del>V</del>&amp; imags = {}) noexcept;
+</pre>
+<blockquote>
+<p>
+-19- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p><del>(19.1) &mdash;</del> <code><i>simd-complex</i>&lt;basic_vec&gt;</code> is modeled<ins>.</ins><del>, and</del></p></li>
+<li><p><del>(19.2) &mdash; <code class='backtick'>V::size() == size()</code> is <code class='backtick'>true</code>.</del></p></li>
+</ol>
+<p>
+[&hellip;]
+<p/>
+<del>-21- <i>Remarks</i>: The expression inside <code class='backtick'>explicit</code> evaluates to <code class='backtick'>false</code> if and only if the 
+floating-point conversion rank of <code class='backtick'>T::value_type</code> is greater than or equal to the floating-point 
+conversion rank of <code>V::value_type</code>.</del>
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.8.4 <a href="https://wg21.link/simd.complex.access">[simd.complex.access]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr <ins><i>real-type</i></ins><del>auto</del> real() const noexcept;
+constexpr <ins><i>real-type</i></ins><del>auto</del> imag() const noexcept;
+</pre>
+<blockquote>
+<p>
+-1- <i>Constraints</i>: <code><i>simd-complex</i>&lt;basic_vec&gt;</code> is modeled.
+<p/>
+-2- <i>Returns</i>: An object of type <code><ins><i>real-type</i></ins><del>rebind_t&lt;typename T::value_type, basic_vec&gt;</del></code> 
+where the <code><i>i</i></code><sup>th</sup> element is initialized to the result of 
+<code><i>cmplx-func</i>(operator[](<i>i</i>))</code> for all <code><i>i</i></code> in the range 
+<code class='backtick'>[0, size())</code>, where <code><i>cmplx-func</i></code> is the corresponding function from 
+<code>&lt;complex&gt;</code>.
+</p>
+</blockquote>
+<pre>
+<del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+  constexpr void real(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+<del>template&lt;<i>simd-floating-point</i> V&gt;</del>
+  constexpr void imag(const <ins><i>real-type</i></ins><del>V</del>&amp; v) noexcept;
+</pre>
+<blockquote>
+<p>
+-3- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p><del>(3.1) &mdash;</del> <code><i>simd-complex</i>&lt;basic_vec&gt;</code> is modeled<ins>.</ins><del>,</del></p></li>
+<li><p><del>(3.2) &mdash; <code>same_as&lt;typename V::value_type, typename T::value_type&gt;</code> is modeled, and</del></p></li>
+<li><p><del>(3.3) &mdash; <code class='backtick'>V::size() == size()</code> is <code class='backtick'>true</code>.</del></p></li>
+</ol>
+<p>
+[&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4251"><a href="#4251">4251</a><sup><a href="https://cplusplus.github.io/LWG/issue4251">(i)</a></sup>. Move assignment for <code class='backtick'>indirect</code> unnecessarily requires copy construction</h3>
+<p><b>Section:</b> 20.4.1.5 <a href="https://wg21.link/indirect.assign">[indirect.assign]</a>, 20.4.2.5 <a href="https://wg21.link/polymorphic.assign">[polymorphic.assign]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2025-05-01 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>1
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+The move assignment operator for <code class='backtick'>indirect</code> says:
+<blockquote>
+<i>Mandates</i>: <code>is_copy_constructible_t&lt;T&gt;</code> is <code class='backtick'>true</code>.
+</blockquote>
+
+However, the only way it ever construct an object is:
+<blockquote>
+constructs a new owned object with the owned object of <code class='backtick'>other</code> as the argument
+as an rvalue
+</blockquote>
+and that only ever happens when <code><i>alloc</i> == other.<i>alloc</i></code>
+is false.
+</p>
+<p>
+It seems like we should require <code class='backtick'>is_move_constructible_v</code> instead,
+and only if the allocator traits mean we need to construct an object.
+(Technically move-constructible might not be correct, because the allocator's
+<code class='backtick'>construct</code> member might use a different constructor).
+</p>
+<p>
+Additionally, the noexcept-specifier for the move assignment doesn't match
+the effects. The noexcept-specifier says it can't throw if POCMA is true,
+but nothing in the effects says that ownership can be transferred in that case;
+we only do a non-throwing transfer when the allocators are equal.
+I think we <i>should</i> transfer ownership when POCMA is true,
+which would make the noexcept-specifier correct.
+</p>
+
+<p><i>[2025-06-12; Reflector poll]</i></p>
+
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+Similar change needed for <code class='backtick'>std::polymorphic</code>.
+</p>
+
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N5008" title=" Working Draft, Programming Languages — C++">N5008</a>.
+</p>
+<ol>
+
+<li><p>Modify 20.4.1.5 <a href="https://wg21.link/indirect.assign">[indirect.assign]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+constexpr indirect&amp; operator=(indirect&amp;&amp; other)
+  noexcept(allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value ||
+           allocator_traits&lt;Allocator&gt;::is_always_equal::value);
+</code></pre>
+<blockquote>
+<p>
+-5- <i>Mandates</i>:
+<ins>
+If
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>false</code>
+and
+<code>allocator_traits&lt;Allocator&gt;::is_always_equal::value</code>
+is <code class='backtick'>false</code>,
+</ins>
+<code>is_<del>copy</del><ins>move</ins>_constructible_t&lt;T&gt;</code> is <code class='backtick'>true</code>.
+</p>
+<p>
+-6- <i>Effects</i>:
+If <code class='backtick'>addressof(other) == this</code> is <code class='backtick'>true</code>, there are no effects.
+Otherwise:
+<ol style="list-style-type:none">
+<li>(6.1) &mdash;
+The allocator needs updating if
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>true</code>.
+</li>
+<li>(6.2) &mdash;
+If <code class='backtick'>other</code> is valueless, <code class='backtick'>*this</code> becomes valueless<del> and the owned object
+in <code class='backtick'>*this</code>, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated</del>.
+</li>
+<li>(6.3) &mdash;
+Otherwise,
+<ins>if the allocator needs updating or</ins>
+if <code><i>alloc</i> == other.<i>alloc</i></code> is <code class='backtick'>true</code>,
+<del>
+swaps the owned objects in <code class='backtick'>*this</code> and <code class='backtick'>other</code>;
+the owned object in <code class='backtick'>other</code>, if any, is then destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated
+</del>
+<ins><code class='backtick'>*this</code> takes ownership of the owned object of <code class='backtick'>other</code></ins>.
+</li>
+<li>(6.4) &mdash;
+Otherwise, constructs a new owned object with the owned object of <code class='backtick'>other</code>
+as the argument as an rvalue, using either the allocator in <code class='backtick'>*this</code>
+or the allocator in <code class='backtick'>other</code> if the allocator needs updating.
+</li>
+<li>(6.5) &mdash;
+The previously owned object in <code class='backtick'>*this</code>, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated.
+</li>
+<li>(6.6) &mdash;
+If the allocator needs updating,
+the allocator in <code class='backtick'>*this</code> is replaced with a copy of the allocator in <code class='backtick'>other</code>.
+</li>
+</ol>
+</p>
+<p>-7- <i>Postcondition</i>: <code class='backtick'>other</code> is valueless.</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</blockquote>
+
+<p><i>[2025-11-03; Tomasz provides wording.]</i></p>
+
+
+<p><i>[Kona 2025-11-03; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4251"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+<ol>
+
+<li><p>Modify 20.4.1.5 <a href="https://wg21.link/indirect.assign">[indirect.assign]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+constexpr indirect&amp; operator=(indirect&amp;&amp; other)
+  noexcept(allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value ||
+           allocator_traits&lt;Allocator&gt;::is_always_equal::value);
+</code></pre>
+<blockquote>
+<p>
+-5- <i>Mandates</i>:
+<ins>
+If
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>false</code>
+and
+<code>allocator_traits&lt;Allocator&gt;::is_always_equal::value</code>
+is <code class='backtick'>false</code>,
+</ins>
+<code>is_<del>copy</del><ins>move</ins>_constructible_t&lt;T&gt;</code> is <code class='backtick'>true</code>.
+</p>
+<p>
+-6- <i>Effects</i>:
+If <code class='backtick'>addressof(other) == this</code> is <code class='backtick'>true</code>, there are no effects.
+Otherwise:
+<ol style="list-style-type:none">
+<li>(6.1) &mdash;
+The allocator needs updating if
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>true</code>.
+</li>
+<li>(6.2) &mdash;
+If <code class='backtick'>other</code> is valueless, <code class='backtick'>*this</code> becomes valueless<del> and the owned object
+in <code class='backtick'>*this</code>, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated</del>.
+</li>
+<li>(6.3) &mdash;
+Otherwise,
+<ins>if the allocator needs updating or</ins>
+if <code><i>alloc</i> == other.<i>alloc</i></code> is <code class='backtick'>true</code>,
+<del>
+swaps the owned objects in <code class='backtick'>*this</code> and <code class='backtick'>other</code>;
+the owned object in <code class='backtick'>other</code>, if any, is then destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated
+</del>
+<ins><code class='backtick'>*this</code> takes ownership of the owned object of <code class='backtick'>other</code></ins>.
+</li>
+<li>(6.4) &mdash;
+Otherwise, constructs a new owned object with the owned object of <code class='backtick'>other</code>
+as the argument as an rvalue, using <del>either</del> the allocator in <code class='backtick'>*this</code>
+<del>or the allocator in <code class='backtick'>other</code> if the allocator needs updating</del>.
+</li>
+<li>(6.5) &mdash;
+The previously owned object in <code class='backtick'>*this</code>, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated.
+</li>
+<li>(6.6) &mdash;
+If the allocator needs updating,
+the allocator in <code class='backtick'>*this</code> is replaced with a copy of the allocator in <code class='backtick'>other</code>.
+</li>
+</ol>
+</p>
+<p>-7- <i>Postcondition</i>: <code class='backtick'>other</code> is valueless.</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 20.4.2.5 <a href="https://wg21.link/polymorphic.assign">[polymorphic.assign]</a> as indicated:</p>
+<blockquote>
+<pre><code>
+constexpr polymorphic&amp; operator=(polymorphic&amp;&amp; other)
+  noexcept(allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value ||
+           allocator_traits&lt;Allocator&gt;::is_always_equal::value);
+</code></pre>
+<blockquote>
+<p>
+-5- <i>Mandates</i>:
+If
+<ins>
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>false</code>
+and
+</ins>
+<code>allocator_traits&lt;Allocator&gt;::is_always_equal::value</code>
+is <code class='backtick'>false</code>,
+<code class='backtick'>T</code> is complete type.
+</p>
+<p>
+-6- <i>Effects</i>:
+If <code class='backtick'>addressof(other) == this</code> is <code class='backtick'>true</code>, there are no effects.
+Otherwise:
+<ol style="list-style-type:none">
+<li>(6.1) &mdash;
+The allocator needs updating if
+<code>allocator_traits&lt;Allocator&gt;::propagate_on_container_move_assignment::value</code>
+is <code class='backtick'>true</code>.
+</li>
+<li><ins>(6.?) &mdash; If <code class='backtick'>other</code> is valueless, <code class='backtick'>*this</code> becomes valueless.</ins></li>
+<li>(6.2) &mdash;
+<ins>Otherwise, if the allocator needs updating or</ins><del>If</del>
+<code><i>alloc</i> == other.<i>alloc</i></code> is <code class='backtick'>true</code>,
+<del>
+swaps the owned objects in <code class='backtick'>*this</code> and <code class='backtick'>other</code>;
+the owned object in <code class='backtick'>other</code>, if any, is then destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated
+</del>
+<ins><code class='backtick'>*this</code> takes ownership of the owned object of <code class='backtick'>other</code></ins>.
+</li>
+<li>(6.3) &mdash;
+<del>Otherwise, if <code class='backtick'>alloc != other.alloc</code> is <code class='backtick'>true</code>; if <code class='backtick'>other</code> is not valueless, 
+a new owned object is constructed in <code class='backtick'>*this</code> using <code>allocator_traits::construct</code>
+with the owned object from</del>
+<ins>Otherwise, constructs a new owned object with the owned object of</ins>
+<code class='backtick'>other</code> as the argument as an rvalue, using <del>either</del> the allocator in <code class='backtick'>*this</code>
+<del>or the allocator in <code class='backtick'>other</code> if the allocator needs updating</del>.
+</li>
+<li>(6.4) &mdash;
+The previously owned object in <code class='backtick'>*this</code>, if any, is destroyed using
+<code>allocator_traits&lt;Allocator&gt;::destroy</code>
+and then the storage is deallocated.
+</li>
+<li>(6.5) &mdash;
+If the allocator needs updating,
+the allocator in <code class='backtick'>*this</code> is replaced with a copy of the allocator in <code class='backtick'>other</code>.
+</li>
+</ol>
+</p>
+[&hellip;]
+</blockquote>
+</blockquote>
+</li>
+
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4304"><a href="#4304">4304</a><sup><a href="https://cplusplus.github.io/LWG/issue4304">(i)</a></sup>. <code>std::optional&lt;<i>NonReturnable</i>&amp;&gt;</code> is ill-formed due to <code class='backtick'>value_or</code></h3>
+<p><b>Section:</b> 22.5.4.6 <a href="https://wg21.link/optional.ref.observe">[optional.ref.observe]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Jiang An <b>Opened:</b> 2025-07-25 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>1
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+Currently, if <code class='backtick'>T</code> is an array type or a function type, instantiation of <code>std::optional&lt;T&amp;&gt;</code> 
+is still ill-formed, because the return type of its <code class='backtick'>value_or</code> member function is specified as 
+<code>remove_cv_t&lt;T&gt;</code>, which is invalid as a return type.
+<p/>
+However, we don't exclude such <code>T&amp;</code> from valid contained types. Given only <code class='backtick'>value_or</code> is 
+problematic here, perhaps we can avoid providing it if <code class='backtick'>T</code> is not returnable.
+</p>
+
+<p><i>[2025-10-16; Reflector poll]</i></p>
+
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+Why not just add <i>Constraints</i>: and use <code>decay_t&lt;T&gt;</code>
+for the return type, instead of "not always present" which is currently
+only used for member types, not member functions.
+</p>
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 22.5.4.1 <a href="https://wg21.link/optional.optional.ref.general">[optional.optional.ref.general]</a>, header <code>&lt;iterator&gt;</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std {
+  template&lt;class T&gt;
+  class optional&lt;T&amp;&gt; {
+    [&hellip;]
+    constexpr T&amp; value() const; // freestanding-deleted
+    template&lt;class U = remove_cv_t&lt;T&gt;&gt;
+      constexpr remove_cv_t&lt;T&gt; value_or(U&amp;&amp; u) const; <ins>// <i>not always present</i></ins>
+    [&hellip;]
+  };
+}
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 22.5.4.6 <a href="https://wg21.link/optional.ref.observe">[optional.ref.observe]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U = remove_cv_t&lt;T&gt;&gt; constexpr remove_cv_t&lt;T&gt; value_or(U&amp;&amp; u) const;
+</pre>
+<blockquote>
+<p>
+-8- Let <code class='backtick'>X</code> be <code>remove_cv_t&lt;T&gt;</code>.
+<p/>
+-9- <i>Mandates</i>: <code>is_constructible_v&lt;X, T&amp;&gt; &amp;&amp; is_convertible_v&lt;U, X&gt;</code> is <code class='backtick'>true</code>.
+<p/>
+-10- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? *<i>val</i> : static_cast&lt;X&gt;(std::forward&lt;U&gt;(u));
+</pre></blockquote>
+<p>
+<ins>-?- <i>Remarks</i>: This function template is present if and only if <code class='backtick'>T</code> is a non-array object type.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</blockquote>
+
+<p><i>[2025-10-16; Jonathan provides new wording]</i></p>
+
+
+
+<p><i>[Kona 2025-11-03; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4304"><b>Proposed resolution:</b></p>
+
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 22.5.4.6 <a href="https://wg21.link/optional.ref.observe">[optional.ref.observe]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U = remove_cv_t&lt;T&gt;&gt; constexpr remove_cv_t&lt;T&gt; value_or(U&amp;&amp; u) const;
+</pre>
+<blockquote>
+<p>
+<ins>
+-?- <i>Constraints</i>:
+<code class='backtick'>T</code> is a non-array object type.
+</ins>
+</p>
+<p>
+-8- Let <code class='backtick'>X</code> be <code>remove_cv_t&lt;T&gt;</code>.
+<p/>
+-9- <i>Mandates</i>: <code>is_constructible_v&lt;X, T&amp;&gt; &amp;&amp; is_convertible_v&lt;U, X&gt;</code> is <code class='backtick'>true</code>.
+<p/>
+-10- <i>Effects</i>: Equivalent to:
+</p>
+<blockquote><pre>
+return has_value() ? *<i>val</i> : static_cast&lt;X&gt;(std::forward&lt;U&gt;(u));
+</pre></blockquote>
+<p>
+<ins>
+-?- <i>Remarks</i>:
+The return type is unspecified if <code class='backtick'>T</code> is an array type or a non-object type.
+[<i>Note ?</i>: This is to avoid the declaration being ill-formed.
+<i>&mdash; end note</i>]
+</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4376"><a href="#4376">4376</a><sup><a href="https://cplusplus.github.io/LWG/issue4376">(i)</a></sup>. ABI tag in return type of [simd.mask.unary] is overconstrained</h3>
+<p><b>Section:</b> 29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Matthias Kretz <b>Opened:</b> 2025-09-15 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>1
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#simd.mask.unary">active issues</a> in [simd.mask.unary].</p>
+<p><b>View all other</b> <a href="lwg-index.html#simd.mask.unary">issues</a> in [simd.mask.unary].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/873">DE 298</a></b>
+<p>
+29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> spells out the return type with the ABI tag of 
+the <code class='backtick'>basic_mask</code> specialization. That's problematic / overconstrained.
+</p>
+<ol>
+<li><p>Consider Intel SandyBridge/IvyBridge-like targets:
+</p>
+<blockquote><pre>
+vec&lt;float&gt;::size() -&gt; 8
+vec&lt;int&gt;::size() -&gt; 4
+mask&lt;float&gt;::size() -&gt; 8
+</pre></blockquote>
+<p>
+The ABI tag in this case encodes for <code>vec&lt;float&gt;</code> that one object holds 8
+elements and is passed via <em>one</em> register. <code>vec&lt;int&gt;</code> uses a 
+different ABI tag that says 4 elements passed via <em>one</em> register. 
+<code>vec&lt;int, 8&gt;</code>'s ABI tag says 8 elements passed via <em>two</em> registers.
+<p/>
+Now what should <code>+mask&lt;float&gt;()</code> return? The working draft says it must 
+return a <code>basic_vec&lt;int, mask&lt;float&gt;::abi_type&gt;</code>. And 
+<code>mask&lt;float&gt;::abi_type</code> is constrained to be the same as 
+<code>vec&lt;float&gt;::abi_type</code>. The working draft thus makes it
+impossible to implement ABI tags that encode number of elements + number of
+registers (+ bit-masks vs. vector-masks, but that's irrelevant for this
+issue). Instead, an ABI tag would have to encode the native SIMD width of all
+vectorizable types. And that's unnecessarily making compatible types
+incompatible. Also we make it harder to add to the set of vectorizable types
+in the future.</p></li>
+<li><p>The issue is even worse for an implementation that implements
+<code>vec&lt;complex&lt;T&gt;&gt;</code> using different ABI tags. Encoding 
+whether the value-type is complex into the ABI is useful because it impacts 
+how the mask is stored (<code>mask&lt;complex&lt;float&gt;, 8&gt;</code> is 
+internally stored as a 16-element bit-mask (for interleaved <code class='backtick'>complex</code>), while 
+<code>mask&lt;double, 8&gt;</code> is stored as an 8-element bit-mask). The ABI 
+tag can also be used to implement interleaved vs. contiguous storage, which 
+is useful for different architectures. If we require 
+<code>+mask&lt;complex&lt;float&gt;&gt;()</code> to be of a different type than 
+any <code>vec&lt;long long&gt;</code> would ever be, that's just brittle and 
+unnecessary template bloat.</p></li>
+</ol>
+
+<p><i>[2025-10-17; Reflector poll.]</i></p>
+
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+"Should be addressed together with <a href="lwg-active.html#4238" title="simd_mask&lt;complex&lt;double&gt;&gt;::operator+/-/~ return a disabled simd specialization (Status: New)">4238</a><sup><a href="https://cplusplus.github.io/LWG/issue4238" title="Latest snapshot">(i)</a></sup>."
+</p>
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<blockquote class="note">
+<p>
+[<i>Drafting note:</i> LWG <a href="lwg-active.html#4238" title="simd_mask&lt;complex&lt;double&gt;&gt;::operator+/-/~ return a disabled simd specialization (Status: New)">4238</a><sup><a href="https://cplusplus.github.io/LWG/issue4238" title="Latest snapshot">(i)</a></sup> is closely related.]
+</p>
+</blockquote>
+
+<ol>
+
+<li><p>Modify 29.10.2 <a href="https://wg21.link/simd.expos">[simd.expos]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+using <i>simd-size-type</i> = <i>see below</i>;                      // <i>exposition only</i>
+template&lt;size_t Bytes&gt; using <i>integer-from</i> = <i>see below</i>; // <i>exposition only</i>
+
+template&lt;class T, class Abi&gt;
+  constexpr <i>simd-size-type</i> <i>simd-size-v</i> = <i>see below</i>;               // <i>exposition only</i>
+template&lt;class T&gt; constexpr size_t <i>mask-element-size</i> = <i>see below</i>; // <i>exposition only</i>
+
+<ins>template &lt;size_t Bytes, class Abi&gt;
+  using <i>simd-vec-from-mask-t</i> = <i>see below</i>;                         // <i>exposition only</i></ins>
+[&hellip;]
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify 29.10.2.1 <a href="https://wg21.link/simd.expos.defn">[simd.expos.defn]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T&gt; constexpr size_t <i>mask-element-size</i> = <i>see below</i>; // <i>exposition only</i>
+</pre>
+<blockquote>
+<p>
+-4- <code><i>mask-element-size</i>&lt;basic_mask&lt;Bytes, Abi&gt;&gt;</code> has the value <code class='backtick'>Bytes</code>.
+</p>
+</blockquote>
+<pre>
+<ins>template &lt;size_t Bytes, class Abi&gt;
+  using <i>simd-vec-from-mask-t</i> = <i>see below</i>;</ins>
+</pre>
+<blockquote>
+<p>
+<ins>-?- <code><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</code> is an alias for an enabled 
+specialization of <code class='backtick'>basic_vec</code> if and only if <code>basic_mask&lt;Bytes, Abi&gt;</code> is a 
+data-parallel type and <code><i>integer-from</i>&lt;Bytes&gt;</code> is valid and a vectorizable type.</ins>
+<p/>
+<ins>-?- <code><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;::size() == basic_mask&lt;Bytes, Abi&gt;::size()</code>
+is <code class='backtick'>true</code>.</ins>
+<p/>
+<ins>-?- <code>typename <i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;::value_type</code> is 
+<code><i>integer-from</i>&lt;Bytes&gt;</code></ins>
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+<li><p>Modify 29.10.9.1 <a href="https://wg21.link/simd.mask.overview">[simd.mask.overview]</a>, class template <code class='backtick'>basic_mask overview</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;size_t Bytes, class Abi&gt; class basic_mask {
+  public:
+    [&hellip;]
+    // <i>29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a>, basic_mask unary operators</i>
+    constexpr basic_mask operator!() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator+() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator-() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator~() const noexcept;    
+    [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify 29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr basic_mask operator!() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator+() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator-() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>simd-vec-from-mask-t</i>&lt;Bytes, Abi&gt;</ins> operator~() const noexcept;    
+</pre>
+<blockquote>
+<p>
+-1- Let <code><i>op</i></code> be the operator.
+<p/>
+-2- <i>Returns</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+
+</li>
+
+</ol></blockquote>
+
+<p><i>[2025-11-04; Matthias Kretz provides new wording]</i></p>
+
+<p>
+This also resolves <a href="lwg-active.html#4238" title="simd_mask&lt;complex&lt;double&gt;&gt;::operator+/-/~ return a disabled simd specialization (Status: New)">4238</a><sup><a href="https://cplusplus.github.io/LWG/issue4238" title="Latest snapshot">(i)</a></sup> and addresses 
+<a href="https://github.com/cplusplus/nbballot/issues/872">DE 297</a>.
+</p>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4376"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 29.10.9.1 <a href="https://wg21.link/simd.mask.overview">[simd.mask.overview]</a>, class template <code class='backtick'>basic_mask overview</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+namespace std::simd {
+  template&lt;size_t Bytes, class Abi&gt; class basic_mask {
+  public:
+    [&hellip;]
+    // <i>29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a>, basic_mask unary operators</i>
+    constexpr basic_mask operator!() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>see below</i></ins> operator+() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>see below</i></ins> operator-() const noexcept;
+    constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>see below</i></ins> operator~() const noexcept;
+    [&hellip;]
+}
+</pre>
+</blockquote>
+
+</li>
+
+<li><p>Modify 29.10.9.4 <a href="https://wg21.link/simd.mask.unary">[simd.mask.unary]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+constexpr basic_mask operator!() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>see below</i></ins> operator+() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>see below</i></ins> operator-() const noexcept;
+constexpr <del>basic_vec&lt;<i>integer-from</i>&lt;Bytes&gt;, Abi&gt;</del><ins><i>see below</i></ins> operator~() const noexcept;
+</pre>
+<blockquote>
+<p>
+-1- Let <code><i>op</i></code> be the operator.
+<p/>
+-2- <i>Returns</i>: A data-parallel object where the <i>i</i>-th element is initialized to the
+results of applying <code><i>op</i></code> to <code>operator[](<i>i</i>)</code> for all <i>i</i> in the
+range of [0, <code>size()</code>).
+<p/>
+<ins>-?- <i>Remarks</i>: If there exists a vectorizable signed integer type <code>I</code> such that
+<code>sizeof(I) == Bytes</code> is <code class='backtick'>true</code>, <code>operator+</code>, <code>operator-</code>, and <code>operator~</code>
+return an enabled specialization <code>R</code> of <code>basic_vec</code> such that <code>R::value_type</code>
+denotes <code><i>integer-from</i>&lt;Bytes&gt;</code> and <code>R::size() == size()</code> is <code>true</code>.
+Otherwise, these operators are defined as deleted and their return types are unspecified.</ins>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4420"><a href="#4420">4420</a><sup><a href="https://cplusplus.github.io/LWG/issue4420">(i)</a></sup>. &sect;[simd] conversions (constructor, load, stores, gather, and scatter) are
+incorrectly constrained for <code>&lt;stdfloat&gt;</code> types</h3>
+<p><b>Section:</b> 29.10 <a href="https://wg21.link/simd">[simd]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Matthias Kretz <b>Opened:</b> 2025-10-15 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>1
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#simd">active issues</a> in [simd].</p>
+<p><b>View all other</b> <a href="lwg-index.html#simd">issues</a> in [simd].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<p>
+<b>Addresses DE-288 and DE-285</b>
+<p/>
+29.10.8.7 <a href="https://wg21.link/simd.loadstore">[simd.loadstore]</a> <code class='backtick'>unchecked_store</code> and <code class='backtick'>partial_store</code> are constrained with
+<code class='backtick'>indirectly_writable</code> in such a way that <code class='backtick'>basic_vec</code>'s <code class='backtick'>value_type</code> must satisfy
+<code>convertible_to&lt;<i>range value-type</i>&gt;</code>. But that is not the case, 
+e.g. for <code>float &rarr; float16_t</code> or <code>double &rarr; float32_t</code>. However, 
+if <code class='backtick'>simd::flag_convert</code> is passed, these conversions were intended to work. The 
+implementation thus must <code class='backtick'>static_cast</code> the <code class='backtick'>basic_vec</code> values to the range's value-type 
+before storing to the range.
+<p/>
+<code>unchecked_store(vec&lt;float&gt;, span&lt;complex&lt;float16_t&gt;&gt;, flag_convert)</code> 
+does not work for a different reason. The <code>complex(const float16_t&amp;, const float16_t&amp;)</code>
+constructor simply does not allow construction from <code class='backtick'>float</code>, irrespective of
+using implicit or explicit conversion. The only valid conversion from <code>float &rarr;
+complex&lt;float16_t&gt;</code> is via an extra step through <code>complex&lt;float16_t&gt;::value_type</code>. 
+This issue considers it a defect of <code class='backtick'>complex</code> that an explicit conversion from 
+<code>float &rarr; complex&lt;float16_t&gt;</code> is ill-formed and therefore no workaround/special 
+case is introduced.
+<p/>
+Conversely, the conversion constructor in 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> does not reject
+conversion from <code>vec&lt;complex&lt;float&gt;, 4&gt;</code> to <code>vec&lt;float, 4&gt;</code>. 
+I.e. <code>convertible_to&lt;vec&lt;complex&lt;float&gt;, 4&gt;, vec&lt;float, 4&gt;&gt;</code> 
+is <code class='backtick'>true</code>, which is a lie. This is NB comment DE-288. However, the NB comment's proposed 
+resolution is too strict, in that it would disallow conversion from <code class='backtick'>float</code> to <code class='backtick'>float16_t</code>.
+<p/>
+The conversion/load from static-sized range constructor in 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> has a
+similar problem:
+</p>
+<blockquote><p>
+<code>convertible_to&lt;array&lt;std::string, 4&gt;, vec&lt;int, 4&gt;&gt;</code> is <code class='backtick'>true</code>
+</p></blockquote>
+<p>
+but when fixing this
+</p>
+<blockquote><pre>
+vec&lt;float16_t, 4&gt;(array&lt;float, 4&gt;, flag_convert)
+</pre></blockquote>
+<p>
+must continue to be valid.
+<p/>
+<code class='backtick'>unchecked_load</code> and <code class='backtick'>partial_load</code> in 29.10.8.7 <a href="https://wg21.link/simd.loadstore">[simd.loadstore]</a> currently <i>Mandate</i> 
+the range's value-type to be vectorizable, but converting loads from <code>complex&lt;float&gt;</code> 
+to <code class='backtick'>float</code> are not covered. It is unclear what a conversion from <code>complex&lt;float&gt;</code> 
+to <code class='backtick'>float</code> should do, so it needs to be added (again without breaking <code>float &rarr; float16_t</code>).
+<p/>
+29.10.8.11 <a href="https://wg21.link/simd.permute.memory">[simd.permute.memory]</a> is analogous to 29.10.8.7 <a href="https://wg21.link/simd.loadstore">[simd.loadstore]</a> and needs 
+equivalent constraints.
+<p/>
+29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> p2 requires <code>constructible_from&lt;U&gt;</code>, which makes explicit
+construction of <code>vec&lt;float16_t&gt;</code> from <code class='backtick'>float</code> ill-formed. For consistency this
+should also be constrained with <code><i>explicitly-convertible-to</i></code>.
+</p>
+
+<p><i>[2025-10-22; Reflector poll.]</i></p>
+
+<p>
+Set priority to 1 after reflector poll.
+</p>
+<p>
+We also need to update <i>Effects</i>. There are more places in 29.10 <a href="https://wg21.link/simd">[simd]</a>
+where <code>float</code> to <code>float16_t</code> and similar conversion are not supported.
+</p>
+<p>
+It was pointed out that similar issues happen for <code>complex&lt;float16_t&gt;</code>.
+There seem to be mismatch between language initialization rules and the intended
+usage based on library API.
+</p>
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+<li><p>In 29.10.3 <a href="https://wg21.link/simd.syn">[simd.syn]</a> and 29.10.8.7 <a href="https://wg21.link/simd.loadstore">[simd.loadstore]</a> replace all occurrences of</p>
+<blockquote><pre>
+indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;
+</pre></blockquote>
+<p>
+with
+</p>
+<blockquote><pre>
+indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, <del>T</del><ins>ranges::range_value_t&lt;R&gt;</ins>&gt;
+</pre></blockquote>
+<p>
+and all occurrences of
+</p>
+<blockquote><pre>
+indirectly_writable&lt;I, T&gt;
+</pre></blockquote>
+<p>
+with
+</p>
+<blockquote><pre>
+indirectly_writable&lt;I, <del>T</del><ins>iter_value_t&lt;I&gt;</ins>&gt;
+</pre></blockquote>
+
+</li>
+
+<li><p>Modify 29.10.8.7 <a href="https://wg21.link/simd.loadstore">[simd.loadstore]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; &amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r, flags&lt;Flags...&gt; f = {});
+[&hellip;]
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  requires indirectly_writable&lt;I, T&gt;
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-11- Let [&hellip;]
+<p/>
+<ins>-?- <i>Constraints</i>: The expression <code>static_cast&lt;ranges::range_value_t&lt;R&gt;&gt;(x)</code>
+where <code class='backtick'>x</code> is an object of type <code class='backtick'>T</code> is well-formed.</ins>
+<p/>
+-12- <i>Mandates</i>: If <code class='backtick'>ranges::size(r)</code> is a constant expression then 
+<code>ranges::size(r) &ge; <i>simd-size-v</i>&lt;T, Abi&gt;</code>.
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; &amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r, flags&lt;Flags...&gt; f = {});
+[&hellip;]
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  requires indirectly_writable&lt;I, T&gt;
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-15- Let [&hellip;]
+<p/>
+<ins>-?- <i>Constraints</i>: The expression <code>static_cast&lt;iter_value_t&lt;I&gt;&gt;(x)</code>
+where <code class='backtick'>x</code> is an object of type <code class='backtick'>T</code> is well-formed.</ins>
+<p/>
+-16- <i>Mandates</i>: [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+</blockquote>
+
+<p><i>[2025-10-22; Matthias Kretz improves discussion and provides new wording]</i></p>
+
+
+<p><i>[Kona 2025-11-04; Also resolves LWG <a href="lwg-active.html#4393" title="simd::unchecked_scatter_to is underconstrained (Status: New)">4393</a><sup><a href="https://cplusplus.github.io/LWG/issue4393" title="Latest snapshot">(i)</a></sup>.]</i></p>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+
+<p id="res-4420"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+<li><p>Modify 29.10.2 <a href="https://wg21.link/simd.expos">[simd.expos]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+
+template&lt;class T&gt;
+  concept <i>constexpr-wrapper-like</i> =                   <i>// exposition only</i>
+    [&hellip;]
+    bool_constant&lt;static_cast&lt;decltype(T::value)&gt;(T()) == T::value&gt;::value;
+    
+<ins>template&lt;class From, class To&gt;
+  concept <i>explicitly-convertible-to</i> =                <i>// exposition-only</i>
+    requires {
+      static_cast&lt;To&gt;(declval&lt;From&gt;());
+    };</ins>
+
+template&lt;class T&gt; using <i>deduced-vec-t</i> = <i>see below</i>; <i>// exposition only</i>
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.3 <a href="https://wg21.link/simd.syn">[simd.syn]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.7.2 <a href="https://wg21.link/simd.ctor">[simd.ctor]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class U&gt; constexpr explicit(<i>see below</i>) basic_vec(U&amp;&amp; value) noexcept;
+</pre>
+<blockquote>
+<p>
+-1- Let <code class='backtick'>From</code> denote the type <code>remove_cvref_t&lt;U&gt;</code>.
+<p/>
+-2- <i>Constraints</i>: <code><del>value_type</del><ins>U</ins></code> satisfies 
+<code><del>constructible_from&lt;U&gt;</del><ins><i>explicitly-convertible-to</i>&lt;value_type&gt;</ins></code>.
+</p>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;class U, class UAbi&gt;
+  constexpr explicit(<i>see below</i>) basic_vec(const basic_vec&lt;U, UAbi&gt;&amp; x) noexcept;
+</pre>
+<blockquote>
+<p>
+-5- <i>Constraints</i>: 
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<ins>(5.1) &mdash;</ins> <code><i>simd-size-v</i>&lt;U, UAbi&gt; == size()</code> is <code class='backtick'>true</code><ins>, and</ins>
+</p></li>
+<li><p>
+<ins>(5.2) &mdash; <code class='backtick'>U</code> satisfies <code><i>explicitly-convertible-to</i>&lt;T&gt;</code></ins>.
+</p></li>
+</ol>
+[&hellip;]
+</blockquote>
+<pre>
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, flags&lt;Flags...&gt; = {});
+template&lt;class R, class... Flags&gt;
+  constexpr basic_vec(R&amp;&amp; r, const mask_type&amp; mask, flags&lt;Flags...&gt; = {});
+</pre>
+<blockquote>
+<p>
+-12- Let <code class='backtick'>mask</code> be <code class='backtick'>mask_type(true)</code> for the overload with no <code class='backtick'>mask</code> parameter.
+<p/>
+-13- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(13.1) &mdash; <code class='backtick'>R</code> models <code class='backtick'>ranges::contiguous_range</code> and <code class='backtick'>ranges::sized_range</code>,
+</p></li>
+<li><p>
+(13.2) &mdash; <code class='backtick'>ranges::size(r)</code> is a constant expression, <del>and</del>
+</p></li>
+<li><p>
+(13.3) &mdash; <code class='backtick'>ranges::size(r)</code> is equal to <code class='backtick'>size()</code><ins>, and</ins>
+</p></li>
+<li><p>
+<ins>(13.?) &mdash; <code>ranges::range_value_t&lt;R&gt;</code> is a vectorizable type and satisfies
+<code><i>explicitly-convertible-to</i>&lt;T&gt;</code></ins>.
+</p></li>
+</ol>
+<p>
+-14- <i>Mandates</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<del>(14.1) &mdash; <code>ranges::range_value_t&lt;R&gt;</code> is a vectorizable type, and</del>
+</p></li>
+<li><p>
+<del>(14.2) &mdash; if</del><ins>If</ins> the template parameter pack <code class='backtick'>Flags</code> does not contain 
+<code><i>convert-flag</i></code>, then the conversion from <code>ranges::range_value_t&lt;R&gt;</code> 
+to <code class='backtick'>value_type</code> is value-preserving.
+</p></li>
+</ol>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.8.7 <a href="https://wg21.link/simd.loadstore">[simd.loadstore]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class V = see below , ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_load(R&amp;&amp; r, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_load(R&amp;&amp; r, const typename V::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, class... Flags&gt;
+  constexpr V partial_load(I first, iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, class... Flags&gt;
+  constexpr V partial_load(I first, iter_difference_t&lt;I&gt; n, const typename V::mask_type&amp; mask,
+                           flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  constexpr V partial_load(I first, S last, flags&lt;Flags...&gt; f = {});
+template&lt;class V = see below , contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  constexpr V partial_load(I first, S last, const typename V::mask_type&amp; mask,
+                           flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-6- Let
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(6.1) &mdash; <code>mask</code> be <code>V::mask_type(true)</code> for the overloads with no <code>mask</code> parameter;
+</p></li>
+<li><p>
+(6.2) &mdash; <code>R</code> be <code>span&lt;const iter_value_t&lt;I&gt;&gt;</code> for the overloads with no template parameter <code>R</code>;
+</p></li>
+<li><p>
+(6.3) &mdash; <code>r</code> be <code>R(first, n)</code> for the overloads with an <code>n</code> parameter and <code>R(first, last)</code> for the overloads with a <code>last</code> parameter<del>.</del><ins>;</ins>
+</p></li>
+<li><p>
+<ins>(6.?) &mdash; <code>T</code> be <code>typename V::value_type</code>.</ins>
+</p></li>
+</ol>
+<p>
+-7- <i>Mandates</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+(7.1) &mdash; <code>ranges::range_value_t&lt;R&gt;</code> is a vectorizable type <ins>and satisfies
+<code><i>explicitly-convertible-to</i>&lt;T&gt;</code></ins>,
+</p></li>
+<li><p>
+(7.2) &mdash; <code>same_as&lt;remove_cvref_t&lt;V&gt;, V&gt;</code> is <code class='backtick'>true</code>,
+</p></li>
+<li><p>
+(7.3) &mdash; <code class='backtick'>V</code> is an enabled specialization of <code class='backtick'>basic_vec</code>, and
+</p></li>
+<li><p>
+(7.4) &mdash; if the template parameter pack <code class='backtick'>Flags</code> does not contain <code><i>convert-flag</i></code>, 
+then the conversion from <code>ranges::range_value_t&lt;R&gt;</code> to <code class='backtick'>V::value_type</code> is value-preserving.
+</p></li>
+</ol>
+</blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first,
+                                 iter_difference_t&lt;I&gt; n, const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void unchecked_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                                 const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-11- Let [&hellip;]
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, ranges::contiguous_range R, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt; <del>&amp;&amp; indirectly_writable&lt;ranges::iterator_t&lt;R&gt;, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, R&amp;&amp; r,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(
+    const basic_vec&lt;T, Abi&gt;&amp; v, I first, iter_difference_t&lt;I&gt; n,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+                               flags&lt;Flags...&gt; f = {});
+template&lt;class T, class Abi, contiguous_iterator I, sized_sentinel_for&lt;I&gt; S, class... Flags&gt;
+  <del>requires indirectly_writable&lt;I, T&gt;</del>
+  constexpr void partial_store(const basic_vec&lt;T, Abi&gt;&amp; v, I first, S last,
+    const typename basic_vec&lt;T, Abi&gt;::mask_type&amp; mask, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-15- Let [&hellip;]
+<p/>
+<ins>-?- <i>Constraints</i>:</ins>
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<ins>(?.1) &mdash; <code>ranges::iterator_t&lt;R&gt;</code> models
+<code>indirectly_writable&lt;ranges::range_value_t&lt;R&gt;&gt;</code>, and</ins>
+</p></li>
+<li><p>
+<ins>(?.2) &mdash; <code class='backtick'>T</code> satisfies <code><i>explicitly-convertible-to</i>&lt;ranges::range_value_t&lt;R&gt;&gt;</code></ins>
+</p></li>
+</ol>
+<p>
+-16- <i>Mandates</i>: [&hellip;]
+<p/>
+-17- <i>Preconditions</i>: [&hellip;]
+<p/>
+-18- <i>Effects</i>: For all <code><i>i</i></code> in the range of <code>[0, basic_vec&lt;T, Abi&gt;::size())</code>, 
+if <code>mask[<i>i</i>] &amp;&amp; <i>i</i> &lt; ranges::size(r)</code> is <code class='backtick'>true</code>, evaluates 
+<code>ranges::data(r)[<i>i</i>] = <ins>static_cast&lt;ranges::range_value_t&lt;R&gt;&gt;(</ins>v[<i>i</i>]<ins>)</ins></code>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+
+<li><p>Modify 29.10.8.11 <a href="https://wg21.link/simd.permute.memory">[simd.permute.memory]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+template&lt;class V = <i>see below</i>, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_gather_from(R&amp;&amp; in, const I&amp; indices, flags&lt;Flags...&gt; f = {});
+template&lt;class V = <i>see below</i>, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr V partial_gather_from(R&amp;&amp; in, const typename I::mask_type&amp; mask,
+                                  const I&amp; indices, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-5- Let: [&hellip;] 
+<p/>
+<ins>-?- <i>Constraints:</i> <code>ranges::range_value_t&lt;R&gt;</code> is a vectorizable type and
+satisfies <code><i>explicitly-convertible-to</i>&lt;T&gt;</code>.</ins>
+</p>
+<p>
+-6- <i>Mandates</i>: [&hellip;] 
+<p/>
+[&hellip;]
+</p>
+</blockquote>
+<pre>
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr void
+  partial_scatter_to(const V&amp; v, R&amp;&amp; out, const I&amp; indices, flags&lt;Flags...&gt; f = {});
+template&lt;<i>simd-vec-type</i> V, ranges::contiguous_range R, <i>simd-integral</i> I, class... Flags&gt;
+  requires ranges::sized_range&lt;R&gt;
+  constexpr void partial_scatter_to(const V&amp; v, R&amp;&amp; out, const typename I::mask_type&amp; mask,
+                                    const I&amp; indices, flags&lt;Flags...&gt; f = {});
+</pre>
+<blockquote>
+<p>
+-13- Let <code class='backtick'>mask</code> be <code class='backtick'>I::mask_type(true)</code> for the overload with no <code class='backtick'>mask</code> parameter.
+<p/>
+-14- <i>Constraints</i>:
+</p>
+<ol style="list-style-type: none">
+<li><p>
+<ins>(14.1) &mdash;</ins> <code class='backtick'>V::size() == I::size()</code> is <code class='backtick'>true</code><ins>,</ins>
+</p></li>
+<li><p>
+<ins>(14.2) &mdash; <code>ranges::iterator_t&lt;R&gt;</code> models
+<code>indirectly_writable&lt;ranges::range_value_t&lt;R&gt;&gt;</code>, and</ins> 
+</p></li>
+<li><p>
+<ins>(14.3) &mdash; <code class='backtick'>typename V::value_type</code> satisfies 
+<code><i>explicitly-convertible-to</i>&lt;ranges::range_value_t&lt;R&gt;&gt;</code></ins>.
+</p></li>
+</ol>
+[&hellip;]
+<p>
+-17- <i>Effects</i>: For all <i>i</i> in the range [<code>0</code>, <code>I::size()</code>), if <code>mask[<i>i</i>] 
+&amp;&amp; (indices[<i>i</i>] &lt; ranges::size(out))</code> is <code>true</code>, evaluates 
+<code>ranges::data(out)[indices[<i>i</i>]] = <ins>static_cast&lt;ranges::range_value_t&lt;R&gt;&gt;(</ins>v[<i>i</i>]<ins>)</ins></code>.
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4424"><a href="#4424">4424</a><sup><a href="https://cplusplus.github.io/LWG/issue4424">(i)</a></sup>. <code class='backtick'>meta::define_aggregate</code> should require a class type</h3>
+<p><b>Section:</b> 21.4.16 <a href="https://wg21.link/meta.reflection.define.aggregate">[meta.reflection.define.aggregate]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Jakub Jelinek <b>Opened:</b> 2025-10-20 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>1
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#meta.reflection.define.aggregate">active issues</a> in [meta.reflection.define.aggregate].</p>
+<p><b>View all other</b> <a href="lwg-index.html#meta.reflection.define.aggregate">issues</a> in [meta.reflection.define.aggregate].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/757">US 125-188</a></b>
+<p>
+The <code class='backtick'>meta::define_aggregate</code> function doesn't say what happens if <i>C</i>
+does not represent a class type.
+</p>
+<p>It's also unclear whether it should work
+with aliases to class types, e.g.
+<pre>struct S; using A = S; ... meta::define_aggregate(^^A, {});</pre>
+</p>
+<p>
+And what happens if you try to define a cv-qualified type:
+<pre>struct S; meta::define_aggregate(^^const S, {});</pre>
+Should this be an error, or inject a definition of the unqualified type?
+</p>
+
+<p><i>[2025-10-23; Reflector poll.]</i></p>
+
+<p>
+Set priority to 1 after reflector poll.
+</p>
+
+<p><i>[Kona 2025-11-03; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+	
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.16 <a href="https://wg21.link/meta.reflection.define.aggregate">[meta.reflection.define.aggregate]</a> as indicated:</p>
+
+<blockquote>
+<p>-7-
+Let <i>C</i> be the class represented by 
+<code><ins>dealias(</ins>class_type<ins>)</ins></code>
+and <i>r<sub>K</sub></i> be the <i>K</i><sup>th</sup> reflection value
+in <code class='backtick'>mdescrs</code>.
+For every <i>r<sub>K</sub></i> in <code class='backtick'>mdescrs</code>,
+let (<i>T<sub>K</sub></i>, <i>N<sub>K</sub></i>, <i>A<sub>K</sub></i>,
+<i>W<sub>K</sub></i>, <i>NUA<sub>K</sub></i>)
+be the corresponding data member description represented by
+<i>r<sub>K</sub></i>.
+</p>
+<p>-8- <i>Constant when</i>:
+<ul style="list-style-type: none">
+<li><ins>(8.?) &mdash;
+<code class='backtick'>dealias(class_type)</code> represents a class type;
+</ins>
+</li>
+<li>(8.1) &mdash;
+<i>C</i> is incomplete from every point in the evaluation context;
+</li>
+</ul>
+</p>
+</blockquote>
+</li>
+</ol>
+</blockquote>
+
+<p><i>[2025-10-24; LWG telecon. Jonathan updates wording]</i></p>
+
+<p>Make a minimal change for now, can add support for aliases later.</p>
+
+
+
+<p id="res-4424"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.16 <a href="https://wg21.link/meta.reflection.define.aggregate">[meta.reflection.define.aggregate]</a> as indicated:</p>
+
+<blockquote>
+<p>-7-
+Let <i>C</i> be the <del>class</del> <ins>type</ins> represented by
+<code>class_type</code>
+and <i>r<sub>K</sub></i> be the <i>K</i><sup>th</sup> reflection value
+in <code class='backtick'>mdescrs</code>.
+For every <i>r<sub>K</sub></i> in <code class='backtick'>mdescrs</code>,
+let (<i>T<sub>K</sub></i>, <i>N<sub>K</sub></i>, <i>A<sub>K</sub></i>,
+<i>W<sub>K</sub></i>, <i>NUA<sub>K</sub></i>)
+be the corresponding data member description represented by
+<i>r<sub>K</sub></i>.
+</p>
+<p>-8- <i>Constant when</i>:
+<ul style="list-style-type: none">
+<li><ins>(8.?) &mdash;
+<code class='backtick'>class_type</code> represents a cv-unqualified class type;
+</ins>
+</li>
+<li>(8.1) &mdash;
+<i>C</i> is incomplete from every point in the evaluation context;
+</li>
+</ul>
+</p>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+<hr>
+<h3 id="4427"><a href="#4427">4427</a><sup><a href="https://cplusplus.github.io/LWG/issue4427">(i)</a></sup>. <code class='backtick'>meta::dealias</code> needs to work with things that aren't entities</h3>
+<p><b>Section:</b> 21.4.7 <a href="https://wg21.link/meta.reflection.queries">[meta.reflection.queries]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Jonathan Wakely <b>Opened:</b> 2025-10-24 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#meta.reflection.queries">active issues</a> in [meta.reflection.queries].</p>
+<p><b>View all other</b> <a href="lwg-index.html#meta.reflection.queries">issues</a> in [meta.reflection.queries].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses US 99-205</b>
+<p>
+Several uses of <code class='backtick'>dealias</code> assume that it can be used with reflections that
+represent direct base class relationships, which are not entities.
+The spec for <code class='backtick'>dealias</code> says that such uses should fail with an exception.
+</p>
+<p>
+In the 2025-10-24 LWG telecon it was agreed that <code class='backtick'>dealias</code> should just
+be the identity function for non-entities.
+</p>
+
+<p><i>[Kona 2025-11-03; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4427"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.7 <a href="https://wg21.link/meta.reflection.queries">[meta.reflection.queries]</a> as indicated:</p>
+
+<blockquote>
+<pre>consteval info dealias(info r);</pre>
+<blockquote>
+<p>-49- <i>Returns</i>:
+<ins>If <code class='backtick'>r</code> represents an entity, then a</ins>
+<del>A</del>
+reflection representing the underlying entity of what <code class='backtick'>r</code> represents.
+<ins>Otherwise, <code class='backtick'>r</code>.</ins>
+</p>
+<p>[<i>Example 5</i>: <br/>
+... <br/>
+<i>&mdash; end example</i>]
+</p>
+<p><del>-50- <i>Throws</i>:
+<code class='backtick'>meta::exception</code> unless <code class='backtick'>r</code> represents an entity.
+</del>
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4429"><a href="#4429">4429</a><sup><a href="https://cplusplus.github.io/LWG/issue4429">(i)</a></sup>. <code>meta::alignment_of</code> should exclude data member description of bit-field</h3>
+<p><b>Section:</b> 21.4.11 <a href="https://wg21.link/meta.reflection.layout">[meta.reflection.layout]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tomasz Kamiński <b>Opened:</b> 2025-10-24 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/988">US 109-170</a></b>
+<p>
+21.4.11 <a href="https://wg21.link/meta.reflection.layout">[meta.reflection.layout]</a> p#8
+This should similarly disallow data member descriptions of bit-fields.
+</p>
+<p><i>[Kona 2025-11-03; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4429"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.11 <a href="https://wg21.link/meta.reflection.layout">[meta.reflection.layout]</a> as indicated:</p>
+
+<pre>
+consteval size_t alignment_of(info r);	
+</pre>
+<blockquote>
+<p>-7- <i>Returns</i>: [&hellip;]
+</p>
+<p>-8- <i>Throws</i>: <code class='backtick'>meta::exception</code> unless all of the following conditions are met:
+<ul style="list-style-type: none">
+<li>(8.1) &mdash;
+<code class='backtick'>dealias(r)</code> is a reflection of a type, object, variable of non-reference type,
+non-static data member that is not a bit-field, direct base class relationship,
+or data member description <ins><i>(T,N,A,W,NUA)</i> (11.4.1 <a href="https://wg21.link/class.mem.general">[class.mem.general]</a>)
+where <i>W</i> is ⊥.</ins>.
+</li>
+<li>(8.2) &mdash;
+If <code class='backtick'>dealias(r)</code> represents a type, then <code class='backtick'>is_complete_type(r)</code> is true.
+</li>
+</ul>
+</p>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4432"><a href="#4432">4432</a><sup><a href="https://cplusplus.github.io/LWG/issue4432">(i)</a></sup>. Clarify element initialization for <code>meta::reflect_constant_array</code></h3>
+<p><b>Section:</b> 21.4.3 <a href="https://wg21.link/meta.define.static">[meta.define.static]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tomasz Kamiński <b>Opened:</b> 2025-10-27 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/750">US 120-181</a> and <a href="https://github.com/cplusplus/nbballot/issues/751">US 121-182</a></b>
+<p>
+21.4.15 <a href="https://wg21.link/meta.reflection.array">[meta.reflection.array]</a> p10 Clarify <i>e<sub>i</sub></i> type.
+It is not clear what <i>e<sub>i</sub></i> is when proxy references are involved.
+</p>
+<p>
+21.4.15 <a href="https://wg21.link/meta.reflection.array">[meta.reflection.array]</a> Clarify copy-initialization vs. direct-initialization use
+The initialization of <code>P</code> uses copy-initialization but the Mandates clause uses direct-initialization.
+</p>
+
+<p><strong>Previous resolution [SUPERSEDED]:</strong></p>
+<blockquote class="note">
+
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.3 <a href="https://wg21.link/meta.define.static">[meta.define.static]</a> as indicated:</p>
+
+<pre>
+template&lt;ranges::input_range R&gt;
+  consteval info reflect_constant_array(R&amp;&amp; r);
+</pre>
+<blockquote>
+<p>-8- Let <code>T</code> be <code>ranges::range_value_t&lt;R&gt;</code>.</p>
+<p>-9- <i>Mandates</i>:
+  <code>T</code> is a structural type (13.2 <a href="https://wg21.link/temp.param">[temp.param]</a>),
+  <code>is_constructible_v&lt;T, ranges::range_reference_t&lt;R&gt;&gt;</code> is <code>true</code>, and
+  <del><code>is_copy_constructible_v&lt;T&gt;</code> is <code>true</code></del>
+  <ins><code>T</code> satisfies <code>copy_constructible</code></ins>.</p>
+<p>-10- Let <code>V</code> be the pack of values of type info of the same size as <code>r</code>,
+where the <i>i<sup>th</sup></i> element is
+<code>reflect_constant(<del><i>e<sub>i</sub></i></del><ins>static_cast&lt;T&gt;(*<i>it<sub>i</sub></i>)</ins>)</code>,
+where <i><del>e<sub>i</sub></del><ins>it<sub>i</sub></ins></i> is <ins>an iterator to</ins> the <i>i<sup>th</sup></i> element of <code>r</code>.
+</p>
+<p>[&hellip;]</p>
+</blockquote>
+</li>
+</ol>
+
+</blockquote>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4432"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.3 <a href="https://wg21.link/meta.define.static">[meta.define.static]</a> as indicated:</p>
+
+<pre>
+template&lt;ranges::input_range R&gt;
+  consteval info reflect_constant_array(R&amp;&amp; r);
+</pre>
+<blockquote>
+<p>-8- Let <code>T</code> be <code>ranges::range_value_t&lt;R&gt;</code>
+<ins>and <i>e<sub>i</sub></i> be <code>static_cast&lt;T&gt;(*<i>it<sub>i</sub></i>)</code>,
+where <i>it<sub>i</sub></i> is an iterator to the <i>i<sup>th</sup></i> element of <code class='backtick'>r</code></ins>.
+</p>
+<p>-9- <i>Mandates</i>:
+  <code>T</code> is a structural type (13.2 <a href="https://wg21.link/temp.param">[temp.param]</a>),
+  <code>is_constructible_v&lt;T, ranges::range_reference_t&lt;R&gt;&gt;</code> is <code>true</code>, and
+  <del><code>is_copy_constructible_v&lt;T&gt;</code> is <code>true</code></del>
+  <ins><code>T</code> satisfies <code>copy_constructible</code></ins>.</p>
+<p>-10- Let <code>V</code> be the pack of values of type <code class='backtick'>info</code> of the same size as <code>r</code>,
+where the <i>i<sup>th</sup></i> element is <code>reflect_constant(<i>e<sub>i</sub></i>)</code><del>,
+where <i>e<sub>i</sub></i> is an iterator to the <i>i<sup>th</sup></i> element of <code>r</code></del>.
+</p>
+<p>[&hellip;]</p>
+<p>-13- Throws: <ins>Any exception thrown by the evaluation of any <i>e<sub>i</sub></i>, or</ins>
+<code class='backtick'>meta::exception</code> <del>unless</del><ins>if evaluation of any</ins> <code>reflect_constant(<del>e</del><ins><i>e<sub>i</sub></i></ins>)</code>
+<ins>would exit via an exception</ins>
+<del>is a constant subexpression for every element <code class='backtick'>e</code> of <code class='backtick'>r</code></del>.</p>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
+
+
+<hr>
+<h3 id="4433"><a href="#4433">4433</a><sup><a href="https://cplusplus.github.io/LWG/issue4433">(i)</a></sup>. Incorrect query for C language linkage</h3>
+<p><b>Section:</b> 21.4.7 <a href="https://wg21.link/meta.reflection.queries">[meta.reflection.queries]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tomasz Kamiński <b>Opened:</b> 2025-10-27 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#meta.reflection.queries">active issues</a> in [meta.reflection.queries].</p>
+<p><b>View all other</b> <a href="lwg-index.html#meta.reflection.queries">issues</a> in [meta.reflection.queries].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses US <a href="https://github.com/cplusplus/nbballot/issues/772">97-203</a></b>
+<p>
+21.4.7 <a href="https://wg21.link/meta.reflection.queries">[meta.reflection.queries]</a>
+Language linkage is a property of functions, variables, and function types (6.7 <a href="https://wg21.link/basic.link">[basic.link]</a>),
+not of names.
+</p>
+<p><i>[
+The wording below contains a drive-by fix for a misapplication of <a href="https://wg21.link/P2996R13" title=" Reflection for C++26">P2996R13</a>
+]</i></p>
+
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4433"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.7 <a href="https://wg21.link/meta.reflection.queries">[meta.reflection.queries]</a> as indicated:</p>
+
+<pre>
+consteval bool has_internal_linkage(info r);
+consteval bool has_module_linkage(info r);
+consteval bool has_external_linkage(info r);
+<del>consteval bool has_c_language_linkage(info r);</del>
+consteval bool has_linkage(info r);
+</pre>
+<blockquote>
+<p>-25- <i>Returns</i>: <code class='backtick'>true</code> if <code class='backtick'>r</code> represents a variable, function, type, template, or namespace
+whose name has internal linkage, module linkage, <del>C language</del><ins>external</ins> linkage, or any linkage,
+respectively (6.7 <a href="https://wg21.link/basic.link">[basic.link]</a>). Otherwise, <code class='backtick'>false</code>.</p>
+</blockquote>
+
+<pre>
+<ins>consteval bool has_c_language_linkage(info r);</ins>
+</pre>
+<blockquote>
+<p><ins>-??- <i>Returns</i>: <code class='backtick'>true</code> if <code class='backtick'>r</code> represents a variable, function, or function type with C language
+linkage. Otherwise, <code class='backtick'>false</code>.</ins></p>
+</blockquote>
+
+</li>
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4440"><a href="#4440">4440</a><sup><a href="https://cplusplus.github.io/LWG/issue4440">(i)</a></sup>. Forward declarations of entities need also in entries</h3>
+<p><b>Section:</b> 17.3.2 <a href="https://wg21.link/version.syn">[version.syn]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tomasz Kamiński <b>Opened:</b> 2025-11-03 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#version.syn">active issues</a> in [version.syn].</p>
+<p><b>View all other</b> <a href="lwg-index.html#version.syn">issues</a> in [version.syn].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses US 65-116</b>
+<p>
+There are forward declarations of entities from <code>&lt;spanstream&gt;</code> and
+<code>&lt;syncstream&gt;</code> in <code>&lt;iosfwd&gt;</code> so their feature macros
+should be added to that header too. Proposed change: Add <code>&lt;iosfwd&gt;</code>
+to the "also in" entries for <code class='backtick'>__cpp_lib_char8_t</code>, <code class='backtick'>__cpp_lib_spanstream</code>, and
+<code class='backtick'>__cpp_lib_syncbuf</code>.
+</p>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4440"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 17.3.2 <a href="https://wg21.link/version.syn">[version.syn]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+#define __cpp_lib_char8_t                           201907L
+  // freestanding, also in &lt;atomic&gt;, &lt;filesystem&gt;, <ins>&lt;iosfwd&gt;,</ins> &lt;istream&gt;, &lt;limits&gt;, &lt;locale&gt;, &lt;ostream&gt;, &lt;string&gt;,
+  // &lt;string_view&gt;
+[&hellip;]
+#define __cpp_lib_spanstream                        202106L // also in <ins>&lt;iosfwd&gt;,</ins> &lt;spanstream&gt;
+[&hellip;]
+#define __cpp_lib_syncbuf                           201803L // also in <ins>&lt;iosfwd&gt;,</ins> &lt;syncstream&gt;
+</pre>
+</blockquote>
+</li>
+
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4441"><a href="#4441">4441</a><sup><a href="https://cplusplus.github.io/LWG/issue4441">(i)</a></sup>. <code>ranges::rotate</code> do not handle sized-but-not-sized-sentinel ranges correctly</h3>
+<p><b>Section:</b> 26.7.11 <a href="https://wg21.link/alg.rotate">[alg.rotate]</a>, 26.8.2.3 <a href="https://wg21.link/partial.sort">[partial.sort]</a>, 26.8.3 <a href="https://wg21.link/alg.nth.element">[alg.nth.element]</a>, 26.8.6 <a href="https://wg21.link/alg.merge">[alg.merge]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tomasz Kamiński <b>Opened:</b> 2025-11-03 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all other</b> <a href="lwg-index.html#alg.rotate">issues</a> in [alg.rotate].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses US 161-258</b>
+<p>These do not handle sized-but-not-sized-sentinel ranges correctly.</p>
+
+<p><i>[Kona 2025-11-03; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4441"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 26.7.11 <a href="https://wg21.link/alg.rotate">[alg.rotate]</a> as indicated:</p>
+
+<pre>
+template&lt;execution-policy Ep, <i>sized-random-access-range</i> R&gt;
+  requires permutable&lt;iterator_t&lt;R&gt;&gt;
+  borrowed_subrange_t&lt;R&gt; ranges::rotate(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; middle);
+
+</pre>
+<blockquote>
+<p>-6- <i>Effects</i> Equivalent to:
+<code>return ranges::rotate(std::forward&lt;Ep&gt;(exec), ranges::begin(r), middle,
+<del>ranges::end(r)</del><ins>ranges::begin(r) + ranges::distance(r)</ins>);</code>
+</p>
+</blockquote>
+
+[&hellip;]
+
+<pre>
+template&lt;execution-policy Ep, <i>sized-random-access-range</i> R, <i>sized-random-access-range</i> OutR&gt;
+  requires indirectly_copyable&lt;iterator_t&lt;R&gt;, iterator_t&lt;OutR&gt;&gt;
+  ranges::rotate_copy_truncated_result&lt;borrowed_iterator_t&lt;R&gt;, borrowed_iterator_t&lt;OutR&gt;&gt;
+	  ranges::rotate_copy(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; middle, OutR&amp;&amp; result_r);
+</pre>
+<blockquote>
+<p>-18- <i>Effects</i> Equivalent to:
+<code>return ranges::rotate(std::forward&lt;Ep&gt;(exec), ranges::begin(r), middle,
+<del>ranges::end(r)</del><ins>ranges::begin(r) + ranges::distance(r)</ins>,
+ranges::begin(result_r), <del>ranges::end(result_r)</del><ins>ranges::begin(result_r) + ranges::distance(result_r)</ins>);</code>
+</p>
+</blockquote>
+
+</li>
+
+<li><p>Modify 26.8.2.3 <a href="https://wg21.link/partial.sort">[partial.sort]</a> as indicated:</p>
+
+<pre>
+template&lt;execution-policy Ep, <i>sized-random-access-range</i> R,
+         class Comp = ranges::less, class Proj = identity&gt;
+  requires sortable&lt;iterator_t&lt;R&gt;, Comp, Proj&gt;
+  borrowed_iterator_t&lt;R&gt;
+    ranges::partial_sort(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; middle, Comp comp = {},
+                         Proj proj = {});
+</pre>
+<blockquote>
+<p>-7- <i>Effects</i> Equivalent to:
+<code>return ranges::partial_sort(std::forward&lt;Ep&gt;(exec), ranges::begin(r), middle,
+<del>ranges::end(r)</del><ins>ranges::begin(r) + ranges::distance(r)</ins>, comp, proj);</code>
+</p>
+</blockquote>
+
+</li>
+
+<li><p>Modify 26.8.3 <a href="https://wg21.link/alg.nth.element">[alg.nth.element]</a> as indicated:</p>
+
+<pre>
+template&lt;execution-policy Ep, <i>sized-random-access-range</i> R, class Comp = ranges::less,
+         class Proj = identity&gt;
+  requires sortable&lt;iterator_t&lt;R&gt;, Comp, Proj&gt;
+  borrowed_iterator_t&lt;R&gt;
+    ranges::nth_element(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; nth, Comp comp = {}, Proj proj = {});
+</pre>
+<blockquote>
+<p>-7- <i>Effects</i> Equivalent to:
+<code>return ranges::nth_element(std::forward&lt;Ep&gt;(exec), ranges::begin(r), nth,
+<del>ranges::end(r)</del><ins>ranges::begin(r) + ranges::distance(r)</ins>, comp, proj);</code>
+</p>
+</blockquote>
+
+</li>
+
+<li><p>Modify 26.8.6 <a href="https://wg21.link/alg.merge">[alg.merge]</a> as indicated:</p>
+
+<pre>
+template&lt;execution-policy Ep, <i>sized-random-access-range</i> R, class Comp = ranges::less,
+         class Proj = identity&gt;
+  requires sortable&lt;iterator_t&lt;R&gt;, Comp, Proj&gt;
+  borrowed_iterator_t&lt;R&gt;
+    ranges::inplace_merge(Ep&amp;&amp; exec, R&amp;&amp; r, iterator_t&lt;R&gt; middle, Comp comp = {},
+                          Proj proj = {});
+</pre>
+<blockquote>
+<p>-14- <i>Effects</i> Equivalent to:
+<code>return ranges::inplace_merge(std::forward&lt;Ep&gt;(exec), ranges::begin(r), middle,
+<del>ranges::end(r)</del><ins>ranges::begin(r) + ranges::distance(r)</ins>, comp, proj);</code>
+</p>
+</blockquote>
+
+</li>
+
+
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4442"><a href="#4442">4442</a><sup><a href="https://cplusplus.github.io/LWG/issue4442">(i)</a></sup>. Clarify <code class='backtick'>expr</code> and <code class='backtick'>fn</code> for <code class='backtick'>meta::reflect_object</code> and <code class='backtick'>meta::reflect_function</code></h3>
+<p><b>Section:</b> 21.4.14 <a href="https://wg21.link/meta.reflection.result">[meta.reflection.result]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tomasz Kamiński <b>Opened:</b> 2025-11-04 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/748">US 118-179</a></b>
+<p>This should talk about the object/function designated by <code class='backtick'>expr</code>/<code class='backtick'>fn</code>, rather than <code class='backtick'>expr</code>/<code class='backtick'>fn</code>.</p>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4442"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.14 <a href="https://wg21.link/meta.reflection.result">[meta.reflection.result]</a> as indicated:</p>
+
+<pre>
+template&lt;class T&gt;
+  consteval info reflect_object(T&amp; expr);
+</pre>
+<blockquote>
+<p>-7- <i>Mandates</i>: <code class='backtick'>T</code> is an object type.</p>
+<p>-8- <i>Returns</i>: A reflection of the object designated by <code class='backtick'>expr</code>.</p>
+<p>-9- <i>Throws</i>: <code class='backtick'>meta::exception</code>
+<del>unless <code class='backtick'>expr</code> is</del>
+<ins>if <code class='backtick'>E</code> is not</ins>
+suitable for use as a constant template argument
+for a constant template parameter of type <code>T&amp;</code> (13.4.3 <a href="https://wg21.link/temp.arg.nontype">[temp.arg.nontype]</a>)
+<ins>, where <code class='backtick'>E</code> is an lvalue constant expression that computes the object that <code class='backtick'>expr</code> refers to</ins>.</p>
+</blockquote>
+
+<pre>
+template&lt;class T&gt;
+  consteval info reflect_function(T&amp; fn);
+</pre>
+<blockquote>
+<p>-10- <i>Mandates</i>: <code class='backtick'>T</code> is an function type.</p>
+<p>-11- <i>Returns</i>: A reflection of the function designated by <code class='backtick'>fn</code>.</p>
+<p>-12- <i>Throws</i>: <code class='backtick'>meta::exception</code>
+<del>unless <code class='backtick'>fn</code> is</del>
+<ins>if <code class='backtick'>F</code> is not</ins>
+suitable for use as a constant template argument
+for a constant template parameter of type <code>T&amp;</code> (13.4.3 <a href="https://wg21.link/temp.arg.nontype">[temp.arg.nontype]</a>)
+<ins>, where <code class='backtick'>F</code> is an lvalue constant expression that computes the function that <code class='backtick'>fn</code> refers to</ins>.</p>
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4443"><a href="#4443">4443</a><sup><a href="https://cplusplus.github.io/LWG/issue4443">(i)</a></sup>. Clean up identifier comparisons in <code class='backtick'>meta::define_aggregate</code></h3>
+<p><b>Section:</b> 21.4.16 <a href="https://wg21.link/meta.reflection.define.aggregate">[meta.reflection.define.aggregate]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tomasz Kamiński <b>Opened:</b> 2025-11-04 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#meta.reflection.define.aggregate">active issues</a> in [meta.reflection.define.aggregate].</p>
+<p><b>View all other</b> <a href="lwg-index.html#meta.reflection.define.aggregate">issues</a> in [meta.reflection.define.aggregate].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/759">US 127-190</a></b>
+<p><i>N<sub>K</sub></i> is defined as an identifier (see 11.4.1) and should not be compared with
+code or with string literals in bullet 8.4. Similarly, 9.5.1 should not talk about
+“character sequence encoded by <i>N<sub>K</sub></i>”</p>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4443"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 21.4.16 <a href="https://wg21.link/meta.reflection.define.aggregate">[meta.reflection.define.aggregate]</a> as indicated:</p>
+
+<pre>
+template&lt;reflection_range R = initializer_list&lt;info&gt;&gt;
+  consteval info define_aggregate(info class_type, R&amp;&amp; mdescrs);
+</pre>
+<blockquote>
+<p>-7- [&hellip;]</p>
+<p>-8- <i>Constant When</i>:<ul>
+<li>-8.1- [&hellip;]</li>
+<li>-8.2- [&hellip;]</li>
+<li>-8.3- [&hellip;]</li>
+<li>-8.4- for every pair (<i>r<sub>K</sub></i>, <i>r<sub>L</sub></i>) where
+<i>K&lt;L</i>, if <i>N<sub>K</sub></i> is not ⊥ and N<sub>L</sub> is not ⊥, then either:
+<ul>
+  <li>-8.4.1- <del><i>N<sub>K</sub></i><code> != </code><i>N<sub>L</sub></i> is <code class='backtick'>true</code></del>
+  <ins><i>N<sub>K</sub></i> is not the same identifier as <i>N<sub>L</sub></i></ins> or</li>
+  <li>-8.4.2- <del><i>N<sub>K</sub></i><code> == u8"_" </code> is <code class='backtick'>true</code></del>
+  <ins><i>N<sub>K</sub></i> is the identifier <code class='backtick'>_</code> (<span style="font-variant: small-caps">u+005f low line</span>)</ins>.
+  </li>
+</ul></li>
+</ul></p>
+<p>-9- <i>Effects</i>: Produces an injected declaration <i>D</i> (7.7 <a href="https://wg21.link/expr.const">[expr.const]</a>)
+that defines <i>C</i> and has properties as follows: <ul>
+<li>-9.1- [&hellip;]</li>
+<li>-9.2- [&hellip;]</li>
+<li>-9.3- [&hellip;]</li>
+<li>-9.4- [&hellip;]</li>
+<li>-9.5- for every <i>r<sub>K</sub></i>, there is corresponding entity <i>M<sub>K</sub></i>
+belonging to the class scope of <i>D</i> with the following properties:
+<i>K&lt;L</i>, if <i>N<sub>K</sub></i> is not ⊥ and N<sub>L</sub> is not ⊥, then either:
+<ul>
+  <li>-9.5.1- if <i>N<sub>K</sub></i> is ⊥, <i>M<sub>K</sub></i> is an unnamed bit-field.
+  Otherwise, <i>M<sub>K</sub></i> is a non-static data member whose name is the identifier
+  <del>determined by the character sequence encoded by</del> <i>N<sub>K</sub></i><del> in UTF-8</del>.</li>
+  <li>-9.5.2- [&hellip;]</li>
+  <li>-9.5.3- [&hellip;]</li>
+  <li>-9.5.4- [&hellip;]</li>
+  <li>-9.5.5- [&hellip;]</li>
+</ul></li>
+<li>-9.6- [&hellip;]</li>
+</ul></p>
+</blockquote>
+
+</li>
+
+</ol>
+
+
+
+
+
+
+<hr>
+<h3 id="4444"><a href="#4444">4444</a><sup><a href="https://cplusplus.github.io/LWG/issue4444">(i)</a></sup>. Fix default template arguments for <code class='backtick'>ranges::replace</code> and <code class='backtick'>ranges::replace_if</code></h3>
+<p><b>Section:</b> 26.7.5 <a href="https://wg21.link/alg.replace">[alg.replace]</a>, 26.4 <a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a> <b>Status:</b> <a href="lwg-active.html#Immediate">Immediate</a>
+ <b>Submitter:</b> Tim Song <b>Opened:</b> 2025-11-04 <b>Last modified:</b> 2025-11-04</p>
+<p><b>Priority: </b>Not Prioritized
+</p>
+<p><b>View other</b> <a href="lwg-index-open.html#alg.replace">active issues</a> in [alg.replace].</p>
+<p><b>View all other</b> <a href="lwg-index.html#alg.replace">issues</a> in [alg.replace].</p>
+<p><b>View all issues with</b> <a href="lwg-status.html#Immediate">Immediate</a> status.</p>
+<p><b>Discussion:</b></p>
+<b>Addresses <a href="https://github.com/cplusplus/nbballot/issues/834">US 159-259</a></b>
+<p>The default template argument for the type of the new value in 
+<code class='backtick'>ranges::replace</code> and <code class='backtick'>ranges::replace_if</code> should not have projections applied.</p>
+
+<p><i>[Kona 2025-11-04; approved by LWG. Status changed: New &rarr; Immediate.]</i></p>
+
+
+
+<p id="res-4444"><b>Proposed resolution:</b></p>
+<p>
+This wording is relative to <a href="https://wg21.link/N5014">N5014</a>.
+</p>
+
+<ol>
+
+<li><p>Modify 26.4 <a href="https://wg21.link/algorithm.syn">[algorithm.syn]</a>, header <code>&lt;algorithm&gt;</code> synopsis, as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+  namespace ranges {
+    template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class Proj = identity,
+             class T1 = projected_value_t&lt;I, Proj&gt;, class T2 = <del>T1</del><ins>iter_value_t&lt;I&gt;</ins>&gt;
+      requires indirectly_writable&lt;I, const T2&amp;&gt; &amp;&amp;
+               indirect_binary_predicate&lt;ranges::equal_to, projected&lt;I, Proj&gt;, const T1*&gt;
+      constexpr I
+        replace(I first, S last, const T1&amp; old_value, const T2&amp; new_value, Proj proj = {});
+    template&lt;input_range R, class Proj = identity,
+             class T1 = projected_value_t&lt;iterator_t&lt;R&gt;, Proj&gt;, class T2 = <del>T1</del><ins>range_value_t&lt;R&gt;</ins>&gt;
+      requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T2&amp;&gt; &amp;&amp;
+               indirect_binary_predicate&lt;ranges::equal_to,
+                                         projected&lt;iterator_t&lt;R&gt;, Proj&gt;, const T1*&gt;
+      constexpr borrowed_iterator_t&lt;R&gt;
+        replace(R&amp;&amp; r, const T1&amp; old_value, const T2&amp; new_value, Proj proj = {});
+
+    template&lt;<i>execution-policy</i> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S,
+             class Proj = identity, class T1 = projected_value_t&lt;I, Proj&gt;, class T2 = <del>T1</del><ins>iter_value_t&lt;I&gt;</ins>&gt;
+      requires indirectly_writable&lt;I, const T2&amp;&gt; &amp;&amp;
+               indirect_binary_predicate&lt;ranges::equal_to, projected&lt;I, Proj&gt;, const T1*&gt;
+      I replace(Ep&amp;&amp; exec, I first, S last,
+                const T1&amp; old_value, const T2&amp; new_value, Proj proj = {});  // <i>freestanding-deleted</i>
+    template&lt;<i>execution-policy</i> Ep, <i>sized-random-access-range</i> R, class Proj = identity,
+             class T1 = projected_value_t&lt;iterator_t&lt;R&gt;, Proj&gt;, class T2 = <del>T1</del><ins>range_value_t&lt;R&gt;</ins>&gt;
+      requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T2&amp;&gt; &amp;&amp;
+               indirect_binary_predicate&lt;ranges::equal_to,
+                                         projected&lt;iterator_t&lt;R&gt;, Proj&gt;, const T1*&gt;
+      borrowed_iterator_t&lt;R&gt;
+        replace(Ep&amp;&amp; exec, R&amp;&amp; r, const T1&amp; old_value, const T2&amp; new_value,
+                Proj proj = {});                                            // <i>freestanding-deleted</i>
+
+    template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class Proj = identity,
+             class T = <del>projected</del><ins>iter</ins>_value_t&lt;I<del>, Proj</del>&gt;,
+             indirect_unary_predicate&lt;projected&lt;I, Proj&gt;&gt; Pred&gt;
+      requires indirectly_writable&lt;I, const T&amp;&gt;
+      constexpr I replace_if(I first, S last, Pred pred, const T&amp; new_value, Proj proj = {});
+    template&lt;input_range R, class Proj = identity, class T = <del>projected_value_t&lt;I</del><ins>range_value_t&lt;R</ins><del>, Proj</del>&gt;,
+             indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;
+      requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T&amp;&gt;
+      constexpr borrowed_iterator_t&lt;R&gt;
+        replace_if(R&amp;&amp; r, Pred pred, const T&amp; new_value, Proj proj = {});
+
+    template&lt;<i>execution-policy</i> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S,
+             class Proj = identity, class T = <del>projected</del><ins>iter</ins>_value_t&lt;I<del>, Proj</del>&gt;,
+             indirect_unary_predicate&lt;projected&lt;I, Proj&gt;&gt; Pred&gt;
+      requires indirectly_writable&lt;I, const T&amp;&gt;
+      I replace_if(Ep&amp;&amp; exec, I first, S last, Pred pred,
+                   const T&amp; new_value, Proj proj = {});         // <i>freestanding-deleted</i>
+    template&lt;<i>execution-policy</i> Ep, <i>sized-random-access-range</i> R, class Proj = identity,
+             class T = <del>projected_value_t&lt;iterator_t&lt;R&gt;</del><ins>range_value_t&lt;R</ins><del>, Proj</del>&gt;,
+             indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;
+      requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T&amp;&gt;
+      borrowed_iterator_t&lt;R&gt;
+        replace_if(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, const T&amp; new_value,
+                   Proj proj = {});                             // <i>freestanding-deleted</i>
+  }
+[&hellip;]
+</pre>
+</blockquote>
+</li>
+<li><p>Modify 26.7.5 <a href="https://wg21.link/alg.replace">[alg.replace]</a> as indicated:</p>
+
+<blockquote>
+<pre>
+[&hellip;]
+template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class Proj = identity,
+         class T1 = projected_value_t&lt;I, Proj&gt;, class T2 = <del>T1</del><ins>iter_value_t&lt;I&gt;</ins>&gt;
+  requires indirectly_writable&lt;I, const T2&amp;&gt; &amp;&amp;
+           indirect_binary_predicate&lt;ranges::equal_to, projected&lt;I, Proj&gt;, const T1*&gt;
+  constexpr I
+    ranges::replace(I first, S last, const T1&amp; old_value, const T2&amp; new_value, Proj proj = {});
+template&lt;input_range R, class Proj = identity,
+         class T1 = projected_value_t&lt;iterator_t&lt;R&gt;, Proj&gt;, class T2 = <del>T1</del><ins>range_value_t&lt;R&gt;</ins>&gt;
+  requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T2&amp;&gt; &amp;&amp;
+           indirect_binary_predicate&lt;ranges::equal_to,
+                                     projected&lt;iterator_t&lt;R&gt;, Proj&gt;, const T1*&gt;
+  constexpr borrowed_iterator_t&lt;R&gt;
+    ranges::replace(R&amp;&amp; r, const T1&amp; old_value, const T2&amp; new_value, Proj proj = {});
+
+template&lt;<i>execution-policy</i> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S,
+         class Proj = identity, class T1 = projected_value_t&lt;I, Proj&gt;, class T2 = <del>T1</del><ins>iter_value_t&lt;I&gt;</ins>&gt;
+  requires indirectly_writable&lt;I, const T2&amp;&gt; &amp;&amp;
+           indirect_binary_predicate&lt;ranges::equal_to, projected&lt;I, Proj&gt;, const T1*&gt;
+  I ranges::replace(Ep&amp;&amp; exec, I first, S last,
+                    const T1&amp; old_value, const T2&amp; new_value, Proj proj = {});
+template&lt;<i>execution-policy</i> Ep, <i>sized-random-access-range</i> R, class Proj = identity,
+         class T1 = projected_value_t&lt;iterator_t&lt;R&gt;, Proj&gt;, class T2 = <del>T1</del><ins>range_value_t&lt;R&gt;</ins>&gt;
+  requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T2&amp;&gt; &amp;&amp;
+           indirect_binary_predicate&lt;ranges::equal_to,
+                                     projected&lt;iterator_t&lt;R&gt;, Proj&gt;, const T1*&gt;
+  borrowed_iterator_t&lt;R&gt;
+    ranges::replace(Ep&amp;&amp; exec, R&amp;&amp; r, const T1&amp; old_value, const T2&amp; new_value,
+                    Proj proj = {});
+
+template&lt;input_iterator I, sentinel_for&lt;I&gt; S, class Proj = identity,
+         class T = <del>projected</del><ins>iter</ins>_value_t&lt;I<del>, Proj</del>&gt;,
+         indirect_unary_predicate&lt;projected&lt;I, Proj&gt;&gt; Pred&gt;
+  requires indirectly_writable&lt;I, const T&amp;&gt;
+  constexpr I ranges::replace_if(I first, S last, Pred pred, const T&amp; new_value, Proj proj = {});
+template&lt;input_range R, class Proj = identity, class T = <del>projected_value_t&lt;I</del><ins>range_value_t&lt;R</ins><del>, Proj</del>&gt;,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;
+  requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T&amp;&gt;
+  constexpr borrowed_iterator_t&lt;R&gt;
+    ranges::replace_if(R&amp;&amp; r, Pred pred, const T&amp; new_value, Proj proj = {});
+
+template&lt;<i>execution-policy</i> Ep, random_access_iterator I, sized_sentinel_for&lt;I&gt; S,
+         class Proj = identity, class T = <del>projected</del><ins>iter</ins>_value_t&lt;I<del>, Proj</del>&gt;,
+         indirect_unary_predicate&lt;projected&lt;I, Proj&gt;&gt; Pred&gt;
+  requires indirectly_writable&lt;I, const T&amp;&gt;
+  I ranges::replace_if(Ep&amp;&amp; exec, I first, S last, Pred pred,
+                       const T&amp; new_value, Proj proj = {});
+template&lt;<i>execution-policy</i> Ep, <i>sized-random-access-range</i> R, class Proj = identity,
+         class T = <del>projected_value_t&lt;iterator_t&lt;R&gt;</del><ins>range_value_t&lt;R</ins><del>, Proj</del>&gt;,
+         indirect_unary_predicate&lt;projected&lt;iterator_t&lt;R&gt;, Proj&gt;&gt; Pred&gt;
+  requires indirectly_writable&lt;iterator_t&lt;R&gt;, const T&amp;&gt;
+  borrowed_iterator_t&lt;R&gt;
+    ranges::replace_if(Ep&amp;&amp; exec, R&amp;&amp; r, Pred pred, const T&amp; new_value,
+                       Proj proj = {});
+</pre>
+<blockquote>
+<p>
+-1- [&hellip;]
+</p>
+</blockquote>
+</blockquote>
+</li>
+</ol>
+
+
+
+
+
+
 </body>
 </html>
