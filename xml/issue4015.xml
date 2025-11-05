@@ -1610,10 +1610,9 @@ namespace std {
 -1-
 <ins>
 An instance of <code>optional&lt;T&gt;</code> is said to
-<i>contain a value</i> when its member <tt><i>val</i></tt> is active
-(<sref ref="[class.union.general]"/>),
-and <tt><i>val</i></tt> is referred to as its
-<i>contained value</i>.
+<i>contain a value</i> when and only when its member <tt><i>val</i></tt> is active
+(<sref ref="[class.union.general]"/>);
+<tt><i>val</i></tt> is referred to as its <i>contained value</i>.
 </ins>
 <del>
 An object of type <code>optional&lt;T&gt;</code> at any given time either
