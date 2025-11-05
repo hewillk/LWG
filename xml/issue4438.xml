@@ -75,8 +75,8 @@ template&lt;class Env&gt;
 </pre>
 </blockquote>
 <p>
-<ins><i>Returns</i>:</ins>
-<del>Returns</del> an object `e` such that
+<ins><i>Returns</i>: An</ins>
+<del>Returns and</del> object `e` such that
 </p>
 <ul style="list-style-type: none">
 <li>(5.1) &mdash; `decltype(e)` models <tt><i>queryable</i></tt>, and
