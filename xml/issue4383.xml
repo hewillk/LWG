@@ -54,9 +54,7 @@ Set priority to 1 after reflector poll.
 <p>
 `operator+=` changed between <paper num="P2781R4"/> and <paper num="P2781R5"/>, intent is unclear.
 </p>
-</discussion>
-
-<resolution>
+<superseded>
 <p>
 This wording is relative to <paper num="N5014"/>.
 </p>
@@ -142,6 +140,13 @@ struct <i>cw-operators</i> {                                                    
 </li>
 
 </ol>
+</superseded>
+
+<note>2025-11-04; Zach provides improved wording</note>
+
+</discussion>
+
+<resolution>
 </resolution>
 
 </issue>
