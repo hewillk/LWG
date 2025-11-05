@@ -1591,7 +1591,7 @@ namespace std {
     using value_type = T;
     [&hellip;]
   private:
-    <del>*val // <i>exposition only</i></del>;
+    <del>T* val; // <i>exposition only</i></del>
     <ins>union {</ins>
       <ins>remove_cv_t&lt;T&gt; <i>val</i>; // <i>exposition only</i></ins>
     <ins>};</ins>
@@ -1609,10 +1609,10 @@ namespace std {
 <p>
 -1-
 <ins>
-When its member <tt><i>val</i></tt> is active
 (<sref ref="[class.union.general]"/>),
-an instance of <code>optional&lt;T&gt;</code> is said to
-<i>contain a value</i>, and <tt><i>val</i></tt> is referred to as its
+An instance of <code>optional&lt;T&gt;</code> is said to
+<i>contain a value</i> when its member <tt><i>val</i></tt> is active,
+and <tt><i>val</i></tt> is referred to as its
 <i>contained value</i>.
 </ins>
 <del>
